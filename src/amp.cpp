@@ -49,7 +49,6 @@ extern "C" {
 using namespace guitar_amp;
 
 
-
 void callback(ma_device *d, void* output, const void *input, ma_uint32 frameCount) {
     MA_ASSERT(d->capture.format == d->playback.format);
     MA_ASSERT(d->capture.channels == d->playback.channels);
@@ -59,11 +58,7 @@ void callback(ma_device *d, void* output, const void *input, ma_uint32 frameCoun
     float *output_buf = (float *) malloc(frameCount * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
     guitar_amp::dsp::hardclip(input_float, output_buf, 0.01, frameCount);
 
-    // tonestack simulation 
-    
-    // cabinet simulation (you need to provide your own impulse response files)
-    kfr::univector<float> c_input = kfr::make_univector(output_buf, frameCount);
-    kfr::sse2::convolve_filter<float> cab (guitar_amp::state::ir[0]);
+    // tonestack simulation
 
     // put into real output
     MA_COPY_MEMORY(output, output_buf, frameCount * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
@@ -83,10 +78,7 @@ int main () {
         exit(-1);
     }
 
-    // sfml stuff here
-
     state::selectedOutput--, state::selectedInput--;
-
     state::state::deviceConf = ma_device_config_init(ma_device_type_duplex);
     state::state::deviceConf.playback.format = ma_format_f32;
     state::deviceConf.capture.format = ma_format_f32;
@@ -103,15 +95,13 @@ int main () {
     }
 
     // start amp simulation
-    ma_device_start(&state::device);
+    // ma_device_start(&state::device);
     printf("Press CTRL+C to exit\n");
     printf("Press ENTER to refresh configurations\n");
 
-    while(1) {
-        
-    }
+    
 
-    ma_device_uninit(&state::device);
+    // ma_device_uninit(&state::device);
     return 0;
 }
 

@@ -1,8 +1,11 @@
 CXX := clang++
+INCLUDE := /usr/local/include
+LIB := /usr/local/lib
+CXXFLAGS := -std=c++17
 
-amp:
-	$(CXX) amp.cpp -o amp -lsfml-graphics -lsfml-window -lsfml-system -lkfr_dft -lkfr_io
 
 clean:
 	rm -rf *.exe
 	rm -rf amp
+	rm -rf obj/
+	mkdir obj
