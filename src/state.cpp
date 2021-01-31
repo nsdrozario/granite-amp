@@ -8,4 +8,3 @@ ma_uint32               guitar_amp::state::selectedInput;
 ma_uint32               guitar_amp::state::selectedOutput;
 ma_device_config        guitar_amp::state::deviceConf;
 ma_device               guitar_amp::state::device;
-kfr::univector2d<float> guitar_amp::state::ir;

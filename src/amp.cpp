@@ -1,21 +1,3 @@
-/*
-    Real time guitar amplifier simulator
-    Copyright (C) 2021  Nathaniel D'Rozario
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
 #define MINIAUDIO_IMPLEMENTATION
 
 extern "C" {
@@ -29,25 +11,11 @@ extern "C" {
 #include <algorithm>
 #include <SFML/Graphics.hpp>
 
-#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_STANDARD_IO
-#define NK_INCLUDE_STANDARD_VARARGS
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#include <nuklear.h>
-#include <nuklear_sfml.hpp>
-
-#define KFR_ENABLE_WAV 1
-#include <kfr/all.hpp>
-
 #define AMP_SAMPLE_RATE 48000
 
 #include <internal_dsp.hpp>
 #include <state.hpp>
 using namespace guitar_amp;
-
 
 void callback(ma_device *d, void* output, const void *input, ma_uint32 frameCount) {
     MA_ASSERT(d->capture.format == d->playback.format);
@@ -95,13 +63,11 @@ int main () {
     }
 
     // start amp simulation
-    // ma_device_start(&state::device);
+    ma_device_start(&state::device);
     printf("Press CTRL+C to exit\n");
     printf("Press ENTER to refresh configurations\n");
-
-    
-
-    // ma_device_uninit(&state::device);
+    while (1) { }
+    ma_device_uninit(&state::device);
     return 0;
 }
 

@@ -1,5 +1,5 @@
 CXX := clang++
-LDFLAGS := -L/usr/local/lib -lsfml-graphics -lsfml-window -lsfml-system -lkfr_dft -lkfr_io
+LDFLAGS := -L/usr/local/lib -lsfml-graphics -lsfml-window -lsfml-system
 CXXFLAGS := -Wall -Werror -std=c++17 -I/usr/local/include -Iinclude/
 SRCS := $(wildcard src/*.cpp)
 OBJS := $(patsubst src/%.cpp, obj/%.o, $(SRCS))
