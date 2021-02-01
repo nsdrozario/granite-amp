@@ -11,6 +11,9 @@ extern "C" {
 #include <algorithm>
 #include <SFML/Graphics.hpp>
 
+#include "imgui.h"
+#include "imgui-SFML.h"
+
 #define AMP_SAMPLE_RATE 48000
 
 #include <internal_dsp.hpp>
@@ -21,7 +24,6 @@ void callback(ma_device *d, void* output, const void *input, ma_uint32 frameCoun
     MA_ASSERT(d->capture.format == d->playback.format);
     MA_ASSERT(d->capture.channels == d->playback.channels);
 
-    float *output_float = (float *) output;
     float *input_float = (float *) input;
     float *output_buf = (float *) malloc(frameCount * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
     guitar_amp::dsp::hardclip(input_float, output_buf, 0.01, frameCount);
@@ -34,7 +36,7 @@ void callback(ma_device *d, void* output, const void *input, ma_uint32 frameCoun
 }
 
 int main () {
-
+    /*
     // initialize miniaudio
     if (ma_context_init(NULL, 0, NULL, &state::c) != MA_SUCCESS) {
        printf("Error initializing context\n");
@@ -63,11 +65,40 @@ int main () {
     }
 
     // start amp simulation
-    ma_device_start(&state::device);
+    // ma_device_start(&state::device);
     printf("Press CTRL+C to exit\n");
     printf("Press ENTER to refresh configurations\n");
-    while (1) { }
-    ma_device_uninit(&state::device);
+    */
+    sf::Event e;
+    sf::RenderWindow w(sf::VideoMode(800,600), "Guitar Amp");
+    sf::Clock dt;
+    ImGui::SFML::Init(w);
+    while (w.isOpen()) {
+        while (w.pollEvent(e)) {
+            ImGui::SFML::ProcessEvent(e);
+            if (e.type == sf::Event::Closed) {
+                w.close();
+            }
+        }
+        w.clear();
+        ImGui::SFML::Update(w, dt.restart());
+
+        // imgui stuff
+        ImGui::Begin("Input");
+        ImGui::End();
+
+        ImGui::Begin("Preamp");
+        ImGui::End();
+
+        ImGui::Begin("Output");
+        ImGui::End();
+        // raw sfml calls
+        
+
+        ImGui::SFML::Render(w);
+        w.display();
+    }
+    // ma_device_uninit(&state::device);
     return 0;
 }
 

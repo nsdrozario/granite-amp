@@ -2,6 +2,7 @@
 #define GUITAR_AMP_CONSOLE_UI_HPP
 
 #include <cstdio>
+#include <cstring>
 extern "C" {
     #include "miniaudio.h"
 }
