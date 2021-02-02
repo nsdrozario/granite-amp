@@ -13,6 +13,7 @@ extern "C" {
 
 #include "imgui.h"
 #include "imgui-SFML.h"
+#include "imnodes.h"
 
 #define AMP_SAMPLE_RATE 48000
 
@@ -36,6 +37,7 @@ void callback(ma_device *d, void* output, const void *input, ma_uint32 frameCoun
 }
 
 int main () {
+
     /*
     // initialize miniaudio
     if (ma_context_init(NULL, 0, NULL, &state::c) != MA_SUCCESS) {
@@ -69,14 +71,19 @@ int main () {
     printf("Press CTRL+C to exit\n");
     printf("Press ENTER to refresh configurations\n");
     */
+    
+    // Initialize ImGui
     sf::Event e;
     sf::RenderWindow w(sf::VideoMode(800,600), "Guitar Amp");
     sf::Clock dt;
     ImGui::SFML::Init(w);
+    imnodes::Initialize();
+
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
             ImGui::SFML::ProcessEvent(e);
             if (e.type == sf::Event::Closed) {
+                imnodes::Shutdown();
                 w.close();
             }
         }
@@ -84,20 +91,28 @@ int main () {
         ImGui::SFML::Update(w, dt.restart());
 
         // imgui stuff
-        ImGui::Begin("Input");
-        ImGui::End();
 
-        ImGui::Begin("Preamp");
-        ImGui::End();
+        imnodes::BeginNodeEditor();
 
-        ImGui::Begin("Output");
-        ImGui::End();
+            std::string names[] = {"Input", "Preamp", "Output"};
+
+            for (int i = 0; i < 3; i++) {
+                imnodes::BeginNode(i);
+                    imnodes::BeginNodeTitleBar();
+                        ImGui::TextUnformatted(names[i].c_str());
+                    imnodes::EndNodeTitleBar();
+                imnodes::EndNode();
+            }
+
+        imnodes::EndNodeEditor();
+
         // raw sfml calls
         
 
         ImGui::SFML::Render(w);
         w.display();
     }
+
     // ma_device_uninit(&state::device);
     return 0;
 }
