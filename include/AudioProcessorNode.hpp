@@ -8,11 +8,19 @@
 #include <map>
 
 namespace guitar_amp {
+    
     class AudioProcessorNode {
     public:
-        AudioProcessorNode();
+        AudioProcessorNode(int id) { this->id = id; }
         virtual void showGui()=0;
+
+        int getId() { return this->id; }
+        void setId(int id) { this->id = id; }
+    
+    protected:
+        int id;
     };
+
 }
 
 #endif

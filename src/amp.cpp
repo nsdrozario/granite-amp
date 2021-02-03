@@ -15,6 +15,12 @@ extern "C" {
 #include "imgui-SFML.h"
 #include "imnodes.h"
 
+#include <AudioProcessorNode.hpp>
+#include <InputNode.hpp>
+#include <OutputNode.hpp>
+
+#include <utility>
+
 #define AMP_SAMPLE_RATE 48000
 
 #include <internal_dsp.hpp>
@@ -79,11 +85,17 @@ int main () {
     ImGui::SFML::Init(w);
     imnodes::Initialize();
 
+    guitar_amp::InputNode inputNode (1);
+    guitar_amp::OutputNode outputNode (2);
+
+    std::vector<std::pair<int,int>> edgelist; 
+
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
             ImGui::SFML::ProcessEvent(e);
             if (e.type == sf::Event::Closed) {
                 imnodes::Shutdown();
+                ImGui::SFML::Shutdown();
                 w.close();
             }
         }
@@ -94,17 +106,20 @@ int main () {
 
         imnodes::BeginNodeEditor();
 
-            std::string names[] = {"Input", "Preamp", "Output"};
+        inputNode.showGui();
+        outputNode.showGui();
 
-            for (int i = 0; i < 3; i++) {
-                imnodes::BeginNode(i);
-                    imnodes::BeginNodeTitleBar();
-                        ImGui::TextUnformatted(names[i].c_str());
-                    imnodes::EndNodeTitleBar();
-                imnodes::EndNode();
-            }
+    
+        for (size_t i = 0; i < edgelist.size(); i++) {
+            imnodes::Link(i, edgelist[i].first, edgelist[i].second);
+        }
 
         imnodes::EndNodeEditor();
+
+        int start_link; int end_link;
+        if (imnodes::IsLinkCreated(&start_link, &end_link)) {
+            edgelist.push_back(std::pair<int,int>(start_link, end_link));
+        }
 
         // raw sfml calls
         

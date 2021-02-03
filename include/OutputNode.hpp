@@ -1,18 +1,16 @@
-#ifndef GUITAR_AMP_INPUTNODE_HPP
-#define GUITAR_AMP_INPUTNODE_HPP
+#ifndef GUITAR_AMP_OUTPUTNODE_HPP
+#define GUITAR_AMP_OUTPUTNODE_HPP
 
 #include "AudioProcessorNode.hpp"
 
 namespace guitar_amp {
-    class InputNode : public AudioProcessorNode {
+    class OutputNode : public AudioProcessorNode {
     public:
-        InputNode(int id) : AudioProcessorNode(id) { };
+        OutputNode(int id) : AudioProcessorNode(id) { };
         float getGain();
         void setGain(float g);
 
         void showGui();
-
-        AudioProcessorNode *next;
 
     private:
         float gain = 0.0f;
