@@ -38,7 +38,8 @@ extern "C" {
 #include <OutputNode.hpp>
 
 #include <utility>
-#include <map>
+#include <set>
+#include <unordered_set>
 
 #define AMP_SAMPLE_RATE 48000
 
@@ -46,57 +47,8 @@ extern "C" {
 #include <state.hpp>
 using namespace guitar_amp;
 
-void callback(ma_device *d, void* output, const void *input, ma_uint32 frameCount) {
-    MA_ASSERT(d->capture.format == d->playback.format);
-    MA_ASSERT(d->capture.channels == d->playback.channels);
-
-    float *input_float = (float *) input;
-    float *output_buf = (float *) malloc(frameCount * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
-    guitar_amp::dsp::hardclip(input_float, output_buf, 0.01, frameCount);
-
-    // tonestack simulation
-
-    // put into real output
-    MA_COPY_MEMORY(output, output_buf, frameCount * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
-    free(output_buf);
-}
-
 int main () {
 
-    /*
-    // initialize miniaudio
-    if (ma_context_init(NULL, 0, NULL, &state::c) != MA_SUCCESS) {
-       printf("Error initializing context\n");
-       exit(-1); 
-    }
-    
-    if (ma_context_get_devices(&state::c, &state::state::outputDeviceInfo, &state::numOutputDevices, &state::inputDeviceInfo, &state::numInputDevices) != MA_SUCCESS) {
-        printf("Could not obtain audio device info!\n");
-        exit(-1);
-    }
-
-    state::selectedOutput--, state::selectedInput--;
-    state::state::deviceConf = ma_device_config_init(ma_device_type_duplex);
-    state::state::deviceConf.playback.format = ma_format_f32;
-    state::deviceConf.capture.format = ma_format_f32;
-    state::deviceConf.playback.pDeviceID = &(state::outputDeviceInfo[state::selectedOutput].id);
-    state::deviceConf.capture.pDeviceID = &(state::inputDeviceInfo[state::selectedInput].id); 
-    state::deviceConf.capture.channels = 1;
-    state::deviceConf.playback.channels = 1;
-    state::deviceConf.sampleRate = AMP_SAMPLE_RATE;
-    state::deviceConf.dataCallback = callback;
-    
-    if (ma_device_init(&state::c, &state::state::deviceConf, &state::device) != MA_SUCCESS) {
-        printf("Failed to access device\n");
-        exit(-1);
-    }
-
-    // start amp simulation
-    // ma_device_start(&state::device);
-    printf("Press CTRL+C to exit\n");
-    printf("Press ENTER to refresh configurations\n");
-    */
-    
     // Initialize ImGui
     sf::Event e;
     sf::RenderWindow w(sf::VideoMode(800,600), "Guitar Amp");
@@ -104,10 +56,23 @@ int main () {
     ImGui::SFML::Init(w);
     imnodes::Initialize();
 
-    guitar_amp::InputNode inputNode (1);
-    guitar_amp::OutputNode outputNode (2);
-
-   std::multimap<int,int> adjlist;
+    /*
+        Each node will reserve 5 times it's own zero-indexed ID, plus 4 more spaces.
+        The first two IDs after the node's ID * 5 are reserved for input, and the next two for output.
+        For example:
+        Node 0:
+            ID: 0
+            Input: 1, 2
+            Output: 3, 4
+        Node 1:
+            ID: 5
+            Input: 6, 7
+            Output: 8, 9
+    */
+    std::vector<AudioProcessorNode *> nodes;
+    std::vector<std::unordered_set<int>> adjlist_outward;
+    std::vector<std::unordered_set<int>> adjlist_inward;
+    std::vector<std::pair<int,int>> edge_list;
 
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
@@ -125,23 +90,27 @@ int main () {
 
         imnodes::BeginNodeEditor();
 
-        inputNode.showGui();
-        outputNode.showGui();
-
         size_t count = 0;
-        for (auto it = adjlist.begin(); it != adjlist.end(); count++) {
-            auto nodes = adjlist.equal_range(it->first);
-            for (auto it2 = nodes.first; it2 != nodes.second; it2++) {
-                imnodes::Link(it2->first, it2->first, it2->second);
+        for (size_t i = 0; i < adjlist_outward.size(); i++) {
+            int starting_node = (i/static_cast<size_t>(5))*static_cast<size_t>(5);
+            for (auto t : adjlist_outward[i]) {
+                imnodes::Link(starting_node, i, t);
             }
-            it = adjlist.upper_bound(it->first);
         } 
 
         imnodes::EndNodeEditor();
 
         int start_link; int end_link;
         if (imnodes::IsLinkCreated(&start_link, &end_link)) {
-            adjlist.insert(std::pair<int,int>(start_link, end_link)); // we don't want to backtrack so make it a directed graph
+            adjlist_outward[start_link].insert(end_link);
+            adjlist_inward[end_link].insert(start_link);
+            edge_list.push_back(std::pair<int,int>(start_link,end_link));
+        }
+
+        int destroyedLink;
+        if (imnodes::IsLinkDestroyed(&destroyedLink)) {
+            adjlist_outward[edge_list[destroyedLink].first].erase(edge_list[destroyedLink].second);
+            adjlist_inward[edge_list[destroyedLink].second].erase(edge_list[destroyedLink].first);
         }
 
         ImGui::Begin("I/O Devices");
@@ -155,7 +124,6 @@ int main () {
         w.display();
     }
 
-    // ma_device_uninit(&state::device);
     return 0;
 }
 
