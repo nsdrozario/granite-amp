@@ -1,3 +1,21 @@
+/*
+    Real time guitar amplifier simulation
+    Copyright (C) 2021  Nathaniel D'Rozario
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
 #define MINIAUDIO_IMPLEMENTATION
 
 extern "C" {
@@ -20,6 +38,7 @@ extern "C" {
 #include <OutputNode.hpp>
 
 #include <utility>
+#include <map>
 
 #define AMP_SAMPLE_RATE 48000
 
@@ -88,7 +107,7 @@ int main () {
     guitar_amp::InputNode inputNode (1);
     guitar_amp::OutputNode outputNode (2);
 
-    std::vector<std::pair<int,int>> edgelist; 
+   std::multimap<int,int> adjlist;
 
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
@@ -109,17 +128,25 @@ int main () {
         inputNode.showGui();
         outputNode.showGui();
 
-    
-        for (size_t i = 0; i < edgelist.size(); i++) {
-            imnodes::Link(i, edgelist[i].first, edgelist[i].second);
-        }
+        size_t count = 0;
+        for (auto it = adjlist.begin(); it != adjlist.end(); count++) {
+            auto nodes = adjlist.equal_range(it->first);
+            for (auto it2 = nodes.first; it2 != nodes.second; it2++) {
+                imnodes::Link(it2->first, it2->first, it2->second);
+            }
+            it = adjlist.upper_bound(it->first);
+        } 
 
         imnodes::EndNodeEditor();
 
         int start_link; int end_link;
         if (imnodes::IsLinkCreated(&start_link, &end_link)) {
-            edgelist.push_back(std::pair<int,int>(start_link, end_link));
+            adjlist.insert(std::pair<int,int>(start_link, end_link)); // we don't want to backtrack so make it a directed graph
         }
+
+        ImGui::Begin("I/O Devices");
+            
+        ImGui::End();
 
         // raw sfml calls
         

@@ -16,22 +16,23 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#ifndef GUITAR_AMP_OUTPUTNODE_HPP
-#define GUITAR_AMP_OUTPUTNODE_HPP
+#ifndef GUITAR_AMP_MIDDLENODE_HPP
+#define GUITAR_AMP_MIDDLENODE_HPP
 
 #include "AudioProcessorNode.hpp"
 
 namespace guitar_amp {
-    class OutputNode : public AudioProcessorNode {
+    class MiddleNode : public AudioProcessorNode {
     public:
-        OutputNode(int id) : AudioProcessorNode(id) { };
-        float getGain();
-        void setGain(float g);
-
+        
+        MiddleNode(int id) : AudioProcessorNode(id) { }
         void showGui();
 
-    private:
-        float gain = 0.0f;
+        virtual void ApplyFX(float *in, float *out)=0; 
+
+    protected: 
+        AudioProcessorNode *input;
+        AudioProcessorNode *output;
     };
 }
 
