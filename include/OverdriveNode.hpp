@@ -16,23 +16,32 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#ifndef GUITAR_AMP_MIDDLENODE_HPP
-#define GUITAR_AMP_MIDDLENODE_HPP
+#ifndef GUITAR_AMP_OVERDRIVENODE_HPP
+#define GUITAR_AMP_OVERDRIVENODE_HPP
 
-#include "AudioProcessorNode.hpp"
+#include "MiddleNode.hpp"
 
 namespace guitar_amp {
-    class MiddleNode : public AudioProcessorNode {
+    class OverdriveNode : public MiddleNode {
+    
     public:
         
-        MiddleNode(int id) : AudioProcessorNode(id) { }
+        OverdriveNode(int id) : MiddleNode(id) { }
         void showGui();
-
-        virtual void ApplyFX(float *in, float *out, size_t numFrames)=0; 
+        void ApplyFX(float *in, float *out, size_t numFrames); 
 
     protected: 
+    
         AudioProcessorNode *input;
         AudioProcessorNode *output;
+    
+    private:
+
+        float lpf_cutoff;
+        float hpf_cutoff;
+        float gain_coefficient;
+        float normalized_threshold;
+        
     };
 }
 
