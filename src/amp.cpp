@@ -18,9 +18,14 @@
 */
 #define MINIAUDIO_IMPLEMENTATION
 
+#define MA_NO_DECODING
+#define MA_NO_ENCODING
+
 extern "C" {
-#include <miniaudio.h>
+    #include "miniaudio.h"
 }
+
+#include <kfr/all.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -36,6 +41,7 @@ extern "C" {
 #include <AudioProcessorNode.hpp>
 #include <InputNode.hpp>
 #include <OutputNode.hpp>
+#include <OverdriveNode.hpp>
 
 #include <utility>
 #include <set>
@@ -90,7 +96,7 @@ int main () {
 
         imnodes::BeginNodeEditor();
 
-        size_t count = 0;
+        
         for (size_t i = 0; i < adjlist_outward.size(); i++) {
             int starting_node = (i/static_cast<size_t>(5))*static_cast<size_t>(5);
             for (auto t : adjlist_outward[i]) {
@@ -98,7 +104,12 @@ int main () {
             }
         } 
 
+        
+
         imnodes::EndNodeEditor();
+
+       
+
 
         int start_link; int end_link;
         if (imnodes::IsLinkCreated(&start_link, &end_link)) {
@@ -117,8 +128,8 @@ int main () {
             
         ImGui::End();
 
+
         // raw sfml calls
-        
 
         ImGui::SFML::Render(w);
         w.display();

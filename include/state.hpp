@@ -19,10 +19,14 @@
 #ifndef GUITAR_AMP_STATE_HPP
 #define GUITAR_AMP_STATE_HPP
 
+#define MA_NO_DECODING
+#define MA_NO_ENCODING
+
 extern "C" {
     #include "miniaudio.h"
 }
 
+#include <kfr/all.hpp>
 #include <SFML/Graphics.hpp>
 
 namespace guitar_amp {

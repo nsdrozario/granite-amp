@@ -19,9 +19,14 @@
 #ifndef GUITAR_AMP_INTERNAL_DSP_HPP
 #define GUITAR_AMP_INTERNAL_DSP_HPP
 
+#define MA_NO_DECODING
+#define MA_NO_ENCODING
+
 extern "C" {
     #include "miniaudio.h"
 }
+
+#include <kfr/all.hpp>
 
 namespace guitar_amp {
     namespace dsp {
