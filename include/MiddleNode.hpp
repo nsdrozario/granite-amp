@@ -26,7 +26,7 @@ namespace guitar_amp {
     public:
         
         MiddleNode(int id) : AudioProcessorNode(id) { }
-        void showGui();
+        virtual void showGui()=0;
 
         virtual void ApplyFX(float *in, float *out, size_t numFrames)=0; 
 
