@@ -5,8 +5,17 @@ using namespace guitar_amp;
 
 void OverdriveNode::showGui() {
 
+    ImGui::PushItemWidth(100);
+    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(201, 4, 126, 100));
+    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(201, 4, 126, 255));
+    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(201, 4, 126, 255));
+
     imnodes::BeginNode(this->id);
-        
+
+        imnodes::BeginNodeTitleBar();
+            ImGui::TextUnformatted("Overdrive");
+        imnodes::EndNodeTitleBar();
+
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
 
@@ -16,10 +25,14 @@ void OverdriveNode::showGui() {
         ImGui::DragFloat("High pass frequency", &(this->hpf_cutoff), 1, 0, 21000, "%.3f");
 
         imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndInputAttribute();
+        imnodes::EndOutputAttribute();
 
     imnodes::EndNode();
-    
+
+    ImGui::PopItemWidth();
+    imnodes::PopColorStyle();
+    imnodes::PopColorStyle();
+
 }
 
 void OverdriveNode::ApplyFX(float *in, float *out, size_t numFrames) {

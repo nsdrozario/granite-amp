@@ -8,13 +8,19 @@ void ConvolutionNode::showGui() {
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(170,110,220, 255));
     
     imnodes::BeginNode(id);
+        
         imnodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Convolution IR");
         imnodes::EndNodeTitleBar();
 
+        
 
-        imnodes::BeginInputAttribute(this->id);
+        imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
+
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+
     imnodes::EndNode();
 
     ImGui::PopItemWidth();

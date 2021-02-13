@@ -20,7 +20,6 @@
 #define GUITAR_AMP_CONVOLUTIONNODE_HPP
 
 #include "MiddleNode.hpp"
-#include <kfr/all.hpp>
 #include "internal_dsp.hpp"
 
 namespace guitar_amp {

@@ -40,9 +40,9 @@ void InputNode::showGui() {
             ImGui::TextUnformatted("Input");
         imnodes::EndNodeTitleBar();
 
-        ImGui::DragFloat("Gain coefficient", &(this->gain), 0.1, 0, 20, "%.3f");
+        ImGui::DragFloat("Gain coefficient", &(this->gain), 0.1, 0, 5, "%.3f");
 
-        imnodes::BeginOutputAttribute(this->id);
+        imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();
     imnodes::EndNode();
 
