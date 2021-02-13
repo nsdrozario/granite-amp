@@ -19,7 +19,7 @@ Real-time guitar amplifier simulation.
 
 After making sure SFML and KFR are installed, you should be able to simply run
 ```bash
-make
+make clean && make
 ```
 and it should successfully generate the `amp` binary. If linker errors concerning KFR occur, try following the instructions in the Windows section of this README.
 
@@ -38,4 +38,4 @@ link_directories(/path/to/libc)
 to the top of `CMakeLists.txt` before invoking CMake. For MinGW/MSYS2, this may be in /usr/lib.
 
 You may need to invoke Ninja without any targets at first to build the C API at first, but after that, you should be able to
-run `ninja install` successfully afterwards. Now, this project can be built with an invocation of `make` in the root directory of this repository.
+run `ninja install` successfully afterwards. Now, this project can be built with the command `make clean && make` while the working directory is the root directory of this repository.
