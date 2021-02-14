@@ -1,6 +1,6 @@
 CXX := g++
 LDFLAGS := -L/usr/local/lib -lsfml-graphics -lsfml-window -lsfml-system -lopengl32 -lkfr_dft -lkfr_io
-CXXFLAGS := -std=c++17 -I/usr/local/include -Iinclude/ -I$(IMGUI_DIR) -I$(IMGUI_SFML_DIR) -O2
+CXXFLAGS := -std=c++17 -I/usr/local/include -Iinclude/ -O2
 SRCS := $(wildcard src/*.cpp)
 OBJS := $(patsubst src/%.cpp, obj/%.o, $(SRCS))
 

@@ -14,13 +14,13 @@ void ConvolutionNode::showGui() {
         imnodes::EndNodeTitleBar();
 
         
-
+        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
 
         imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();
-
+        imnodes::PopAttributeFlag();
     imnodes::EndNode();
 
     ImGui::PopItemWidth();

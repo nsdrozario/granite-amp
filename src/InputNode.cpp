@@ -41,9 +41,10 @@ void InputNode::showGui() {
         imnodes::EndNodeTitleBar();
 
         ImGui::DragFloat("Gain coefficient", &(this->gain), 0.1, 0, 5, "%.3f");
-
+        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();
+        imnodes::PopAttributeFlag();
     imnodes::EndNode();
 
     ImGui::PopItemWidth();

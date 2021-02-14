@@ -15,7 +15,7 @@ void OverdriveNode::showGui() {
         imnodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Overdrive");
         imnodes::EndNodeTitleBar();
-
+        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
 
@@ -26,7 +26,7 @@ void OverdriveNode::showGui() {
 
         imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();
-
+        imnodes::PopAttributeFlag();
     imnodes::EndNode();
 
     ImGui::PopItemWidth();

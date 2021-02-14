@@ -19,6 +19,7 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "headers.hpp"
 #include <kfr/all.hpp>
+#include <climits>
 
 #include <cstdio>
 #include <cstdlib>
@@ -54,6 +55,8 @@ ma_device_info *inputDevices;
 ma_device_info *outputDevices;
 ma_uint32 numInputDevices;
 ma_uint32 numOutputDevices;
+ma_device device;
+ma_device_config deviceConfig;
 
 int listBoxSelectedInput = 0;
 int listBoxSelectedOutput = 0;
@@ -63,6 +66,12 @@ std::vector<std::string> outputNames;
 
 const char ** cstr_inputNames;
 const char ** cstr_outputNames;
+
+int current_edge_id = INT_MIN;
+
+void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
+
+}
 
 int main () {
 
@@ -100,6 +109,13 @@ int main () {
         std::cout << outputDevices[i].name << "\n";
     }
 
+    deviceConfig = ma_device_config_init(ma_device_type_duplex);
+    deviceConfig.periodSizeInFrames = 512;
+    deviceConfig.capture.channels = 1;
+    deviceConfig.capture.format = ma_format_f32;
+    deviceConfig.playback.channels = 1;
+    deviceConfig.playback.format = ma_format_f32;
+    deviceConfig.dataCallback = callback; 
 
     // Initialize ImGui
     sf::Event e;
@@ -124,8 +140,7 @@ int main () {
     std::map<int, AudioProcessorNode *> nodes;
     std::vector<std::unordered_set<int>> adjlist_outward;
     std::vector<std::unordered_set<int>> adjlist_inward;
-    std::vector<std::pair<int,int>> edge_list;
-
+    std::unordered_map<int, std::pair<int,int>> edge_list;
     nodes[0] = new guitar_amp::InputNode(0);
     nodes[5] = new guitar_amp::OutputNode(5);
 
@@ -184,11 +199,10 @@ int main () {
             }
 
             // draw links
-            for (size_t i = 0; i < adjlist_outward.size(); i++) {
-                int starting_node = (i/static_cast<size_t>(5))*static_cast<size_t>(5);
-                for (auto t : adjlist_outward[i]) {
-                    imnodes::Link((starting_node/5)* 5, i, t);
-                }
+            for (auto it = edge_list.begin(); it != edge_list.end(); it++) {
+                int id = it->first;
+                std::pair<int,int> node = it->second;
+                imnodes::Link(id, node.first, node.second);
             }
 
         imnodes::EndNodeEditor();
@@ -204,19 +218,39 @@ int main () {
             }
             adjlist_outward[start_link].insert(end_link);
             adjlist_inward[end_link].insert(start_link);
-            edge_list.push_back(std::pair<int,int>(start_link,end_link));
+            std::cout << "Link created with id " << current_edge_id + 1<< " from " << start_link << " " << end_link << std::endl;
+            edge_list.insert({++current_edge_id, std::pair<int,int>(start_link,end_link)});
         }
 
         int destroyedLink;
         if (imnodes::IsLinkDestroyed(&destroyedLink)) {
-            adjlist_outward[edge_list[destroyedLink-1].first].erase(edge_list[destroyedLink-1].second);
-            adjlist_inward[edge_list[destroyedLink-1].second].erase(edge_list[destroyedLink-1].first);
+            std::cout << "Link destroyed\n";
+            adjlist_outward[edge_list[destroyedLink].first].erase(edge_list[destroyedLink].second);
+            adjlist_inward[edge_list[destroyedLink].second].erase(edge_list[destroyedLink].first);
+            edge_list.erase(destroyedLink);
         }
 
+        // consider using ListBoxHeader
         ImGui::Begin("I/O Devices");
             ImGui::ListBox("Inputs", &listBoxSelectedInput, cstr_inputNames, static_cast<int>(numInputDevices));
             ImGui::ListBox("Outputs", &listBoxSelectedOutput, cstr_outputNames, static_cast<int>(numOutputDevices));
         ImGui::End();
+
+        bool inputChanged = deviceConfig.capture.pDeviceID != &(inputDevices[listBoxSelectedInput].id);
+        bool outputChanged = deviceConfig.playback.pDeviceID != &(outputDevices[listBoxSelectedOutput].id);
+        
+        if (inputChanged || outputChanged) {
+            ma_device_stop(&device);
+            ma_device_uninit(&device);
+            if (inputChanged) {
+                deviceConfig.capture.pDeviceID = &(inputDevices[listBoxSelectedInput].id);
+            }
+            if (outputChanged) {
+                deviceConfig.playback.pDeviceID = &(outputDevices[listBoxSelectedOutput].id);
+            }
+            deviceConfig.sampleRate = 0; // default sample rate
+            ma_device_init(&context, &deviceConfig, &device);
+        }
 
 
         // raw sfml calls
