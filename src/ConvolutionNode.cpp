@@ -1,4 +1,5 @@
 #include <ConvolutionNode.hpp>
+#include <state.hpp>
 using namespace guitar_amp;
 
 void ConvolutionNode::showGui() {
@@ -30,4 +31,12 @@ void ConvolutionNode::showGui() {
 
 void ConvolutionNode::ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames) { 
 
+}
+
+bool ConvolutionNode::loadIRFile(std::string path) {
+    
+    kfr::audio_reader_wav<float> fRead (kfr::open_file_for_reading(path));
+
+    return true;
+    
 }

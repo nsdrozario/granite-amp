@@ -22,6 +22,7 @@
 
 #include "headers.hpp"
 
+#define KFR_ENABLE_WAV 1
 #include <kfr/all.hpp>
 
 namespace guitar_amp {

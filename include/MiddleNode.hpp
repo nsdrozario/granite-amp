@@ -20,7 +20,7 @@
 #define GUITAR_AMP_MIDDLENODE_HPP
 
 #include "AudioProcessorNode.hpp"
-#include <kfr/all.hpp>
+#include "internal_dsp.hpp"
 
 namespace guitar_amp {
     class MiddleNode : public AudioProcessorNode {

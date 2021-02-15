@@ -17,8 +17,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #define MINIAUDIO_IMPLEMENTATION
-#include "headers.hpp"
-#include <kfr/all.hpp>
+#include <headers.hpp>
 #include <climits>
 
 #include <cstdio>
@@ -42,8 +41,8 @@
 #include <set>
 #include <vector>
 #include <unordered_set>
-
-#define AMP_SAMPLE_RATE 48000
+#include <stack>
+#include <state.hpp>
 
 #include <internal_dsp.hpp>
 #include <iostream>
@@ -81,9 +80,37 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
     }
     MA_ASSERT(d->capture.format == d->playback.format);
     MA_ASSERT(d->capture.channels == d->playback.channels);
+    
+    /*
+    const float *f32_input = static_cast<const float *> (input);
+    float *f32_output = static_cast<float *> (output);
+
+    kfr::univector<float> u_input = kfr::make_univector(f32_input, ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
+    kfr::univector<float> u_output = kfr::univector<float>(u_input);
+    kfr::univector<float> tmp_input = kfr::univector<float>(u_input);
+    
+    // dfs from vertex 3 (the output attribute of the input node)
+    
+    std::stack<int> dfs_stack;
+    dfs_stack.push(3);
+    std::unordered_map<int,bool> visited;
+    while (!dfs_stack.empty()) {
+        int current_node = dfs_stack.top();
+        dfs_stack.pop();
+        if (visited.find(current_node) != visited.end()) {
+            if (visited[current_node]) {
+                // do applyFX() at each step
+                // if reached edge 6 stop (input attribute of the output node)
+                // copy the output univector's data
+            }
+        }
+    }
+    */
+
     if (audioEnabled) {
         MA_COPY_MEMORY(output, input, numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
     }
+
 }
 
 int main () {
@@ -114,12 +141,10 @@ int main () {
 
     for (ma_uint32 i = 0; i < numInputDevices; i++) {
         cstr_inputNames[i] = inputDevices[i].name;
-        std::cout << inputDevices[i].name << "\n";
     }
 
     for (ma_uint32 i = 0; i < numOutputDevices; i++) {
         cstr_outputNames[i] = outputDevices[i].name;
-        std::cout << outputDevices[i].name << "\n";
     }
 
     deviceConfig = ma_device_config_init(ma_device_type_duplex);
@@ -261,6 +286,7 @@ int main () {
             deviceConfig.sampleRate = 0; // default sample rate
             ma_device_init(&context, &deviceConfig, &device);
             ma_device_start(&device);
+            std::cout << "sample rate: " << device.sampleRate << std::endl;
         }
 
 

@@ -33,14 +33,14 @@ namespace guitar_amp {
         ConvolutionNode(int id) : MiddleNode(id) { }
         void showGui();
         void ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames); 
-        bool loadIRFile(std::string path);
+        
     
         std::mutex impulseLock;
 
     private:
 
         kfr::univector<float> impulse;
-        
+        bool loadIRFile(std::string path);
 
     };
 }

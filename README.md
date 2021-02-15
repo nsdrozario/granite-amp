@@ -17,7 +17,7 @@ Real-time guitar amplifier simulation.
 
 ### Linux
 
-After making sure SFML and KFR are installed, you should be able to simply run
+KFR should compile from source smoothly on Linux, so after making sure SFML and KFR are installed, you should be able to simply run
 ```bash
 make clean && make
 ```
@@ -26,16 +26,14 @@ and it should successfully generate the `amp` binary. If linker errors concernin
 ### Windows (MinGW/MSYS2)
 
 #### Setting up KFR for this project
-You'll need to have KFR compiled from source on Windows, but you can install SFML just fine by using MSYS2's `pacman` command.
 
-As of the time this was written, KFR only supports compilation using Clang, however the resulting C API libraries can be used with GCC.
-
+As of the time this was written, KFR only supports compilation using Clang.
 You can follow the same instructions for "Linux, macOS, other" for building KFR for MinGW/MSYS2 at https://github.com/kfrlib/kfr.
-If you get build errors about `ld` being unable to find `-lc`, try adding
+Personally, I had build errors about `ld` being unable to find `-lc`, but adding
 ```
 link_directories(/path/to/libc)
 ```
-to the top of `CMakeLists.txt` before invoking CMake. For MinGW/MSYS2, this may be in /usr/lib.
+to the top of `CMakeLists.txt` before invoking CMake solved it. For MinGW/MSYS2, libc may be located in /usr/lib.
 
 You may need to invoke Ninja without any targets at first to build the C API at first, but after that, you should be able to
 run `ninja install` successfully afterwards. Now, this project can be built with the command `make clean && make` while the working directory is the root directory of this repository.
