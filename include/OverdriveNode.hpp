@@ -37,10 +37,10 @@ namespace guitar_amp {
     
     private:
 
-        float lpf_cutoff;
-        float hpf_cutoff;
-        float gain_coefficient;
-        float normalized_threshold;
+        float lpf_cutoff = 12000.0f;
+        float hpf_cutoff = 300.0f;
+        float gain_coefficient = 1.0f;
+        float normalized_threshold = 1.0f;
         
     };
 }

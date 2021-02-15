@@ -138,9 +138,7 @@ int main () {
             Output: 8, 9
     */
     std::map<int, AudioProcessorNode *> nodes;
-    std::vector<std::unordered_set<int>> adjlist_outward;
-    std::vector<std::unordered_set<int>> adjlist_inward;
-    std::unordered_map<int, std::pair<int,int>> edge_list;
+    std::map<int,int> adjlist; // will need another adjacency list to track inward links to prevent double connections on an attribute
     nodes[0] = new guitar_amp::InputNode(0);
     nodes[5] = new guitar_amp::OutputNode(5);
 
@@ -199,36 +197,35 @@ int main () {
             }
 
             // draw links
-            for (auto it = edge_list.begin(); it != edge_list.end(); it++) {
-                int id = it->first;
-                std::pair<int,int> node = it->second;
-                imnodes::Link(id, node.first, node.second);
+            for (auto it = adjlist.begin(); it != adjlist.end(); it++) {
+                imnodes::Link((it->first/5)*5, it->first, it->second);
             }
 
         imnodes::EndNodeEditor();
 
         int start_link; int end_link;
         if (imnodes::IsLinkCreated(&start_link, &end_link)) {
-            int new_size = std::max(start_link, end_link);
-            if (new_size > adjlist_inward.size()) {
-                adjlist_inward.resize(new_size+1);
+            if (adjlist.find(start_link) != adjlist.end() || adjlist.find(end_link) != adjlist.end()) {
+                std::cout << "Deleting link from " << start_link << "->" << adjlist[start_link]  << std::endl;
+                adjlist.erase(start_link);
             }
-            if (new_size > adjlist_outward.size()) {
-                adjlist_outward.resize(new_size+1);
+            std::cout << "Create " << start_link << " -> " << end_link << std::endl;
+            adjlist[start_link] = end_link;
+            std::cout <<"adjlist: \n";
+            for (auto it = adjlist.begin(); it != adjlist.end(); it++) {
+                std::cout << it->first << "->" << it->second << std::endl;
             }
-            adjlist_outward[start_link].insert(end_link);
-            adjlist_inward[end_link].insert(start_link);
-            std::cout << "Link created with id " << current_edge_id + 1<< " from " << start_link << " " << end_link << std::endl;
-            edge_list.insert({++current_edge_id, std::pair<int,int>(start_link,end_link)});
         }
 
+        /*
         int destroyedLink;
         if (imnodes::IsLinkDestroyed(&destroyedLink)) {
             std::cout << "Link destroyed\n";
-            adjlist_outward[edge_list[destroyedLink].first].erase(edge_list[destroyedLink].second);
-            adjlist_inward[edge_list[destroyedLink].second].erase(edge_list[destroyedLink].first);
+            adjlist[edge_list[destroyedLink].first] = -1;
+            adjlist[edge_list[destroyedLink].second] = -1;
             edge_list.erase(destroyedLink);
         }
+        */
 
         // consider using ListBoxHeader
         ImGui::Begin("I/O Devices");
