@@ -35,11 +35,9 @@ void OverdriveNode::showGui() {
 
 }
 
-void OverdriveNode::ApplyFX(float *in, float *out, size_t numFrames) {
+void OverdriveNode::ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames) {
 
     // apply lpf to out before hard clipping
-
-    dsp::hardclip(in, out, this->normalized_threshold, numFrames);
 
     // now apply hpf to out after hard clipping
 

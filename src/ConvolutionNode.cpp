@@ -28,6 +28,6 @@ void ConvolutionNode::showGui() {
     imnodes::PopColorStyle();
 }
 
-void ConvolutionNode::ApplyFX(float *in, float *out, size_t numFrames) { 
+void ConvolutionNode::ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames) { 
 
 }

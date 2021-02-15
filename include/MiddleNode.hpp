@@ -20,6 +20,7 @@
 #define GUITAR_AMP_MIDDLENODE_HPP
 
 #include "AudioProcessorNode.hpp"
+#include <kfr/all.hpp>
 
 namespace guitar_amp {
     class MiddleNode : public AudioProcessorNode {
@@ -28,7 +29,7 @@ namespace guitar_amp {
         MiddleNode(int id) : AudioProcessorNode(id) { }
         virtual void showGui()=0;
 
-        virtual void ApplyFX(float *in, float *out, size_t numFrames)=0; 
+        virtual void ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames)=0; 
 
     protected: 
         AudioProcessorNode *input;

@@ -23,6 +23,7 @@
 #include "internal_dsp.hpp"
 #include <string>
 #include <thread>
+#include <mutex>
 
 namespace guitar_amp {
     class ConvolutionNode : public MiddleNode {
@@ -31,18 +32,16 @@ namespace guitar_amp {
         
         ConvolutionNode(int id) : MiddleNode(id) { }
         void showGui();
-        void ApplyFX(float *in, float *out, size_t numFrames); 
+        void ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames); 
         bool loadIRFile(std::string path);
+    
+        std::mutex impulseLock;
 
-    protected: 
-    
-        AudioProcessorNode *input;
-        AudioProcessorNode *output;
-    
     private:
 
-        kfr::univector<float> *impulse;
+        kfr::univector<float> impulse;
         
+
     };
 }
 
