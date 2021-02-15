@@ -21,6 +21,8 @@
 
 #include "MiddleNode.hpp"
 #include "internal_dsp.hpp"
+#include <string>
+#include <thread>
 
 namespace guitar_amp {
     class ConvolutionNode : public MiddleNode {
@@ -30,6 +32,7 @@ namespace guitar_amp {
         ConvolutionNode(int id) : MiddleNode(id) { }
         void showGui();
         void ApplyFX(float *in, float *out, size_t numFrames); 
+        bool loadIRFile(std::string path);
 
     protected: 
     

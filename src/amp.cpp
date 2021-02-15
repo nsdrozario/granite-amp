@@ -67,10 +67,23 @@ std::vector<std::string> outputNames;
 const char ** cstr_inputNames;
 const char ** cstr_outputNames;
 
+std::map<int, AudioProcessorNode *> nodes;
+std::map<int,int> adjlist; // will need another adjacency list to track inward links to prevent double connections on an attribute
+
 int current_edge_id = INT_MIN;
+ma_uint32 lastFrameCount;
+bool audioEnabled = false;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
-
+    if (numFrames != lastFrameCount) {
+        std::cout << "period of " << numFrames << " frames" << std::endl;
+        lastFrameCount = numFrames;
+    }
+    MA_ASSERT(d->capture.format == d->playback.format);
+    MA_ASSERT(d->capture.channels == d->playback.channels);
+    if (audioEnabled) {
+        MA_COPY_MEMORY(output, input, numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
+    }
 }
 
 int main () {
@@ -137,8 +150,7 @@ int main () {
             Input: 6, 7
             Output: 8, 9
     */
-    std::map<int, AudioProcessorNode *> nodes;
-    std::map<int,int> adjlist; // will need another adjacency list to track inward links to prevent double connections on an attribute
+
     nodes[0] = new guitar_amp::InputNode(0);
     nodes[5] = new guitar_amp::OutputNode(5);
 
@@ -231,6 +243,7 @@ int main () {
         ImGui::Begin("I/O Devices");
             ImGui::ListBox("Inputs", &listBoxSelectedInput, cstr_inputNames, static_cast<int>(numInputDevices));
             ImGui::ListBox("Outputs", &listBoxSelectedOutput, cstr_outputNames, static_cast<int>(numOutputDevices));
+            ImGui::Checkbox("Audio enabled", &audioEnabled);
         ImGui::End();
 
         bool inputChanged = deviceConfig.capture.pDeviceID != &(inputDevices[listBoxSelectedInput].id);
@@ -247,6 +260,7 @@ int main () {
             }
             deviceConfig.sampleRate = 0; // default sample rate
             ma_device_init(&context, &deviceConfig, &device);
+            ma_device_start(&device);
         }
 
 
