@@ -37,8 +37,18 @@ void OverdriveNode::showGui() {
 
 void OverdriveNode::ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames) {
 
-    // apply lpf to out before hard clipping
+    // apply hpf to out before hard clipping
+    out = kfr::univector<float> (in);
+    kfr::biquad_params<float> highpass_config[] = { kfr::biquad_highpass(this->hpf_cutoff, 1.0f) };
+    out = kfr::biquad(highpass_config, out);
 
-    // now apply hpf to out after hard clipping
+    // hard clip
+    kfr::univector<float> out_buf (out);
+    guitar_amp::dsp::hardclip(out, out_buf, this->normalized_threshold, numFrames);
+
+    out = out_buf;
+    // now apply lpf to out after hard clipping
+    kfr::biquad_params<float> lowpass_config[] = { kfr::biquad_lowpass(this->lpf_cutoff, 1.0f) };
+    out = kfr::biquad(lowpass_config, out);
 
 }

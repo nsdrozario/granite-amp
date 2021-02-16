@@ -28,3 +28,13 @@ void guitar_amp::dsp::hardclip(const float *input, float *transform, float thres
         }
     }
 }
+
+void guitar_amp::dsp::hardclip(const kfr::univector<float> &input, kfr::univector<float> &output, float threshold, ma_uint32 frameCount) {
+        for (ma_uint32 i = 0; i < frameCount; i++) {
+        if (input[i] > 0) {
+            output[i] = std::min(input[i]*10, threshold);
+        } else {
+            output[i] = std::max(input[i]*10, -threshold);
+        }
+    }
+}
