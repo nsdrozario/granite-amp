@@ -1,6 +1,6 @@
 language: cpp
 before_install:
-  - sudo apt-get -y install sfml
+  - sudo apt-get -y install libsfml-dev
   - sudo apt-get -y install cmake
   - sudo apt-get -y install ninja-build
 install:
