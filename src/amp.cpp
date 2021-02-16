@@ -43,6 +43,7 @@
 #include <unordered_set>
 #include <stack>
 #include <state.hpp>
+#include <sstream>
 
 #include <internal_dsp.hpp>
 #include <iostream>
@@ -73,42 +74,61 @@ int current_edge_id = INT_MIN;
 ma_uint32 lastFrameCount;
 bool audioEnabled = false;
 
+std::string dfs_path = "";
+
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
     if (numFrames != lastFrameCount) {
         std::cout << "period of " << numFrames << " frames" << std::endl;
         lastFrameCount = numFrames;
     }
-    MA_ASSERT(d->capture.format == d->playback.format);
-    MA_ASSERT(d->capture.channels == d->playback.channels);
-    
-    /*
-    const float *f32_input = static_cast<const float *> (input);
-    float *f32_output = static_cast<float *> (output);
+    if (audioEnabled) {
+        MA_ASSERT(d->capture.format == d->playback.format);
+        MA_ASSERT(d->capture.channels == d->playback.channels);
+        MA_ASSERT(d->capture.internalSampleRate == d->playback.internalSampleRate);
+        MA_ASSERT(d->capture.internalPeriodSizeInFrames == d->playback.internalPeriodSizeInFrames);
+        const float *f32_input = static_cast<const float *> (input);
+        float *f32_output = static_cast<float *> (output);
 
-    kfr::univector<float> u_input = kfr::make_univector(f32_input, ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
-    kfr::univector<float> u_output = kfr::univector<float>(u_input);
-    kfr::univector<float> tmp_input = kfr::univector<float>(u_input);
-    
-    // dfs from vertex 3 (the output attribute of the input node)
-    
-    std::stack<int> dfs_stack;
-    dfs_stack.push(3);
-    std::unordered_map<int,bool> visited;
-    while (!dfs_stack.empty()) {
-        int current_node = dfs_stack.top();
-        dfs_stack.pop();
-        if (visited.find(current_node) != visited.end()) {
-            if (visited[current_node]) {
-                // do applyFX() at each step
-                // if reached edge 6 stop (input attribute of the output node)
-                // copy the output univector's data
+        kfr::univector<float> u_input = kfr::make_univector(f32_input, numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
+        kfr::univector<float> tmp_input = kfr::univector<float>(u_input);
+        kfr::univector<float> tmp_output = kfr::univector<float>(u_input);
+        kfr::univector<float> u_output = kfr::univector<float>(u_input);
+        // dfs from vertex 3 (the output attribute of the input node)
+        // this assumes that there will be only one inward connection per node, except for input and output (which is correct for the time being)
+        // the audio processing has to be done on a node by node basis but the dfs operates on attribute to attribute
+        std::stack<int> dfs_stack;
+        dfs_stack.push(3);
+        std::unordered_map<int,bool> visited_attributes;
+        std::unordered_map<int,bool> visited_nodes;
+        std::stringstream current_dfs_path;
+        while (!dfs_stack.empty()) {
+            int current_attribute = dfs_stack.top(); dfs_stack.pop();
+            int current_node = (current_attribute / 5) * 5;
+            int next_attribute = -1;
+            int next_node = -1;
+            
+            if (!visited_nodes[current_node]) {
+                visited_nodes[current_node] = true;
+                current_dfs_path << current_node << " -> ";
+                if (current_node == 5) {
+                    goto processing_done;
+                }
+                MiddleNode *currentNodePtr = dynamic_cast<MiddleNode *>(nodes[current_node]);
+                if (currentNodePtr) {
+                    currentNodePtr->ApplyFX(tmp_input, tmp_output, numFrames);
+                    u_output = tmp_output;
+                    tmp_input = tmp_output;
+                }
+                dfs_stack.push(adjlist[current_node+3]);
             }
         }
-    }
-    */
-
-    if (audioEnabled) {
-        MA_COPY_MEMORY(output, input, numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
+        
+        processing_done:
+        if (current_dfs_path.str() != dfs_path) {
+            dfs_path = current_dfs_path.str();
+            std::cout << current_dfs_path.str() << std::endl;
+        }
+        MA_COPY_MEMORY(output, u_output.data(), numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
     }
 
 }
@@ -287,6 +307,8 @@ int main () {
             ma_device_init(&context, &deviceConfig, &device);
             ma_device_start(&device);
             std::cout << "sample rate: " << device.sampleRate << std::endl;
+            std::cout << "capture sample rate: " << device.capture.internalSampleRate << std::endl;
+            std::cout << "playback sample rate: " << device.playback.internalSampleRate << std::endl;
         }
 
 
