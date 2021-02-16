@@ -1,0 +1,29 @@
+language: cpp
+before_install:
+  - sudo apt-get -y install sfml
+  - sudo apt-get -y install cmake
+  - sudo apt-get -y install ninja-build
+install:
+  - wget https://github.com/kfrlib/kfr/archive/4.2.0.tar.gz
+  - tar -xzvf kfr-4.2.0.tar.gz
+  - cd kfr-4.2.0.tar.gz
+  - mkdir build && cd build
+  - cmake -GNinja -DENABLE_CAPI_BUILD=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ ..
+  - ninja
+  - ninja install
+  - cd ..
+  - cd ..
+compiler: clang
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise 10
+          packages:
+            - clang-10
+      env:
+        - MATRIX_EVAL="CXX=clang++-10"
+script: make clean && make
