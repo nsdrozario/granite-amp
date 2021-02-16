@@ -14,16 +14,4 @@ install:
   - cd ..
   - cd ..
 compiler: clang
-matrix:
-  include:
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise 10
-          packages:
-            - clang-10
-      env:
-        - MATRIX_EVAL="CXX=clang++-10"
 script: make clean && make
