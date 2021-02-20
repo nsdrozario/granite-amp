@@ -20,13 +20,14 @@
 #define GUITAR_AMP_OVERDRIVENODE_HPP
 
 #include "MiddleNode.hpp"
+#include "state.hpp"
 
 namespace guitar_amp {
     class OverdriveNode : public MiddleNode {
     
     public:
         
-        OverdriveNode(int id) : MiddleNode(id) { }
+        OverdriveNode(int id);
         void showGui();
         void ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames); 
 
@@ -41,7 +42,13 @@ namespace guitar_amp {
         float hpf_cutoff = 300.0f;
         float gain_coefficient = 1.0f;
         float normalized_threshold = 1.0f;
-        
+
+        ma_lpf2 lpf;
+        ma_hpf2 hpf;
+
+        ma_lpf2_config lpf_config;
+        ma_hpf2_config hpf_config;
+
     };
 }
 

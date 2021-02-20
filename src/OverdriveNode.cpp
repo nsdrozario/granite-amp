@@ -1,7 +1,23 @@
 #include <OverdriveNode.hpp>
 #include <internal_dsp.hpp>
+#include <iostream>
 
 using namespace guitar_amp;
+
+OverdriveNode::OverdriveNode(int id) : MiddleNode(id) {
+
+    this->lpf_config = ma_lpf2_config_init(ma_format_f32, 1, device.sampleRate, this->lpf_cutoff, 0.9f);
+    this->hpf_config = ma_hpf2_config_init(ma_format_f32, 1, device.sampleRate, this->hpf_cutoff, 0.9f);
+
+    if (ma_lpf2_init(&lpf_config, &this->lpf) != MA_SUCCESS) {
+        std::cout << "lpf failed\n";
+    }
+
+    if (ma_hpf2_init(&hpf_config, &this->hpf) != MA_SUCCESS) {
+        std::cout << "hpf failed\n";
+    }
+
+}
 
 void OverdriveNode::showGui() {
 
@@ -21,8 +37,16 @@ void OverdriveNode::showGui() {
 
         ImGui::DragFloat("Gain coefficient", &(this->gain_coefficient), 1.0, 0.0, 10.0, "%.3f");
         ImGui::DragFloat("Threshold", &(this->normalized_threshold), 0.01, 0, 1, "%.3f");
-        ImGui::DragFloat("Low pass frequency", &(this->lpf_cutoff), 1, 0, 21000, "%.3f");
-        ImGui::DragFloat("High pass frequency", &(this->hpf_cutoff), 1, 0, 21000, "%.3f");
+        
+        if(ImGui::DragFloat("Low pass frequency", &(this->lpf_cutoff), 1, 0, 21000, "%.3f")) {
+            this->lpf_config.cutoffFrequency = this->lpf_cutoff;
+            ma_lpf2_reinit(&(this->lpf_config),  &(this->lpf));
+        }
+        
+        if(ImGui::DragFloat("High pass frequency", &(this->hpf_cutoff), 1, 0, 21000, "%.3f")) {
+            this->hpf_config.cutoffFrequency = this->hpf_cutoff;
+            ma_hpf2_reinit(&(this->hpf_config), &(this->hpf));
+        }
 
         imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();
@@ -37,19 +61,17 @@ void OverdriveNode::showGui() {
 
 void OverdriveNode::ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames) {
 
-    
-    // apply hpf to out before hard clipping
-    kfr::biquad_params<float> highpass_config[] = { kfr::biquad_highpass(this->hpf_cutoff, 1.0f) };
-    kfr::univector<float> output_buf (in);
-    kfr::univector<float> lpf_result = kfr::biquad(highpass_config, in);
-    output_buf = lpf_result;
-    
-    // hard clip
-    output_buf *= this->gain_coefficient;
-    guitar_amp::dsp::hardclip(output_buf, output_buf, this->normalized_threshold, numFrames);
+   out = kfr::univector<float>(in);
+   ma_hpf2_process_pcm_frames(&this->hpf, out.data(), out.data(), numFrames);
 
-    // now apply lpf to out after hard clipping
-    kfr::biquad_params<float> lowpass_config[] = { kfr::biquad_lowpass(this->lpf_cutoff, 1.0f) };
-    out = kfr::biquad(lowpass_config, output_buf);
+   for (size_t i = 0; i < numFrames; i++) {
+       if (out[i] > 0.0f) {
+           out[i] = std::min(out[i]*this->gain_coefficient, this->normalized_threshold);
+       } else {
+           out[i] = std::max(out[i]*this->gain_coefficient, -this->normalized_threshold);
+       }
+   }
+
+   ma_lpf2_process_pcm_frames(&this->lpf, out.data(), out.data(), numFrames);
 
 }
