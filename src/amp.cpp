@@ -78,7 +78,7 @@ std::string dfs_path = "";
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
     if (audioEnabled) {
-	/*
+	    /*
         MA_ASSERT(d->capture.format == d->playback.format);
         MA_ASSERT(d->capture.channels == d->playback.channels);
         MA_ASSERT(d->capture.internalSampleRate == d->playback.internalSampleRate);
