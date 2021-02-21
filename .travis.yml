@@ -1,17 +1,27 @@
 language: cpp
 before_install:
-  - sudo apt-get -y install libsfml-dev
+  - sudo apt-get -y install freeglut3-dev
   - sudo apt-get -y install cmake
   - sudo apt-get -y install ninja-build
+  - sudo apt-get -y install unzip
 install:
-  - wget https://github.com/kfrlib/kfr/archive/4.2.0.tar.gz -O kfr-4.2.0.tar.gz
-  - tar -xzvf kfr-4.2.0.tar.gz
-  - cd kfr-4.2.0
+  - wget https://github.com/kfrlib/kfr/archive/4.1.0.tar.gz -O kfr-4.1.0.tar.gz
+  - tar -xzvf kfr-4.1.0.tar.gz
+  - cd kfr-4.1.0
   - mkdir build && cd build
   - cmake -GNinja -DENABLE_CAPI_BUILD=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ ..
   - ninja kfr_capi
-  - ninja install
+  - sudo ninja install
+  - cd ..
+  - cd ..
+  - wget https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip -O sfml-source-2.5.zip
+  - unzip sfml-source-2.5.zip
+  - cd sfml-source-2.5
+  - mkdir build && cd build
+  - cmake ..
+  - make -j
+  - sudo make install
   - cd ..
   - cd ..
 compiler: clang
-script: make clean && make
+script: make clean -f Makefile_LINUX && make -j -f Makefile_LINUX
