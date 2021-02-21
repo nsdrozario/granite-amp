@@ -5,23 +5,21 @@ before_install:
   - sudo apt-get -y install ninja-build
   - sudo apt-get -y install unzip
 install:
-  - wget https://github.com/kfrlib/kfr/archive/4.1.0.tar.gz -O kfr-4.1.0.tar.gz
-  - tar -xzvf kfr-4.1.0.tar.gz
-  - cd kfr-4.1.0
-  - mkdir build && cd build
+  - wget https://github.com/kfrlib/kfr/archive/4.1.0.tar.gz -O /tmp/kfr-4.1.0.tar.gz
+  - tar -xzvf /tmp/kfr-4.1.0.tar.gz
+  - mkdir /tmp/kfr-4.1.0/build
+  - pushd /tmp/kfr-4.1.0/build
   - cmake -GNinja -DENABLE_CAPI_BUILD=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ ..
   - ninja kfr_capi
   - sudo ninja install
-  - cd ..
-  - cd ..
-  - wget https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip -O sfml-source-2.5.zip
-  - unzip sfml-source-2.5.zip
-  - cd sfml-source-2.5
-  - mkdir build && cd build
+  - popd
+  - wget https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip -O /tmp/sfml-source-2.5.zip
+  - unzip /tmp/sfml-source-2.5.zip
+  - mkdir /tmp/sfml-source-2.5/build
+  - pushd /tmp/sfml-source-2.5/build
   - cmake ..
   - make -j
   - sudo make install
-  - cd ..
-  - cd ..
+  - popd
 compiler: clang
 script: make clean -f Makefile_LINUX && make -j -f Makefile_LINUX
