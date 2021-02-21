@@ -19,7 +19,7 @@ Real-time guitar amplifier simulation.
 
 KFR should compile from source smoothly on Linux, so after making sure SFML and KFR are installed, you should be able to simply run
 ```bash
-make -f Makefile\_LINUX clean && make -f Makefile\_LINUX
+make -f Makefile_LINUX clean && make -f Makefile_LINUX
 ```
 and it should successfully generate the `amp` binary. If linker errors concerning KFR occur, try following the instructions in the Windows section of this README.
 
