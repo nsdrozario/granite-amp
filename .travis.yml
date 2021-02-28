@@ -3,10 +3,7 @@ before_install:
   - sudo apt-get -y install freeglut3-dev
   - sudo apt-get -y install cmake
   - sudo apt-get -y install unzip
-  - sudo apt-get -y install
-  - sudo apt-get install libx11-dev
-  - sudo apt-get install xorg-dev
-  - sudo apt-get install libudev-dev
+  - sudo apt-get -y build-dep libsfml-dev
 install:
   - wget https://github.com/kfrlib/kfr/archive/4.2.0.tar.gz -O kfr-4.2.0.tar.gz
   - tar -xzvf kfr-4.2.0.tar.gz
