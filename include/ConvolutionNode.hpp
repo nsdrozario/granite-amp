@@ -30,7 +30,7 @@ namespace guitar_amp {
     
     public:
         
-        ConvolutionNode(int id) : MiddleNode(id) { }
+        ConvolutionNode(int id);
         void showGui();
         void ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames); 
         
@@ -40,6 +40,7 @@ namespace guitar_amp {
     private:
 
         kfr::univector<float> impulse;
+        kfr::convolve_filter<float> conv_filter;
         bool loadIRFile(std::string path);
 
     };
