@@ -38,3 +38,7 @@ void guitar_amp::dsp::hardclip(const kfr::univector<float> &input, kfr::univecto
         }
     }
 }
+
+float f32_to_dbfs(float x) {
+    return 20 * log10 ( fabsf(x) );
+}

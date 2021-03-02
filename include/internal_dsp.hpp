@@ -29,6 +29,7 @@ namespace guitar_amp {
     namespace dsp {
         void hardclip(const float *input, float *transform, float threshold, ma_uint32 frameCount);
         void hardclip(const kfr::univector<float> &input, kfr::univector<float> &output, float threshold, ma_uint32 frameCount);
+        float f32_to_dbfs(float x);
     }
 }
 
