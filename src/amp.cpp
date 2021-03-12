@@ -139,6 +139,9 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
         }
 
         MA_COPY_MEMORY(output, output_buf, buffer_size_in_bytes);
+        delete[] output_buf;
+        delete[] tmp_input;
+        delete[] tmp_output;
     }
 
 }
