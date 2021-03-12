@@ -59,19 +59,13 @@ void OverdriveNode::showGui() {
 
 }
 
-void OverdriveNode::ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames) {
+void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames) {
 
-   out = kfr::univector<float>(in);
-   ma_hpf2_process_pcm_frames(&this->hpf, out.data(), out.data(), numFrames);
+   out = memcpy(out, in, sizeof(float) * numFrames);
+   ma_hpf2_process_pcm_frames(&this->hpf, out, out, numFrames);
 
-   for (size_t i = 0; i < numFrames; i++) {
-       if (out[i] > 0.0f) {
-           out[i] = std::min(out[i]*this->gain_coefficient, this->normalized_threshold);
-       } else {
-           out[i] = std::max(out[i]*this->gain_coefficient, -this->normalized_threshold);
-       }
-   }
+   dsp::hardclip_minmax(out, out, this->gain_coefficient, this->normalized_threshold, numFrames);
 
-   ma_lpf2_process_pcm_frames(&this->lpf, out.data(), out.data(), numFrames);
+   ma_lpf2_process_pcm_frames(&this->lpf, out, out, numFrames);
 
 }

@@ -19,22 +19,12 @@
 #include <internal_dsp.hpp>
 #include <cmath>
 
-void guitar_amp::dsp::hardclip(const float *input, float *transform, float threshold, ma_uint32 frameCount) {
+void guitar_amp::dsp::hardclip_minmax(const float *input, float *transform, float gain, float threshold, ma_uint32 frameCount) {
     for (ma_uint32 i = 0; i < frameCount; i++) {
         if (input[i] > 0) {
-            transform[i] = std::min(input[i]*10, threshold);
+            transform[i] = std::min(input[i]*gain, threshold);
         } else {
-            transform[i] = std::max(input[i]*10, -threshold);
-        }
-    }
-}
-
-void guitar_amp::dsp::hardclip(const kfr::univector<float> &input, kfr::univector<float> &output, float threshold, ma_uint32 frameCount) {
-        for (ma_uint32 i = 0; i < frameCount; i++) {
-        if (input[i] > 0) {
-            output[i] = std::min(input[i]*10, threshold);
-        } else {
-            output[i] = std::max(input[i]*10, -threshold);
+            transform[i] = std::max(input[i]*gain, -threshold);
         }
     }
 }
