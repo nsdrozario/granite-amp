@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/nsdrozario/guitar-amp.svg?branch=main)](https://travis-ci.com/nsdrozario/guitar-amp)
+
 # Guitar Amp
 
 Real-time guitar amplifier simulation.
