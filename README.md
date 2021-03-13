@@ -11,6 +11,7 @@ Real-time guitar amplifier simulation.
 - [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
 - [Imgui-SFML](https://github.com/eliasdaler/imgui-sfml) (contained within this repository already)
 - [imnodes](https://github.com/Nelarius/imnodes) (contained within this repository already)
+- [implot](https://github.com/epezent/implot) (contained within this repository already)
 - [Miniaudio](https://github.com/mackron/miniaudio) (contained within this repository already)
 - [SFML (2.5)](https://github.com/SFML/SFML)
 
