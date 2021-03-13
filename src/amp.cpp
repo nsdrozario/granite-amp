@@ -90,12 +90,6 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
        
         const float *f32_input = static_cast<const float *> (input);
         float *f32_output = static_cast<float *> (output);
-        /*
-        kfr::univector<float> u_input = kfr::make_univector(f32_input, numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
-        kfr::univector<float> tmp_input = kfr::univector<float>(u_input);
-        kfr::univector<float> tmp_output = kfr::univector<float>(u_input);
-        kfr::univector<float> u_output = kfr::univector<float>(u_input);
-        */
 
         float *tmp_input = new float[numFrames];
         float *tmp_output = new float[numFrames];
