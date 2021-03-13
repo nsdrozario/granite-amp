@@ -18,9 +18,9 @@ void ConvolutionNode::showGui() {
             ImGui::TextUnformatted("Convolution IR");
         imnodes::EndNodeTitleBar();
 
-        if (ImGui::Button("Reload")) {
-        
-        }
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(209,192,8)));
+        ImGui::Text("Warning: Convolution is not implemented in this build. This node will merely output its input.");
+        ImGui::PopStyleColor();
         
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
