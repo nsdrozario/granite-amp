@@ -1,6 +1,10 @@
 #include <ConvolutionNode.hpp>
 #include <state.hpp>
+#include <iostream>
+#include <thread>
 using namespace guitar_amp;
+
+ConvolutionNode::ConvolutionNode(int id) : MiddleNode(id) { }
 
 void ConvolutionNode::showGui() {
     ImGui::PushItemWidth(100);
@@ -14,6 +18,9 @@ void ConvolutionNode::showGui() {
             ImGui::TextUnformatted("Convolution IR");
         imnodes::EndNodeTitleBar();
 
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(209,192,8)));
+        ImGui::Text("Warning: Convolution is not implemented in this build. This node will merely output its input.");
+        ImGui::PopStyleColor();
         
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
@@ -29,34 +36,6 @@ void ConvolutionNode::showGui() {
     imnodes::PopColorStyle();
 }
 
-void ConvolutionNode::ApplyFX(const kfr::univector<float> &in, kfr::univector<float> &out, size_t numFrames) { 
-
-}
-
-bool ConvolutionNode::loadIRFile(std::string path) {
-    
-    kfr::audio_reader_wav<float> fRead (kfr::open_file_for_reading(path));
-    kfr::univector2d<float> raw_audio = fRead.read_channels();
-    kfr::univector<float> mixed_impulse;
-
-    if (fRead.format().samplerate != device.sampleRate) {
-        // do sample rate conversion
-    }
-
-    if (fRead.format().channels != 1) {
-        // mix down channels, we don't process in stereo yet
-
-        for (auto t : raw_audio) {
-            mixed_impulse += t;
-        }
-
-    } else {
-        mixed_impulse = raw_audio[0];
-    }
-
-    this->impulseLock.lock();
-    this->impulse = mixed_impulse;
-    this->impulseLock.unlock();
-    return true;
-    
+void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames) { 
+    memcpy(out, in, numFrames * sizeof(float)); // assuming mono output
 }

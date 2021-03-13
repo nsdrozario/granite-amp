@@ -77,6 +77,9 @@ bool audioEnabled = false;
 std::string dfs_path = "";
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
+
+    ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
+
     if (audioEnabled) {
 	    /*
         MA_ASSERT(d->capture.format == d->playback.format);
@@ -88,10 +91,11 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
         const float *f32_input = static_cast<const float *> (input);
         float *f32_output = static_cast<float *> (output);
 
-        kfr::univector<float> u_input = kfr::make_univector(f32_input, numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
-        kfr::univector<float> tmp_input = kfr::univector<float>(u_input);
-        kfr::univector<float> tmp_output = kfr::univector<float>(u_input);
-        kfr::univector<float> u_output = kfr::univector<float>(u_input);
+        float *tmp_input = new float[numFrames];
+        float *tmp_output = new float[numFrames];
+        float *output_buf = new float[numFrames];
+        memcpy(tmp_input, f32_input, buffer_size_in_bytes);
+
         // dfs from vertex 3 (the output attribute of the input node)
         // this assumes that there will be only one inward connection per node, except for input and output (which is correct for the time being)
         // the audio processing has to be done on a node by node basis but the dfs operates on attribute to attribute
@@ -115,8 +119,8 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
                 MiddleNode *currentNodePtr = dynamic_cast<MiddleNode *>(nodes[current_node]);
                 if (currentNodePtr) {
                     currentNodePtr->ApplyFX(tmp_input, tmp_output, numFrames);
-                    u_output = tmp_output;
-                    tmp_input = tmp_output;
+                    memcpy(output_buf, tmp_output, buffer_size_in_bytes);
+                    memcpy(tmp_input, tmp_output, buffer_size_in_bytes);
                 }
                 dfs_stack.push(adjlist[current_node+3]);
             }
@@ -127,7 +131,11 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
             dfs_path = current_dfs_path.str();
             std::cout << current_dfs_path.str() << std::endl;
         }
-        MA_COPY_MEMORY(output, u_output.data(), numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels));
+
+        MA_COPY_MEMORY(output, output_buf, buffer_size_in_bytes);
+        delete[] output_buf;
+        delete[] tmp_input;
+        delete[] tmp_output;
     }
 
 }

@@ -19,16 +19,21 @@
 #ifndef GUITAR_AMP_INTERNAL_DSP_HPP
 #define GUITAR_AMP_INTERNAL_DSP_HPP
 
-
 #include "headers.hpp"
+#define _USE_MATH_DEFINES
+#include <cmath>
 
-#define KFR_ENABLE_WAV 1
-#include <kfr/all.hpp>
 
 namespace guitar_amp {
     namespace dsp {
-        void hardclip(const float *input, float *transform, float threshold, ma_uint32 frameCount);
-        void hardclip(const kfr::univector<float> &input, kfr::univector<float> &output, float threshold, ma_uint32 frameCount);
+
+        // Clipping / saturation algorithms
+        void hardclip_minmax(const float *input, float *transform, float gain, float threshold, ma_uint32 frameCount);
+        void clip_tanh(const float *input, float *output, float output_volume, float gain);
+
+        // Utility
+        float f32_to_dbfs(float x);
+        float dbfs_to_f32(float x);
     }
 }
 
