@@ -16,8 +16,16 @@ Real-time guitar amplifier simulation.
 
 ## Building
 
+## Linux
 
+```bash
+make -f Makefile_LINUX -j
+```
 
+## Windows (MSYS2)
 
-### Windows (MinGW/MSYS2)
+```bash
+make -f Makefile_WINDOWS -j
+```
+
 

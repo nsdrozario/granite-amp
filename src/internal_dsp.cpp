@@ -30,10 +30,10 @@ void guitar_amp::dsp::hardclip_minmax(const float *input, float *transform, floa
     }
 }
 
-float f32_to_dbfs(float x) {
+float guitar_amp::dsp::f32_to_dbfs(float x) {
     return 20.0f * log10 ( fabsf(x) );
 }
 
-float dbfs_to_f32(float x) {
+float guitar_amp::dsp::dbfs_to_f32(float x) {
     return powf(10, x / 20.0f);
 }

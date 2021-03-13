@@ -20,6 +20,7 @@
 #define GUITAR_AMP_OVERDRIVENODE_HPP
 
 #include "MiddleNode.hpp"
+#include "internal_dsp.hpp"
 #include "state.hpp"
 
 namespace guitar_amp {
@@ -31,6 +32,11 @@ namespace guitar_amp {
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames); 
 
+        enum ClippingAlgorithm {
+            minmax=0,
+            tanh=1
+        };
+
     protected: 
     
         AudioProcessorNode *input;
@@ -40,8 +46,10 @@ namespace guitar_amp {
 
         float lpf_cutoff = 12000.0f;
         float hpf_cutoff = 300.0f;
-        float gain_coefficient = 1.0f;
-        float normalized_threshold = 1.0f;
+        float gain = 1.0f;
+        float output_volume = -14.0f;
+
+        int clipping_algorithm;
 
         ma_lpf2 lpf;
         ma_hpf2 hpf;

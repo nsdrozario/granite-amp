@@ -35,8 +35,8 @@ void OverdriveNode::showGui() {
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
 
-        ImGui::DragFloat("Gain coefficient", &(this->gain_coefficient), 1.0, 0.0, 10.0, "%.3f");
-        ImGui::DragFloat("Threshold", &(this->normalized_threshold), 0.01, 0, 1, "%.3f");
+        ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 20, "%.3f dB");
+        ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -144, 0, "%.3f dB");
         
         if(ImGui::DragFloat("Low pass frequency", &(this->lpf_cutoff), 1, 0, 21000, "%.3f")) {
             this->lpf_config.cutoffFrequency = this->lpf_cutoff;
@@ -48,6 +48,9 @@ void OverdriveNode::showGui() {
             ma_hpf2_reinit(&(this->hpf_config), &(this->hpf));
         }
 
+        // Will be functional after implementing tanh clipping
+        // ImGui::Combo("Clipping algorithm", &(this->clipping_algorithm), "minmax\0tanh");
+        
         imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();
         imnodes::PopAttributeFlag();
@@ -61,11 +64,11 @@ void OverdriveNode::showGui() {
 
 void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames) {
 
-   memcpy(out, in, sizeof(float) * numFrames);
-   ma_hpf2_process_pcm_frames(&this->hpf, out, out, numFrames);
+    memcpy(out, in, sizeof(float) * numFrames);
+    ma_hpf2_process_pcm_frames(&this->hpf, out, out, numFrames);
 
-   dsp::hardclip_minmax(out, out, this->gain_coefficient, this->normalized_threshold, numFrames);
+    dsp::hardclip_minmax(out, out, dsp::dbfs_to_f32(this->gain), dsp::dbfs_to_f32(this->output_volume), numFrames);
 
-   ma_lpf2_process_pcm_frames(&this->lpf, out, out, numFrames);
+    ma_lpf2_process_pcm_frames(&this->lpf, out, out, numFrames);
 
 }
