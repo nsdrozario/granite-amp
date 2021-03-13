@@ -3,18 +3,8 @@ before_install:
   - sudo apt-get -y install freeglut3-dev
   - sudo apt-get -y install cmake
   - sudo apt-get -y install unzip
-  - sudo apt-get -y build-dep libsfml-dev
+  - sudo apt install libfreetype6-dev libxrandr-dev libudev-dev libogg-dev libflac-dev libvorbis-dev libopenal-dev
 install:
-  - wget https://github.com/kfrlib/kfr/archive/4.2.0.tar.gz -O kfr-4.2.0.tar.gz
-  - tar -xzvf kfr-4.2.0.tar.gz
-  - cd kfr-4.2.0
-  - mkdir build
-  - cd build
-  - cmake -DBUILD_SHARED_LIBS=ON -DENABLE_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="-stdlib=libc++ -std=c++17" ..
-  - make -j
-  - sudo make install -j
-  - cd ..
-  - cd ..
   - wget https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip -O sfml-source-2.5.zip
   - unzip sfml-source-2.5.zip
   - cd SFML-2.5.1

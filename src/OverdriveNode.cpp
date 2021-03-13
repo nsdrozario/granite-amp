@@ -61,7 +61,7 @@ void OverdriveNode::showGui() {
 
 void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames) {
 
-   out = memcpy(out, in, sizeof(float) * numFrames);
+   memcpy(out, in, sizeof(float) * numFrames);
    ma_hpf2_process_pcm_frames(&this->hpf, out, out, numFrames);
 
    dsp::hardclip_minmax(out, out, this->gain_coefficient, this->normalized_threshold, numFrames);

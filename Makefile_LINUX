@@ -1,6 +1,6 @@
 CXX := clang++
-LDFLAGS := -L/usr/local/lib -lsfml-graphics -lsfml-window -lGL -lGLU -lglut -lsfml-system -pthread -ldl -lkfr_dft -lkfr_io -mavx2
-CXXFLAGS := -DKFR_ENABLE_WAV=1 -std=c++17 -I/usr/local/include -Iinclude/ -O2 -mavx2
+LDFLAGS :=  -lsfml-graphics -lsfml-window -lGL -lGLU -lglut -lsfml-system -pthread -ldl
+CXXFLAGS := -std=c++17 -Iinclude/ -O2
 SRCS := $(wildcard src/*.cpp)
 OBJS := $(patsubst src/%.cpp, obj/%.o, $(SRCS))
 
