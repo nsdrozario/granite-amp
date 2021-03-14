@@ -13,6 +13,7 @@ Real-time guitar amplifier simulation.
 - [imnodes](https://github.com/Nelarius/imnodes) (contained within this repository already)
 - [implot](https://github.com/epezent/implot) (contained within this repository already)
 - [Miniaudio](https://github.com/mackron/miniaudio) (contained within this repository already)
+- [FFTConvolver](https://github.com/HiFi-LoFi/FFTConvolver) (contained within this repository already)
 - [SFML (2.5)](https://github.com/SFML/SFML)
 
 ## Building
