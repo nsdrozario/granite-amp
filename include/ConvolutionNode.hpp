@@ -24,6 +24,8 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include <vector>
+#include "FFTConvolver.h"
 
 namespace guitar_amp {
     class ConvolutionNode : public MiddleNode {
@@ -33,13 +35,14 @@ namespace guitar_amp {
         ConvolutionNode(int id);
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames); 
-        
-    
+
         std::mutex impulseLock;
 
     private:
         
-        
+        std::vector<float> impulse;
+        ma_decoder file_reader;
+        fftconvolver::FFTConvolver convolver;
 
     };
 }
