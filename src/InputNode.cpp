@@ -20,6 +20,10 @@
 
 using namespace guitar_amp;
 
+InputNode::~InputNode() {
+    
+}
+
 float InputNode::getGain() {
     return this->gain;
 }

@@ -29,6 +29,8 @@ namespace guitar_amp {
     public:
         
         OverdriveNode(int id);
+        ~OverdriveNode();
+        
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames); 
 

@@ -33,6 +33,8 @@ namespace guitar_amp {
     public:
         
         ConvolutionNode(int id);
+        ~ConvolutionNode();
+        
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames); 
 
@@ -43,7 +45,7 @@ namespace guitar_amp {
         std::vector<float> impulse;
         ma_decoder file_reader;
         fftconvolver::FFTConvolver convolver;
-
+        
     };
 }
 

@@ -19,6 +19,12 @@ OverdriveNode::OverdriveNode(int id) : MiddleNode(id) {
 
 }
 
+OverdriveNode::~OverdriveNode() {
+
+    
+
+}
+
 void OverdriveNode::showGui() {
 
     ImGui::PushItemWidth(100);

@@ -4,7 +4,19 @@
 #include <thread>
 using namespace guitar_amp;
 
-ConvolutionNode::ConvolutionNode(int id) : MiddleNode(id) { }
+ConvolutionNode::ConvolutionNode(int id) : MiddleNode(id) { 
+    
+    ma_decoder_config decoder_cfg = ma_decoder_config_init(ma_format_f32, 1, device.sampleRate);
+    if (ma_decoder_init_file_wav("ir.wav", &decoder_cfg, &(this->file_reader)) != MA_SUCCESS) {
+        std::cerr << "Could not open file ir.wav\n";
+    }
+
+}
+
+ConvolutionNode::~ConvolutionNode() {
+    ma_decoder_uninit(&(this->file_reader));
+    this->convolver.reset();    
+}
 
 void ConvolutionNode::showGui() {
     ImGui::PushItemWidth(100);
