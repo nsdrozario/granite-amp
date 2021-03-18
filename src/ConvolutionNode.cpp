@@ -7,8 +7,27 @@ using namespace guitar_amp;
 ConvolutionNode::ConvolutionNode(int id) : MiddleNode(id) { 
     
     ma_decoder_config decoder_cfg = ma_decoder_config_init(ma_format_f32, 1, device.sampleRate);
+
     if (ma_decoder_init_file_wav("ir.wav", &decoder_cfg, &(this->file_reader)) != MA_SUCCESS) {
+        
         std::cerr << "Could not open file ir.wav\n";
+    
+    } else {
+        
+        size_t numFrames;
+
+        if (ma_decoder_get_available_frames(&(this->file_reader), &numFrames) != MA_SUCCESS) {
+            std::cerr << "Decoder error in ConvolutionNode constructor\n";
+        }
+
+        if (numFrames > 0) {
+            this->impulseLock.lock();
+            this->impulse.resize(numFrames);
+            ma_decoder_read_pcm_frames(&(this->file_reader), this->impulse.data(), numFrames);
+            this->convolver.init(numFrames/4, this->impulse.data(), numFrames);
+            this->impulseLock.unlock();
+        }
+
     }
 
 }
@@ -31,9 +50,11 @@ void ConvolutionNode::showGui() {
         imnodes::EndNodeTitleBar();
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(209,192,8)));
-        ImGui::Text("Warning: Convolution is not implemented in this build. This node will merely output its input.");
+        ImGui::Text("Warning: Experimental convolution support. Audio levels are not guaranteed to be safe.");
         ImGui::PopStyleColor();
         
+        ImGui::Checkbox("Enable", &this->enabled);
+
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
@@ -49,5 +70,9 @@ void ConvolutionNode::showGui() {
 }
 
 void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames) { 
-    memcpy(out, in, numFrames * sizeof(float)); // assuming mono output
+    if (this->enabled) {
+        this->impulseLock.lock();
+        this->convolver.process(in, out, numFrames);
+        this->impulseLock.unlock();
+    }
 }

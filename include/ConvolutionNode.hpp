@@ -45,6 +45,7 @@ namespace guitar_amp {
         std::vector<float> impulse;
         ma_decoder file_reader;
         fftconvolver::FFTConvolver convolver;
+        bool enabled;
         
     };
 }
