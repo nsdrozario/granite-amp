@@ -6,6 +6,13 @@ Real-time guitar amplifier simulation.
 
 *WARNING: In this project's current state, there is no guarantee that the audio levels generated from this application are safe, neither for humans nor audio equipment. Use at your own risk.*
 
+## Features
+
+- [x] Distortion/Overdrive
+  - [x] Min/max clipping
+  - [x] Tanh clipping
+- [x] Convolution Reverb
+
 ## Dependencies
 
 - [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
