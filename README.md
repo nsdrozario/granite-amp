@@ -41,7 +41,7 @@ make -f Makefile_WINDOWS -j
 
 ## Mac
 
-``bash
+```bash
 make -f Makefile_MAC -j
 ```
 
