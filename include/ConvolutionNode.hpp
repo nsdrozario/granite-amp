@@ -24,6 +24,7 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include "ImGuiFileBrowser.h"
 #include <vector>
 #include "FFTConvolver.h"
 
@@ -38,15 +39,17 @@ namespace guitar_amp {
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames); 
 
-        std::mutex impulseLock;
-
     private:
-        
+
+        std::mutex impulseLock;
         std::vector<float> impulse;
         ma_decoder file_reader;
         fftconvolver::FFTConvolver convolver;
         bool enabled;
+        imgui_addons::ImGuiFileBrowser file_browser;
         
+        bool loadIRFile(const std::string &path);
+
     };
 }
 

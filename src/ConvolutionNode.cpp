@@ -14,7 +14,7 @@ ConvolutionNode::ConvolutionNode(int id) : MiddleNode(id) {
     
     } else {
         
-        size_t numFrames;
+        ma_uint64 numFrames;
 
         if (ma_decoder_get_available_frames(&(this->file_reader), &numFrames) != MA_SUCCESS) {
             std::cerr << "Decoder error in ConvolutionNode constructor\n";
@@ -55,6 +55,15 @@ void ConvolutionNode::showGui() {
         
         ImGui::Checkbox("Enable", &this->enabled);
 
+        if (ImGui::Button("Change Impulse Response")) {
+            ImGui::OpenPopup("IR File Explorer");
+        }
+
+        if(this->file_browser.showFileDialog("IR File Explorer", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(100,50), ".wav")) {
+            std::thread t(&ConvolutionNode::loadIRFile, this, file_browser.selected_path);
+            t.detach(); // Don't hold up the rest of the UI        
+        }
+
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
@@ -74,5 +83,37 @@ void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames) {
         this->impulseLock.lock();
         this->convolver.process(in, out, numFrames);
         this->impulseLock.unlock();
+    } else {
+        memcpy(out,in,numFrames*sizeof(float));
+    }
+}
+
+bool ConvolutionNode::loadIRFile(const std::string &path) {
+    ma_decoder_config decoder_cfg = ma_decoder_config_init(ma_format_f32, 1, device.sampleRate);
+    ma_decoder_uninit(&(this->file_reader));
+    if (ma_decoder_init_file_wav(path.c_str(), &decoder_cfg, &(this->file_reader)) != MA_SUCCESS) {
+        std::cerr << "Unable to open file " << path << "\n";
+        return false;
+    } else {
+        ma_uint64 numFrames;
+
+        if (ma_decoder_get_available_frames(&(this->file_reader), &numFrames) != MA_SUCCESS) {
+            std::cerr << "Decoder error in ConvolutionNode::loadIRFile\n";
+            return false;
+        }
+
+        if (numFrames > 0) {
+            this->impulseLock.lock();
+            this->impulse.resize(numFrames);
+            ma_decoder_read_pcm_frames(&(this->file_reader), this->impulse.data(), numFrames);
+            this->convolver.reset();
+            this->convolver.init(numFrames/4, this->impulse.data(), numFrames);
+            this->impulseLock.unlock();
+        } else {
+            return false;
+        }
+
+        return true;
+
     }
 }
