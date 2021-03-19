@@ -39,4 +39,10 @@ make -f Makefile_LINUX -j
 make -f Makefile_WINDOWS -j
 ```
 
+## Mac
+
+``bash
+make -f Makefile_MAC -j
+```
+
 
