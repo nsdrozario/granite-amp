@@ -95,7 +95,7 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
         float *tmp_output = new float[numFrames];
         float *output_buf = new float[numFrames];
         memcpy(tmp_input, f32_input, buffer_size_in_bytes);
-
+        memcpy(output_buf, tmp_input, buffer_size_in_bytes);
         // dfs from vertex 3 (the output attribute of the input node)
         // this assumes that there will be only one inward connection per node, except for input and output (which is correct for the time being)
         // the audio processing has to be done on a node by node basis but the dfs operates on attribute to attribute

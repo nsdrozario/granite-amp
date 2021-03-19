@@ -20,6 +20,10 @@
 
 using namespace guitar_amp;
 
+InputNode::~InputNode() {
+    
+}
+
 float InputNode::getGain() {
     return this->gain;
 }
@@ -39,8 +43,6 @@ void InputNode::showGui() {
         imnodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Input");
         imnodes::EndNodeTitleBar();
-
-        ImGui::DragFloat("Gain coefficient", &(this->gain), 0.1, 0, 5, "%.3f");
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();

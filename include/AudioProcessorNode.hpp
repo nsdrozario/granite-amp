@@ -31,7 +31,8 @@ namespace guitar_amp {
     public:
 
         AudioProcessorNode(int id) { this->id = id; }
-
+        virtual ~AudioProcessorNode();
+        
         virtual void showGui()=0;
 
         int getId() { return this->id; }

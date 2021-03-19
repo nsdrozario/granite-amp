@@ -24,7 +24,10 @@
 namespace guitar_amp {
     class InputNode : public AudioProcessorNode {
     public:
+        
         InputNode(int id) : AudioProcessorNode(id) { };
+        ~InputNode();
+
         float getGain();
         void setGain(float g);
 
@@ -33,7 +36,7 @@ namespace guitar_amp {
         AudioProcessorNode *next;
 
     private:
-        float gain = 1.0f;
+        float gain = 0.0f;
     };
 }
 

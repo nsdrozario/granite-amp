@@ -20,16 +20,6 @@
 #include <algorithm>
 #include <cmath>
 
-void guitar_amp::dsp::hardclip_minmax(const float *input, float *transform, float gain, float threshold, ma_uint32 frameCount) {
-    for (ma_uint32 i = 0; i < frameCount; i++) {
-        if (input[i] > 0) {
-            transform[i] = std::min(input[i]*gain, threshold);
-        } else {
-            transform[i] = std::max(input[i]*gain, -threshold);
-        }
-    }
-}
-
 float guitar_amp::dsp::f32_to_dbfs(float x) {
     return 20.0f * log10 ( fabsf(x) );
 }
@@ -37,3 +27,24 @@ float guitar_amp::dsp::f32_to_dbfs(float x) {
 float guitar_amp::dsp::dbfs_to_f32(float x) {
     return powf(10, x / 20.0f);
 }
+
+void guitar_amp::dsp::hardclip_minmax(const float *input, float *transform, float gain, float threshold, ma_uint32 frameCount) {
+    float real_gain = dbfs_to_f32(gain);
+    float real_threshold = dbfs_to_f32(threshold);
+    for (ma_uint32 i = 0; i < frameCount; i++) {
+        if (input[i] > 0) {
+            transform[i] = std::min(input[i]*real_gain, real_threshold);
+        } else {
+            transform[i] = std::max(input[i]*real_gain, -real_threshold);
+        }
+    }
+}
+
+void guitar_amp::dsp::clip_tanh(const float *input, float *output, float gain, float output_level, ma_uint32 frameCount) {
+    float real_gain = dbfs_to_f32(gain);
+    float real_output_level = dbfs_to_f32(output_level);
+    for (ma_uint32 i = 0; i < frameCount; i++) {
+        output[i] = real_output_level * tanhf(input[i] * real_gain / real_output_level);
+    }
+}
+
