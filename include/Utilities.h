@@ -28,7 +28,7 @@
 #include <cstring>
 #include <new>
 
-
+#define FFTCONVOLVER_DONT_USE_SSE
 namespace fftconvolver
 {
 

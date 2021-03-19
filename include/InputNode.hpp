@@ -36,7 +36,7 @@ namespace guitar_amp {
         AudioProcessorNode *next;
 
     private:
-        float gain = 1.0f;
+        float gain = 0.0f;
     };
 }
 

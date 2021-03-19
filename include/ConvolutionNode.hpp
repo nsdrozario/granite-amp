@@ -18,6 +18,7 @@
 */
 #ifndef GUITAR_AMP_CONVOLUTIONNODE_HPP
 #define GUITAR_AMP_CONVOLUTIONNODE_HPP
+#define FFTCONVOLVER_DONT_USE_SSE
 
 #include "MiddleNode.hpp"
 #include "internal_dsp.hpp"
@@ -45,10 +46,11 @@ namespace guitar_amp {
         std::vector<float> impulse;
         ma_decoder file_reader;
         fftconvolver::FFTConvolver convolver;
-        bool enabled;
+        bool bypass = true;
         imgui_addons::ImGuiFileBrowser file_browser;
-        
-        bool loadIRFile(const std::string &path);
+        float gain = -20.0f;
+
+        void loadIRFile(const std::string &path);
 
     };
 }

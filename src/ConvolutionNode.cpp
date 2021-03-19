@@ -1,6 +1,7 @@
 #include <ConvolutionNode.hpp>
 #include <state.hpp>
 #include <iostream>
+#include "internal_dsp.hpp"
 #include <thread>
 using namespace guitar_amp;
 
@@ -52,8 +53,11 @@ void ConvolutionNode::showGui() {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(209,192,8)));
         ImGui::Text("Warning: Experimental convolution support. Audio levels are not guaranteed to be safe.");
         ImGui::PopStyleColor();
+
+        ImGui::DragFloat("Gain (not applied in bypass mode)", &(this->gain), 1.0f, -144.0f, 0.0f, "%.3f dB");
         
-        ImGui::Checkbox("Enable", &this->enabled);
+        ImGui::Checkbox("Bypass", &this->bypass);
+
 
         if (ImGui::Button("Change Impulse Response")) {
             ImGui::OpenPopup("IR File Explorer");
@@ -79,41 +83,38 @@ void ConvolutionNode::showGui() {
 }
 
 void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames) { 
-    if (this->enabled) {
+    float real_gain = dsp::dbfs_to_f32(this->gain);
+    if (!this->bypass) {
         this->impulseLock.lock();
         this->convolver.process(in, out, numFrames);
         this->impulseLock.unlock();
+        for (size_t i = 0; i < numFrames; i++) {
+            out[i] *= real_gain;
+        }
     } else {
         memcpy(out,in,numFrames*sizeof(float));
     }
 }
 
-bool ConvolutionNode::loadIRFile(const std::string &path) {
+void ConvolutionNode::loadIRFile(const std::string &path) {
     ma_decoder_config decoder_cfg = ma_decoder_config_init(ma_format_f32, 1, device.sampleRate);
-    ma_decoder_uninit(&(this->file_reader));
     if (ma_decoder_init_file_wav(path.c_str(), &decoder_cfg, &(this->file_reader)) != MA_SUCCESS) {
         std::cerr << "Unable to open file " << path << "\n";
-        return false;
+        return;
     } else {
         ma_uint64 numFrames;
 
         if (ma_decoder_get_available_frames(&(this->file_reader), &numFrames) != MA_SUCCESS) {
             std::cerr << "Decoder error in ConvolutionNode::loadIRFile\n";
-            return false;
+            return;
         }
 
         if (numFrames > 0) {
             this->impulseLock.lock();
             this->impulse.resize(numFrames);
             ma_decoder_read_pcm_frames(&(this->file_reader), this->impulse.data(), numFrames);
-            this->convolver.reset();
             this->convolver.init(numFrames/4, this->impulse.data(), numFrames);
             this->impulseLock.unlock();
-        } else {
-            return false;
         }
-
-        return true;
-
     }
 }

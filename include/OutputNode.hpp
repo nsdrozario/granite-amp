@@ -33,7 +33,7 @@ namespace guitar_amp {
         void showGui();
 
     private:
-        float gain = 1.0f;
+        float gain = 0.0f;
     };
 }
 

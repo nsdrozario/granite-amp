@@ -20,9 +20,6 @@ OverdriveNode::OverdriveNode(int id) : MiddleNode(id) {
 }
 
 OverdriveNode::~OverdriveNode() {
-
-    
-
 }
 
 void OverdriveNode::showGui() {
@@ -55,7 +52,7 @@ void OverdriveNode::showGui() {
         }
 
         // Will be functional after implementing tanh clipping
-        // ImGui::Combo("Clipping algorithm", &(this->clipping_algorithm), "minmax\0tanh");
+        ImGui::Combo("Clipping algorithm", &(this->clipping_algorithm), "minmax\0tanh");
         
         imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();
@@ -73,7 +70,11 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames) {
     memcpy(out, in, sizeof(float) * numFrames);
     ma_hpf2_process_pcm_frames(&this->hpf, out, out, numFrames);
 
-    dsp::hardclip_minmax(out, out, dsp::dbfs_to_f32(this->gain), dsp::dbfs_to_f32(this->output_volume), numFrames);
+    if (this->clipping_algorithm == 1) {
+        dsp::clip_tanh(out, out, this->gain, this->output_volume, numFrames);
+    } else {
+        dsp::hardclip_minmax(out, out, this->gain, this->output_volume, numFrames);
+    }
 
     ma_lpf2_process_pcm_frames(&this->lpf, out, out, numFrames);
 
