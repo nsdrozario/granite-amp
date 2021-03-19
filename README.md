@@ -14,7 +14,7 @@ Real-time guitar amplifier simulation.
   - [x] Min/max clipping
   - [x] Tanh clipping
 - [x] Convolution Reverb
-
+  - Note: Impulse responses not included.
 ## Dependencies
 
 - [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
