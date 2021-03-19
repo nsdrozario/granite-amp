@@ -51,11 +51,11 @@ void ConvolutionNode::showGui() {
         imnodes::EndNodeTitleBar();
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(209,192,8)));
-        ImGui::Text("Warning: Experimental convolution support. Audio levels are not guaranteed to be safe.");
+        ImGui::Text("Some impulse responses may be much louder than others.\nPlease change impulses in bypass mode,\nand then disable bypass mode, set your gain to -144dB,\nand slowly bring up the gain to a desired degree.");
         ImGui::PopStyleColor();
 
         ImGui::DragFloat("Gain (not applied in bypass mode)", &(this->gain), 1.0f, -144.0f, 0.0f, "%.3f dB");
-        
+
         ImGui::Checkbox("Bypass", &this->bypass);
 
 

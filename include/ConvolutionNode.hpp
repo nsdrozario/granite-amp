@@ -48,7 +48,7 @@ namespace guitar_amp {
         fftconvolver::FFTConvolver convolver;
         bool bypass = true;
         imgui_addons::ImGuiFileBrowser file_browser;
-        float gain = -20.0f;
+        float gain = -144.0f;
 
         void loadIRFile(const std::string &path);
 

@@ -43,8 +43,6 @@ void OutputNode::showGui() {
         imnodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Ouput");
         imnodes::EndNodeTitleBar();
-
-        ImGui::DragFloat("Gain", &(this->gain), 0.1, -144.0f, 0.0f, "%.3f dB");
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
