@@ -188,7 +188,7 @@ int main () {
     sf::Clock dt;
     ImGui::SFML::Init(w);
     imnodes::Initialize();
-
+    w.setVerticalSyncEnabled(true);
     /*
         Each node will reserve 5 times it's own zero-indexed ID, plus 4 more spaces.
         The first two IDs after the node's ID * 5 are reserved for input, and the next two for output.
