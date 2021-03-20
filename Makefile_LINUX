@@ -15,4 +15,4 @@ clean:
 	rm -rf amp
 	rm -rf obj/
 	mkdir obj
-    mkdir obj/external/
+	mkdir obj/external/
