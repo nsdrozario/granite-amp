@@ -1,6 +1,6 @@
 CXX := clang++
 LDFLAGS :=  -lsfml-graphics -lsfml-window -lGL -lGLU -lglut -lsfml-system -pthread -ldl
-CXXFLAGS := -std=c++17 -Iinclude/ -O2
+CXXFLAGS := -std=c++17 -Iinclude/ -Iexternal_headers/ -O3
 SRCS := $(wildcard src/*.cpp)
 OBJS := $(patsubst src/%.cpp, obj/%.o, $(SRCS))
 
