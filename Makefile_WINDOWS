@@ -1,7 +1,7 @@
 CXX := clang++
 LDFLAGS := -lsfml-graphics -lsfml-window -lsfml-system -lopengl32 
-CXXFLAGS := -std=c++17 -Iinclude/ -O2 
-SRCS := $(wildcard src/*.cpp)
+CXXFLAGS := -std=c++17 -Iinclude/ -Iexternal_headers/ -O3
+SRCS := $(wildcard src/*.cpp) $(wildcard src/external/*.cpp)
 OBJS := $(patsubst src/%.cpp, obj/%.o, $(SRCS))
 
 amp: $(OBJS)
@@ -14,4 +14,5 @@ clean:
 	rm -rf *.exe
 	rm -rf amp
 	rm -rf obj/
-	mkdir obj
+	mkdir obj/
+	mkdir obj/external
