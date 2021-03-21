@@ -1,13 +1,13 @@
 language: cpp
 jobs:
-  include:
-  
+  allow_failures:
     - os: osx
-      before_install:
+      env: HOMEBREW_NO_AUTO_UPDATE=1
+      install:
         - brew install sfml
       compiler: clang
       script: make clean -f Makefile_MAC && make -f -f Makefile_MAC
-
+  include:
     - os: linux
       before_install:
         - sudo apt-get -y install freeglut3-dev
