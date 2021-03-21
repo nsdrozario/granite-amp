@@ -8,7 +8,7 @@ jobs:
       install:
         - brew install sfml
       compiler: clang
-      script: make clean -f Makefile_MAC && make -f -f Makefile_MAC
+      script: make clean -f Makefile_MAC && make -j -f Makefile_MAC
     - os: linux
       before_install:
         - sudo apt-get -y install freeglut3-dev
