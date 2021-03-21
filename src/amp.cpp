@@ -36,6 +36,7 @@
 #include <OutputNode.hpp>
 #include <OverdriveNode.hpp>
 #include <ConvolutionNode.hpp>
+#include <CompressorNode.hpp>
 
 #include <utility>
 #include <set>
@@ -244,6 +245,11 @@ int main () {
 
                 if (ImGui::MenuItem("Create Convolution IR Node")) {
                     nodes[current_node] = new guitar_amp::ConvolutionNode(current_node);
+                    current_node += 5;
+                }
+
+                if (ImGui::MenuItem("Create Compresoor Node")) {
+                    nodes[current_node] = new guitar_amp::CompressorNode(current_node);
                     current_node += 5;
                 }
 
