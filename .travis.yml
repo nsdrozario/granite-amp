@@ -1,19 +1,30 @@
 language: cpp
-before_install:
-  - sudo apt-get -y install freeglut3-dev
-  - sudo apt-get -y install cmake
-  - sudo apt-get -y install unzip
-  - sudo apt install libfreetype6-dev libxrandr-dev libudev-dev libogg-dev libflac-dev libvorbis-dev libopenal-dev
-install:
-  - wget https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip -O sfml-source-2.5.zip
-  - unzip sfml-source-2.5.zip
-  - cd SFML-2.5.1
-  - mkdir build
-  - cd build
-  - cmake ..
-  - make -j
-  - sudo make install
-  - cd ..
-  - cd ..
-compiler: clang
-script: make clean -f Makefile_LINUX && make -j -f Makefile_LINUX
+jobs:
+  allow_failures:
+    - os: osx    
+  include:
+    - os: osx
+      env: HOMEBREW_NO_AUTO_UPDATE=1
+      install:
+        - brew install sfml
+      compiler: clang
+      script: make clean -f Makefile_MAC && make -j -f Makefile_MAC
+    - os: linux
+      before_install:
+        - sudo apt-get -y install freeglut3-dev
+        - sudo apt-get -y install cmake
+        - sudo apt-get -y install unzip
+        - sudo apt install libfreetype6-dev libxrandr-dev libudev-dev libogg-dev libflac-dev libvorbis-dev libopenal-dev
+      install:
+        - wget https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip -O sfml-source-2.5.zip
+        - unzip sfml-source-2.5.zip
+        - cd SFML-2.5.1
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make -j
+        - sudo make install
+        - cd ..
+        - cd ..
+      compiler: clang
+      script: make clean -f Makefile_LINUX && make -j -f Makefile_LINUX
