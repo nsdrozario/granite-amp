@@ -30,6 +30,7 @@ namespace guitar_amp {
         // Clipping / saturation algorithms
         void hardclip_minmax(const float *input, float *transform, float gain, float threshold, ma_uint32 frameCount);
         void clip_tanh(const float *input, float *output, float gain, float output_volume, ma_uint32 frameCount);
+        void clip_sin(const float *input, float *output, float gain, float output_volume, ma_uint32 frameCount);
 
         // Utility
         float f32_to_dbfs(float x);

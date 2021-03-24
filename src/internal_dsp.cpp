@@ -48,3 +48,17 @@ void guitar_amp::dsp::clip_tanh(const float *input, float *output, float gain, f
     }
 }
 
+void guitar_amp::dsp::clip_sin(const float *input, float *output, float gain, float output_level, ma_uint32 frameCount) {
+    float real_gain = dbfs_to_f32(gain);
+    float real_output_level = dbfs_to_f32(output_level);
+    float comp = 1.57079632679f * real_output_level; // x position of abs max of a*sin(a/x) one half cycle to the left and right of the origin
+    for (ma_uint32 i = 0; i < frameCount; i++) {
+        if (input[i] * real_gain > comp) { 
+            output[i] = real_output_level;
+        } else if (input[i] * real_gain < -comp) { //-pi/2
+            output[i] = -real_output_level;
+        } else {
+            output[i] = real_output_level * sinf(input[i] * real_gain / real_output_level);
+        }
+    }
+}
