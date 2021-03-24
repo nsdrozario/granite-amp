@@ -13,8 +13,7 @@ namespace guitar_amp {
         void ApplyFX(const float *in, float *out, size_t numFrames);
 
     private:
-        // static const char COMPRESSOR_RMS = 1<<0;
-        static const char COMPRESSOR_PEAK = 1<<1;
+        static const int COMPRESSOR_PEAK = 0;
         // might add more metering types later
         
         // times are in seconds
@@ -22,7 +21,12 @@ namespace guitar_amp {
         float release = 0.0f;
         float ratio = 2.0f;
         float threshold = -6.0f; // dB
-        char metering = CompressorNode::COMPRESSOR_PEAK;
+        int metering = CompressorNode::COMPRESSOR_PEAK;
+        
+        size_t samples_remaining = 0;
+        size_t samples_until_compress = 0;
+
+        bool compressing = false;
 
         bool sidechain_enabled = false;
 

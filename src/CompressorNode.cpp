@@ -1,4 +1,5 @@
 #include <CompressorNode.hpp>
+#include <state.hpp>
 using namespace guitar_amp;
 
 CompressorNode::CompressorNode(int id) : MiddleNode(id) { }
@@ -19,17 +20,19 @@ void CompressorNode::showGui() {
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
-
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(209,192,8)));
-        ImGui::Text("Note: This node's functionality is unimplemented. This will merely pass its input into its output.");
-        ImGui::PopStyleColor();
-
+        /*
         ImGui::DragFloat("Attack", &this->attack, 0.01f, 0.0f, 10.0f, "%.3f s");
         ImGui::DragFloat("Release", &this->release, 0.01f, 0.0f, 10.0f, "%.3f s");
+        */
         ImGui::DragFloat("Ratio", &this->ratio, 0.01, 1.0f, 50.0f, "%.3f");
         ImGui::DragFloat("Threshold", &this->threshold, 1.0f, -1440.0f, 0.0f, "%.3f dB");
 
         if (this->sidechain_enabled) {
+        
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(209,192,8)));
+        ImGui::Text("Note: Sidechaining is unimplemented for the time being.\nNothing different will happen if you attach a node here!");
+        ImGui::PopStyleColor();
+
             imnodes::BeginInputAttribute(this->id+2);
                 ImGui::Text("Sidechain Signal");
             imnodes::EndInputAttribute();
@@ -48,7 +51,13 @@ void CompressorNode::showGui() {
 }
 
 void CompressorNode::ApplyFX(const float *in, float *out, size_t numFrames) {
-
-    memcpy(out, in, numFrames * sizeof(float));
-
+    float linear_threshold = dsp::dbfs_to_f32(this->threshold);
+    memcpy(out, in, numFrames*sizeof(float));
+    for (size_t i = 0; i < numFrames; i++) {
+        if (out[i] > linear_threshold) {
+            out[i] = ((out[i]-linear_threshold) / dsp::dbfs_to_f32(ratio)) + linear_threshold;
+        } else if (-(out[i]) > linear_threshold) {
+            out[i] = ((out[i] + linear_threshold) / dsp::dbfs_to_f32(ratio)) - linear_threshold;
+        }
+    }
 }
