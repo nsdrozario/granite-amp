@@ -30,6 +30,7 @@ extern const char ** cstr_outputNames;
 
 extern std::map<int, AudioProcessorNode *> nodes;
 extern std::map<int,int> adjlist; // will need another adjacency list to track inward links to prevent double connections on an attribute
+extern std::map<int,int> adjlist_inward;
 
 extern int current_edge_id;
 extern ma_uint32 lastFrameCount;

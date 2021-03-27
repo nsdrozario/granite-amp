@@ -70,6 +70,7 @@ const char ** cstr_outputNames;
 
 std::map<int, AudioProcessorNode *> nodes;
 std::map<int,int> adjlist; // will need another adjacency list to track inward links to prevent double connections on an attribute
+std::map<int,int> adjlist_inward;
 
 int current_edge_id = INT_MIN;
 ma_uint32 lastFrameCount;
@@ -105,6 +106,7 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
         std::unordered_map<int,bool> visited_attributes;
         std::unordered_map<int,bool> visited_nodes;
         std::stringstream current_dfs_path;
+        bool reached_end = false;
         while (!dfs_stack.empty()) {
             int current_attribute = dfs_stack.top(); dfs_stack.pop();
             int current_node = (current_attribute / 5) * 5;
@@ -115,6 +117,7 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
                 visited_nodes[current_node] = true;
                 current_dfs_path << current_node << " -> ";
                 if (current_node == 5) {
+                    reached_end = true;
                     goto processing_done;
                 }
                 MiddleNode *currentNodePtr = dynamic_cast<MiddleNode *>(nodes[current_node]);
@@ -132,8 +135,9 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
             dfs_path = current_dfs_path.str();
             std::cout << current_dfs_path.str() << std::endl;
         }
-
-        MA_COPY_MEMORY(output, output_buf, buffer_size_in_bytes);
+        if (reached_end) {
+            MA_COPY_MEMORY(output, output_buf, buffer_size_in_bytes);
+        }
         delete[] output_buf;
         delete[] tmp_input;
         delete[] tmp_output;
@@ -255,7 +259,7 @@ int main () {
 
                 ImGui::EndPopup();
             }
-        
+
             // draw nodes
 
             for (auto it = nodes.begin(); it != nodes.end(); it++) {
@@ -273,14 +277,38 @@ int main () {
 
         imnodes::EndNodeEditor();
 
+        int selected_node = 0;
+        if (imnodes::IsNodeHovered(&selected_node) && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+            if (selected_node != 0 && selected_node != 5) {
+                ImGui::OpenPopup("Delete Node");
+            }
+        }
+
+        if (ImGui::BeginPopup("Delete Node")) {
+
+            if (ImGui::MenuItem("Delete Node")) {
+                adjlist.erase(adjlist_inward[selected_node+1]);
+                adjlist.erase(adjlist_inward[selected_node+2]);
+                adjlist.erase(selected_node+3);
+                adjlist.erase(selected_node+4);
+                adjlist_inward.erase(selected_node+1);
+                adjlist_inward.erase(selected_node+2);
+                delete nodes[selected_node];
+                nodes.erase(selected_node);
+            }
+
+            ImGui::EndPopup();
+        }
         int start_link; int end_link;
         if (imnodes::IsLinkCreated(&start_link, &end_link)) {
             if (adjlist.find(start_link) != adjlist.end() || adjlist.find(end_link) != adjlist.end()) {
                 std::cout << "Deleting link from " << start_link << "->" << adjlist[start_link]  << std::endl;
                 adjlist.erase(start_link);
+                adjlist_inward.erase(end_link);
             }
             std::cout << "Create " << start_link << " -> " << end_link << std::endl;
             adjlist[start_link] = end_link;
+            adjlist_inward[end_link] = start_link;
             std::cout <<"adjlist: \n";
             for (auto it = adjlist.begin(); it != adjlist.end(); it++) {
                 std::cout << it->first << "->" << it->second << std::endl;
