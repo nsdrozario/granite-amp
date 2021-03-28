@@ -12,9 +12,17 @@ Real-time guitar amplifier simulation.
 
 - [x] Distortion/Overdrive
   - [x] Min/max clipping
-  - [x] Tanh clipping
+  - [x] tanh(x) clipping
+  - [x] sin(x) clipping 
 - [x] Convolution Reverb
   - Note: Impulse responses not included.
+- [x] Compressor
+  - [x] Peak activation
+  - [ ] RMS activation
+  - [ ] Adjustable attack
+  - [ ] Adjustable release
+  - [x] Adjustable ratio
+  - [x] Adjustable threshold (in dB)    
 ## Dependencies
 
 - [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
