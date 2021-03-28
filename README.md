@@ -33,6 +33,8 @@ Real-time guitar amplifier simulation.
 - [FFTConvolver](https://github.com/HiFi-LoFi/FFTConvolver) (contained within this repository already)
 - [SFML (2.5)](https://github.com/SFML/SFML)
 
+SFML 2.5 can be installed using Homebrew on Mac and `pacman` on MSYS2, but depending on your Linux distribution you may need to compile it from source.
+
 ## Building
 
 ## Linux
