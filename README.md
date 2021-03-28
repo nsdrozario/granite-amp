@@ -47,14 +47,14 @@ make -f Makefile_LINUX -j
 ## Windows (MSYS2)
 
 ```bash
-make -f Makefile_LINUX clean
+make -f Makefile_WINDOWS clean
 make -f Makefile_WINDOWS -j
 ```
 
 ## Mac
 
 ```bash
-make -f Makefile_LINUX clean
+make -f Makefile_MAC clean
 make -f Makefile_MAC -j
 ```
 
