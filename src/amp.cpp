@@ -48,6 +48,8 @@
 
 #include <internal_dsp.hpp>
 #include <iostream>
+#include <io_util.hpp>
+
 using namespace guitar_amp;
 
 // global vars
@@ -62,12 +64,6 @@ ma_device_config deviceConfig;
 int listBoxSelectedInput = 0;
 int listBoxSelectedOutput = 0;
 
-std::vector<std::string> inputNames;
-std::vector<std::string> outputNames;
-
-const char ** cstr_inputNames;
-const char ** cstr_outputNames;
-
 std::map<int, AudioProcessorNode *> nodes;
 std::map<int,int> adjlist; // will need another adjacency list to track inward links to prevent double connections on an attribute
 std::map<int,int> adjlist_inward;
@@ -77,6 +73,9 @@ ma_uint32 lastFrameCount;
 bool audioEnabled = false;
 
 std::string dfs_path = "";
+
+std::vector<const char *> inputNames;
+std::vector<const char *> outputNames;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -154,30 +153,7 @@ int main () {
         exit(-1);
     }
 
-    ma_result result_get_devices = ma_context_get_devices
-    (
-        &context,
-        &outputDevices,
-        &numOutputDevices,
-        &inputDevices,
-        &numInputDevices
-    );
-
-    if (result_get_devices != MA_SUCCESS) {
-        std::cout << "Unable to obtain audio device info\n";
-        exit(-1);
-    }
-
-    cstr_inputNames = new const char *[numInputDevices];
-    cstr_outputNames = new const char *[numOutputDevices];
-
-    for (ma_uint32 i = 0; i < numInputDevices; i++) {
-        cstr_inputNames[i] = inputDevices[i].name;
-    }
-
-    for (ma_uint32 i = 0; i < numOutputDevices; i++) {
-        cstr_outputNames[i] = outputDevices[i].name;
-    }
+    io::refresh_devices();
 
     deviceConfig = ma_device_config_init(ma_device_type_duplex);
     deviceConfig.periodSizeInFrames = 512;
@@ -231,6 +207,7 @@ int main () {
         // imgui stuff
 
         // draw node editor
+        ImGui::Begin("Signal Chain");
         imnodes::BeginNodeEditor();
 
             // node creation
@@ -272,11 +249,14 @@ int main () {
 
             // draw links
             for (auto it = adjlist.begin(); it != adjlist.end(); it++) {
-                imnodes::Link((it->first/5)*5, it->first, it->second);
+                if (it->second != 0) {
+                    imnodes::Link((it->first/5)*5, it->first, it->second);
+                }
             }
 
         imnodes::EndNodeEditor();
-
+        ImGui::End();
+        
         int selected_node = 0;
         if (imnodes::IsNodeHovered(&selected_node) && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
             if (selected_node != 0 && selected_node != 5) {
@@ -315,21 +295,14 @@ int main () {
             }
         }
 
-        /*
-        int destroyedLink;
-        if (imnodes::IsLinkDestroyed(&destroyedLink)) {
-            std::cout << "Link destroyed\n";
-            adjlist[edge_list[destroyedLink].first] = -1;
-            adjlist[edge_list[destroyedLink].second] = -1;
-            edge_list.erase(destroyedLink);
-        }
-        */
-
         // consider using ListBoxHeader
         ImGui::Begin("I/O Devices");
-            ImGui::ListBox("Inputs", &listBoxSelectedInput, cstr_inputNames, static_cast<int>(numInputDevices));
-            ImGui::ListBox("Outputs", &listBoxSelectedOutput, cstr_outputNames, static_cast<int>(numOutputDevices));
+            ImGui::ListBox("Inputs", &listBoxSelectedInput, inputNames.data(), static_cast<int>(numInputDevices));
+            ImGui::ListBox("Outputs", &listBoxSelectedOutput, outputNames.data(), static_cast<int>(numOutputDevices));
             ImGui::Checkbox("Audio enabled", &audioEnabled);
+            if (ImGui::Button("Refresh")) {
+                io::refresh_devices(); // consider adding a mutex and putting this off to another thread
+            }
         ImGui::End();
 
         bool inputChanged = deviceConfig.capture.pDeviceID != &(inputDevices[listBoxSelectedInput].id);
