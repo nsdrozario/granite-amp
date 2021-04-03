@@ -188,7 +188,9 @@ int main () {
     nodes[5] = new guitar_amp::OutputNode(5);
 
     int current_node = 10;
-
+    ImGui::SetNextWindowSize(ImVec2(300,200));
+    imnodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
+    imnodes::SetNodeEditorSpacePos(5, ImVec2(50, 200));
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
             ImGui::SFML::ProcessEvent(e);
@@ -206,7 +208,7 @@ int main () {
 
         // imgui stuff
 
-        // draw node editor
+        // draw node 
         ImGui::Begin("Signal Chain");
         imnodes::BeginNodeEditor();
 
@@ -256,7 +258,7 @@ int main () {
 
         imnodes::EndNodeEditor();
         ImGui::End();
-        
+
         int selected_node = 0;
         if (imnodes::IsNodeHovered(&selected_node) && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
             if (selected_node != 0 && selected_node != 5) {

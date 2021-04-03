@@ -22,7 +22,7 @@
 #include "headers.hpp"
 #define _USE_MATH_DEFINES
 #include <cmath>
-
+#include <vector>
 
 namespace guitar_amp {
     namespace dsp {
@@ -35,6 +35,18 @@ namespace guitar_amp {
         // Utility
         float f32_to_dbfs(float x);
         float dbfs_to_f32(float x);
+
+        size_t seconds_to_samples(float time, size_t sample_rate);
+
+        // classes
+        class ring_buffer : public std::vector<float> {
+            public:
+                ring_buffer();
+                virtual ~ring_buffer();
+                ring_buffer(size_t block_size, size_t samples);
+                virtual float& operator[](size_t input);
+        };
+
     }
 }
 
