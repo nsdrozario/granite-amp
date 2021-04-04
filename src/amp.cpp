@@ -49,6 +49,8 @@
 #include <internal_dsp.hpp>
 #include <iostream>
 #include <io_util.hpp>
+#include <implot.h>
+#include <AnalyzerNode.hpp>
 
 using namespace guitar_amp;
 
@@ -169,6 +171,7 @@ int main () {
     sf::Clock dt;
     ImGui::SFML::Init(w);
     imnodes::Initialize();
+    ImPlot::CreateContext();
     w.setVerticalSyncEnabled(true);
     /*
         Each node will reserve 5 times it's own zero-indexed ID, plus 4 more spaces.
@@ -199,6 +202,7 @@ int main () {
                     delete it->second;
                 }
                 imnodes::Shutdown();
+                ImPlot::DestroyContext();
                 ImGui::SFML::Shutdown();
                 w.close();
             }
@@ -233,6 +237,11 @@ int main () {
 
                 if (ImGui::MenuItem("Create Compresoor Node")) {
                     nodes[current_node] = new guitar_amp::CompressorNode(current_node);
+                    current_node += 5;
+                }
+
+                if (ImGui::MenuItem("Create Analyzer Node")) {
+                    nodes[current_node] = new guitar_amp::AnalyzerNode(current_node);
                     current_node += 5;
                 }
 
