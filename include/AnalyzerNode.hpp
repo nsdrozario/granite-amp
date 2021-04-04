@@ -20,6 +20,7 @@ namespace guitar_amp {
     
     private:
         bool showing_spectrum;
+        bool accept_warning;
         size_t fft_size;
         std::vector<float> signal;
         std::vector<float> real;

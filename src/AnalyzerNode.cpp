@@ -24,14 +24,29 @@ void AnalyzerNode::showGui() {
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
+        ImGui::Text("WARNING: The frequency analyzer fluctuates rapidly\nand may cause seizures in some people.\nIf you or any of your relatives have had\na history of epileptic conditions or seizures,\nplease consult a medical professional before using this software\nand DO NOT press the checkbox below.");
+        ImGui::PopStyleColor();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 153, 153)));
+        ImGui::Text("This is not medical advice;\nplease consult a medical professional for medical advice.");
+        ImGui::PopStyleColor();
+        ImGui::Checkbox("I accept the warning and understand the risks.", &(this->accept_warning));
         
+        if (this->accept_warning) {
+            ImGui::Checkbox("Show Spectrum", &(this->showing_spectrum));
+        } else {
+            this->showing_spectrum = false;
+        }
 
-        ImGui::BeginChildFrame(this->id, ImVec2(300,200));
-        ImPlot::BeginPlot("FFT", "Frequency", "Power", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
-        ImPlot::PlotLine("Power", this->freqs.data(), this->output.data(), this->fft_size/2);
-        ImPlot::EndPlot();
-        // ImGui::EndPopup();
-        ImGui::EndChildFrame();
+        if (this->showing_spectrum && this->accept_warning) {
+            ImGui::BeginChildFrame(this->id, ImVec2(400,300));
+            ImPlot::SetNextPlotLimitsX(0.0f, static_cast<double>(device.sampleRate/2));
+            ImPlot::SetNextPlotLimitsY(6.0f, -80.0f);   
+            ImPlot::BeginPlot("FFT", "Frequency", "Power", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
+            ImPlot::PlotLine("Power", this->freqs.data(), this->output.data(), this->fft_size/2);
+            ImPlot::EndPlot();
+            ImGui::EndChildFrame();
+        }
 
         imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();

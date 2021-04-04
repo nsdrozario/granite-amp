@@ -50,7 +50,7 @@ void ConvolutionNode::showGui() {
             ImGui::TextUnformatted("Convolution IR");
         imnodes::EndNodeTitleBar();
 
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(209,192,8)));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
         ImGui::Text("Some impulse responses may be much louder than others.\nPlease change impulses in bypass mode,\nand then disable bypass mode, set your gain to -144dB,\nand slowly bring up the gain to a desired degree.");
         ImGui::PopStyleColor();
 
