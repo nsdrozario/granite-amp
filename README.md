@@ -22,7 +22,8 @@ Real-time guitar amplifier simulation.
   - [ ] Adjustable attack
   - [ ] Adjustable release
   - [x] Adjustable ratio
-  - [x] Adjustable threshold (in dB)    
+  - [x] Adjustable threshold (in dB)
+- [x] Frequency analyzer (need to double click graph to see spectrum) 
 ## Dependencies
 
 - [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
