@@ -31,6 +31,7 @@ Real-time guitar amplifier simulation.
 - [implot](https://github.com/epezent/implot) (contained within this repository already)
 - [Miniaudio](https://github.com/mackron/miniaudio) (contained within this repository already)
 - [FFTConvolver](https://github.com/HiFi-LoFi/FFTConvolver) (contained within this repository already)
+    - [AudioFFT](https://github.com/HiFi-LoFi/AudioFFT) (contained within this repository already)
 - [SFML (2.5)](https://github.com/SFML/SFML)
 
 SFML 2.5 can be installed using Homebrew on Mac and `pacman` on MSYS2, but depending on your Linux distribution you may need to compile it from source.

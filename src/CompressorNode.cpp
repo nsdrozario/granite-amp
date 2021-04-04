@@ -29,7 +29,7 @@ void CompressorNode::showGui() {
 
         if (this->sidechain_enabled) {
         
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(209,192,8)));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
         ImGui::Text("Note: Sidechaining is unimplemented for the time being.\nNothing different will happen if you attach a node here!");
         ImGui::PopStyleColor();
 
