@@ -41,7 +41,8 @@ void AnalyzerNode::showGui() {
         if (this->showing_spectrum && this->accept_warning) {
             ImGui::BeginChildFrame(this->id, ImVec2(400,300));
             ImPlot::SetNextPlotLimitsX(0.0f, static_cast<double>(device.sampleRate/2));
-            ImPlot::SetNextPlotLimitsY(6.0f, -80.0f);   
+            const double ticks[] = {0.0,50.0,100.0,300.0,500.0,1000.0,2000.0,4000.0,10000.0,20000.0};
+            ImPlot::SetNextPlotTicksX(ticks, 10);
             ImPlot::BeginPlot("FFT", "Frequency", "Power", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
             ImPlot::PlotLine("Power", this->freqs.data(), this->output.data(), this->fft_size/2);
             ImPlot::EndPlot();

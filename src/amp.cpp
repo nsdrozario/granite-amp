@@ -33,6 +33,7 @@
 #include <io_util.hpp>
 #include <implot.h>
 #include <AnalyzerNode.hpp>
+#include <OscillatorNode.hpp>
 
 using namespace guitar_amp;
 
@@ -226,7 +227,12 @@ int main () {
                     nodes[current_node] = new guitar_amp::AnalyzerNode(current_node);
                     current_node += 5;
                 }
-
+                #ifdef DEBUG_BUILD
+                if (ImGui::MenuItem("Create Oscillator Node")) {
+                    nodes[current_node] = new guitar_amp::OscillatorNode(current_node);
+                    current_node += 5;
+                }
+                #endif
                 ImGui::EndPopup();
             }
 
