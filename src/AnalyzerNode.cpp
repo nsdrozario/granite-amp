@@ -74,12 +74,17 @@ void AnalyzerNode::ApplyFX(const float *in, float *out, size_t numFrames) {
     }
 
     for (size_t i = 0; i < signal.size(); i++) {
+        // copy input buffer
         if (i < numFrames) {
             signal[i] = in[i];
         } else {
             signal[i] = 0.0f;
         }
+        // apply hann window
+        float sqrt_hann = sinf(M_PI * static_cast<float>(i) / static_cast<float>(signal.size()-1));
+        signal[i] *= sqrt_hann * sqrt_hann;
     }
+
 
     this->internal_fft.fft(this->signal.data(), this->real.data(), this->imaginary.data());
     this->output_lock.lock();

@@ -22,11 +22,23 @@ namespace guitar_amp {
 
         // classes
         class ring_buffer : public std::vector<float> {
-            public:
-                ring_buffer();
-                virtual ~ring_buffer();
-                ring_buffer(size_t block_size, size_t samples);
-                virtual float& operator[](size_t input);
+        public:
+            ring_buffer();
+            virtual ~ring_buffer();
+            ring_buffer(size_t block_size, size_t samples);
+            virtual float& operator[](size_t input);
+        };
+
+        class blackman_harris_window {
+        public:
+            blackman_harris_window();
+            ~blackman_harris_window();
+
+            void apply_window(const float *in, float *out, size_t num_frames);
+
+        private:
+            size_t sample_size;
+            size_t sample_rate;
         };
 
     }
