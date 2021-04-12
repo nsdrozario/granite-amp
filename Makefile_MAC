@@ -1,6 +1,6 @@
 # Flags can be pased to USERDEFS to change the build.
 # Example:
-# make USERDEFS=-DDEBUG_BUILD -f Makefile_LINUX 
+# make USERDEFS=-DDEBUG_BUILD -f Makefile_MAC 
 # Current options:
 #
 # -DDEBUG_BUILD // enables debugging features like normally inaccessible nodes like the oscillator 
