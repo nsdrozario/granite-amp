@@ -3,7 +3,7 @@
 # make USERDEFS=-DDEBUG_BUILD -f Makefile_LINUX 
 # Current options:
 #
-# -DDEBUG_BUILD // enables debugging features like normally inaccessible nodes like the oscillator 
+# -DDEBUG_BUILD // enables experimental features and debugging features like normally inaccessible nodes like the oscillator, may not be stable or safe
 
 CXX := clang++
 LDFLAGS :=  -lsfml-graphics -lsfml-window -lGL -lGLU -lglut -lsfml-system -pthread -ldl

@@ -63,7 +63,8 @@ void AnalyzerNode::showGui() {
 void AnalyzerNode::ApplyFX(const float *in, float *out, size_t numFrames) {
 
     memcpy(out, in, numFrames * sizeof(float));
-    size_t needed_size = fftconvolver::NextPowerOf2(numFrames);
+    // size_t needed_size = fftconvolver::NextPowerOf2(numFrames);
+    size_t needed_size = 4096;
     fft_size = needed_size;
     if (needed_size != this->signal.size()) {
         this->internal_fft.init(needed_size);
