@@ -1,0 +1,2 @@
+external_headers/ -linguist-detectable
+src/external/ -linguist-detectable
