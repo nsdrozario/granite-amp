@@ -41,7 +41,8 @@ void AnalyzerNode::showGui() {
         if (this->showing_spectrum && this->accept_warning) {
             ImGui::BeginChildFrame(this->id, ImVec2(400,300));
             ImPlot::SetNextPlotLimitsX(0.0f, static_cast<double>(device.sampleRate/2));
-            ImPlot::SetNextPlotLimitsY(6.0f, -80.0f);   
+            const double ticks[] = {0.0,50.0,100.0,300.0,500.0,1000.0,2000.0,4000.0,10000.0,20000.0};
+            ImPlot::SetNextPlotTicksX(ticks, 10);
             ImPlot::BeginPlot("FFT", "Frequency", "Power", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
             ImPlot::PlotLine("Power", this->freqs.data(), this->output.data(), this->fft_size/2);
             ImPlot::EndPlot();
@@ -62,7 +63,8 @@ void AnalyzerNode::showGui() {
 void AnalyzerNode::ApplyFX(const float *in, float *out, size_t numFrames) {
 
     memcpy(out, in, numFrames * sizeof(float));
-    size_t needed_size = fftconvolver::NextPowerOf2(numFrames);
+    // size_t needed_size = fftconvolver::NextPowerOf2(numFrames);
+    size_t needed_size = 4096;
     fft_size = needed_size;
     if (needed_size != this->signal.size()) {
         this->internal_fft.init(needed_size);
@@ -73,12 +75,17 @@ void AnalyzerNode::ApplyFX(const float *in, float *out, size_t numFrames) {
     }
 
     for (size_t i = 0; i < signal.size(); i++) {
+        // copy input buffer
         if (i < numFrames) {
             signal[i] = in[i];
         } else {
             signal[i] = 0.0f;
         }
+        // apply hann window
+        float sqrt_hann = sinf(M_PI * static_cast<float>(i) / static_cast<float>(signal.size()-1));
+        signal[i] *= sqrt_hann * sqrt_hann;
     }
+
 
     this->internal_fft.fft(this->signal.data(), this->real.data(), this->imaginary.data());
     this->output_lock.lock();

@@ -1,3 +1,10 @@
+# Flags can be pased to USERDEFS to change the build.
+# Example:
+# make USERDEFS=-DDEBUG_BUILD -f Makefile_MAC 
+# Current options:
+#
+# -DDEBUG_BUILD // enables experimental features and debugging features like normally inaccessible nodes like the oscillator, may not be stable or safe
+
 CXX := clang++
 LDFLAGS :=  -lsfml-graphics -lsfml-window -framework OpenGL -framework GLUT -lsfml-system -pthread -ldl
 CXXFLAGS := -std=c++17 -Iinclude/ -Iexternal_headers/ -O3
@@ -8,7 +15,7 @@ amp: $(OBJS)
 	$(CXX) $(OBJS) $(CXXFLAGS) $(LDFLAGS) -o amp 
 
 obj/%.o: src/%.cpp
-	$(CXX) $< $(CXXFLAGS) -c -o $@
+	$(CXX) $< $(CXXFLAGS) $(USERDEFS) -c -o $@
 
 clean:
 	rm -rf *.exe
