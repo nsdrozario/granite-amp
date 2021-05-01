@@ -10,20 +10,20 @@ Real-time guitar amplifier simulation.
 
 ## Features
 
-- [x] Distortion/Overdrive
+- Distortion/Overdrive
   - [x] Min/max clipping
   - [x] tanh(x) clipping
   - [x] sin(x) clipping 
-- [x] Convolution Reverb
+- Convolution Reverb
   - Note: Impulse responses not included.
-- [x] Compressor
+- Compressor
   - [x] Peak activation
   - [ ] RMS activation
   - [ ] Adjustable attack
   - [ ] Adjustable release
   - [x] Adjustable ratio
   - [x] Adjustable threshold (in dB)
-- [x] Frequency analyzer (need to double click graph to see spectrum) 
+- Frequency analyzer (need to double click graph to see spectrum) 
 - EQ utilities
   - [x] High/low shelf
   - [ ] Peak filter
