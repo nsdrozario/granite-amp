@@ -36,7 +36,7 @@
 #include <OscillatorNode.hpp>
 #include <DelayNode.hpp>
 #include <EQNode.hpp>
-
+#include <ShelfNode.hpp>
 
 using namespace guitar_amp;
 
@@ -231,8 +231,8 @@ int main () {
                     current_node += 5;
                 }
 
-                if (ImGui::MenuItem("Create EQ Node")) {
-                    nodes[current_node] = new guitar_amp::EQNode(current_node);
+                if (ImGui::MenuItem("Create Shelf Node")) {
+                    nodes[current_node] = new guitar_amp::ShelfNode(current_node);
                     current_node += 5;
                 }
 
