@@ -24,8 +24,14 @@ Real-time guitar amplifier simulation.
   - [x] Adjustable ratio
   - [x] Adjustable threshold (in dB)
 - [x] Frequency analyzer (need to double click graph to see spectrum) 
+- EQ utilities
+  - [x] High/low shelf
+  - [ ] Peak filter
+  - [ ] Notch filter
+  - [ ] Standalone low pass
+  - [ ] Standalone high pass
+  
 ## Dependencies
-
 - [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
 - [Imgui-SFML](https://github.com/eliasdaler/imgui-sfml) (contained within this repository already)
 - [imnodes](https://github.com/Nelarius/imnodes) (contained within this repository already)
