@@ -32,6 +32,8 @@ void DelayNode::showGui() {
             ImGui::TextUnformatted("Delay");
         imnodes::EndNodeTitleBar();
 
+        ImGui::TextColored(ImVec4(ImColor(150,70,70,255)), "This node WILL cause segfaults and potentially damaging audio. For your safety, this node has been disabled.");
+
         ImGui::DragFloat("Delay (seconds)", &(this->time_delay), 0.1, 0, 10, "%.3f s");
 
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
@@ -52,7 +54,7 @@ void DelayNode::showGui() {
 void DelayNode::ApplyFX(const float *in, float *out, size_t num_frames) {
 
     // cout << "started one cycle\n";
-
+    /*
     memcpy(out, in, num_frames * sizeof(float));
     size_t delay_in_samples = static_cast<size_t>(static_cast<float>(device.sampleRate) * this->time_delay);    
     
@@ -98,5 +100,5 @@ void DelayNode::ApplyFX(const float *in, float *out, size_t num_frames) {
     }
 
     // cout << "finished one cycle\n";
-
+    */
 }

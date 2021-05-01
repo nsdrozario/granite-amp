@@ -35,7 +35,6 @@
 #include <AnalyzerNode.hpp>
 #include <OscillatorNode.hpp>
 #include <DelayNode.hpp>
-#include <EQNode.hpp>
 #include <ShelfNode.hpp>
 
 using namespace guitar_amp;
