@@ -36,6 +36,7 @@
 #include <OscillatorNode.hpp>
 #include <DelayNode.hpp>
 #include <ShelfNode.hpp>
+#include <CabSimNode.hpp>
 
 using namespace guitar_amp;
 
@@ -232,6 +233,11 @@ int main () {
 
                 if (ImGui::MenuItem("Create Shelf Node")) {
                     nodes[current_node] = new guitar_amp::ShelfNode(current_node);
+                    current_node += 5;
+                }
+
+                if (ImGui::MenuItem("Create Cabinet Simulation Node")) {
+                    nodes[current_node] = new guitar_amp::CabSimNode(current_node);
                     current_node += 5;
                 }
 

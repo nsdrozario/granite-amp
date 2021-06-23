@@ -52,10 +52,10 @@ void OscillatorNode::ApplyFX(const float *in, float *out, size_t numFrames) {
     if (this->wav_gen.config.sampleRate != device.sampleRate) {
         ma_waveform_set_sample_rate(&(this->wav_gen), device.sampleRate);
     }
-    if (fabsf(this->wav_gen.config.amplitude - linear_amplitude) > 0.001) {
+    if (abs(this->wav_gen.config.amplitude - linear_amplitude) > 0.001) {
         ma_waveform_set_amplitude(&(this->wav_gen), linear_amplitude);
     }
-    if(fabsf(this->wav_gen.config.frequency - this->freq) > 0.001) {
+    if(abs(this->wav_gen.config.frequency - this->freq) > 0.001) {
         ma_waveform_set_frequency(&(this->wav_gen), this->freq);
     }
     if(this->wav_gen.config.type != this->wave_type) {

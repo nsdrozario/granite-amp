@@ -24,6 +24,7 @@ namespace guitar_amp {
     private:
 
         fftconvolver::FFTConvolver convolver;
+        size_t last_period_size;
 
     };
 }

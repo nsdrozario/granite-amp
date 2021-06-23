@@ -2,6 +2,8 @@
 #define GUITAR_AMP_DELAY_NODE_HPP
 #include "MiddleNode.hpp"
 #include "state.hpp"
+#include "headers.hpp"
+#include "internal_dsp.hpp"
 
 namespace guitar_amp {
     class DelayNode : public MiddleNode {
@@ -15,10 +17,13 @@ namespace guitar_amp {
     private:
         float time_delay;
         size_t period_size;
-        std::vector<float> ring_buffer;
+        float *ring_buffer;
         size_t write_ptr = 0;
         size_t read_ptr = 0;
         size_t samples_delay = 0;
+        size_t inc_write_ptr();
+        size_t inc_read_ptr();
+        
     };
 }
 

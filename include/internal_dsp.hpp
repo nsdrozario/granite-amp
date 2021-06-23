@@ -6,6 +6,8 @@
 #include <cmath>
 #include <vector>
 
+#define MAX_DELAY_DURATION 10.0
+
 namespace guitar_amp {
     namespace dsp {
 
@@ -21,12 +23,41 @@ namespace guitar_amp {
         size_t seconds_to_samples(float time, size_t sample_rate);
 
         // classes
-        class ring_buffer : public std::vector<float> {
+        template <class T>
+        class ring_buffer {
         public:
             ring_buffer();
-            virtual ~ring_buffer();
-            ring_buffer(size_t block_size, size_t samples);
-            virtual float& operator[](size_t input);
+            ring_buffer(size_t size);
+            
+            size_t inc_read_ptr() {
+                
+            }
+            size_t inc_write_ptr() {
+
+            }
+
+            size_t get_read_ptr_index() {
+
+            }
+            size_t get_write_ptr_index() {
+
+            }
+
+            T get_read_ptr_value() {
+
+            }
+            T get_write_ptr_value() {
+
+            }
+            
+            void set_write_ptr_value(size_t index, T val) {
+
+            };
+        private:
+            size_t read_ptr;
+            size_t write_ptr;
+            size_t buf_size;
+            T *buf;
         };
 
         class blackman_harris_window {

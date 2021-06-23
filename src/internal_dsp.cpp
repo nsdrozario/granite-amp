@@ -1,9 +1,11 @@
 #include <internal_dsp.hpp>
 #include <algorithm>
 #include <cmath>
+#include "state.hpp"
+using namespace guitar_amp;
 
 float guitar_amp::dsp::f32_to_dbfs(float x) {
-    return 20.0f * log10 ( fabsf(x) );
+    return 20.0f * log10 ( abs(x) );
 }
 
 float guitar_amp::dsp::dbfs_to_f32(float x) {
@@ -42,5 +44,13 @@ void guitar_amp::dsp::clip_sin(const float *input, float *output, float gain, fl
         } else {
             output[i] = real_output_level * sinf(input[i] * real_gain / real_output_level);
         }
+    }
+}
+
+dsp::delay_line::delay_line() {
+    if (device.sampleRate) {
+        
+    } else {
+
     }
 }
