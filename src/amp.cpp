@@ -245,11 +245,6 @@ int main () {
                     current_node += 5;
                 }
 
-                if (ImGui::MenuItem("Create Cabinet Simulation Node")) {
-                    nodes[current_node] = new guitar_amp::CabSimNode(current_node);
-                    current_node += 5;
-                }
-
                 #ifdef DEBUG_BUILD
                 // Please don't use this it creates a lot of loud high pitched noise for some reason 
                 // probably pointing to random memory but its using a vector so no idea why
@@ -263,6 +258,12 @@ int main () {
                     nodes[current_node] = new guitar_amp::OscillatorNode(current_node);
                     current_node += 5;
                 }
+
+                if (ImGui::MenuItem("Create Cabinet Simulation Node")) {
+                    nodes[current_node] = new guitar_amp::CabSimNode(current_node);
+                    current_node += 5;
+                }
+
                 #endif
                 ImGui::EndPopup();
             }
