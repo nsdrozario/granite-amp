@@ -14,7 +14,7 @@ namespace guitar_amp {
         AnalyzerNode(int id);
         virtual ~AnalyzerNode();    
         virtual void showGui();
-        virtual void ApplyFX(const float *in, float *out, size_t numFrames);
+        virtual void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info);
 
         void reinit();
     

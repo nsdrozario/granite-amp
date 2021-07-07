@@ -46,11 +46,3 @@ void guitar_amp::dsp::clip_sin(const float *input, float *output, float gain, fl
         }
     }
 }
-
-dsp::delay_line::delay_line() {
-    if (device.sampleRate) {
-        
-    } else {
-
-    }
-}

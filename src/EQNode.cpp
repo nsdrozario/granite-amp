@@ -65,6 +65,6 @@ void EQNode::showGui() {
     imnodes::PopColorStyle();
 }
 
-void EQNode::ApplyFX(const float *in, float *out, size_t numFrames) {
+void EQNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
     memcpy(out, in, numFrames * sizeof(float));
 }

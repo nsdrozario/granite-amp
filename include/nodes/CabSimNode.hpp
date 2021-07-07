@@ -19,7 +19,7 @@ namespace guitar_amp {
         ~CabSimNode();
 
         void showGui();
-        void ApplyFX(const float *in, float *out, size_t numFrames);
+        void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info);
         
     private:
 

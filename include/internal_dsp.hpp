@@ -50,7 +50,7 @@ namespace guitar_amp {
             }
 
             // All values will be initialized to zero.
-            reinit(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
+            void reinit(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
                 delete[] buf;
                 buf = new T[size];
                 buf_size = size;

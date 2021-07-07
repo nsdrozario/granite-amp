@@ -7,7 +7,7 @@
 
 CXX := clang++
 LDFLAGS :=  -lsfml-graphics -lsfml-window -framework OpenGL -framework GLUT -lsfml-system -pthread -ldl
-CXXFLAGS := -std=c++17 -Iinclude/ -Iexternal_headers/ -O3
+CXXFLAGS := -std=c++17 -Iinclude/ -Iexternal_headers/ -O3 -Iinclude/nodes/
 SRCS := $(wildcard src/*.cpp) $(wildcard src/external/*.cpp)
 OBJS := $(patsubst src/%.cpp, obj/%.o, $(SRCS))
 
