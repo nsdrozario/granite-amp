@@ -6,6 +6,8 @@
 #include <cmath>
 #include <vector>
 
+#define MAX_DELAY_DURATION 10.0
+
 namespace guitar_amp {
     namespace dsp {
 
@@ -20,13 +22,95 @@ namespace guitar_amp {
 
         size_t seconds_to_samples(float time, size_t sample_rate);
 
-        // classes
-        class ring_buffer : public std::vector<float> {
+
+        // Templated ring buffer class, uses new for memory allocation
+        template <class T>
+        class ring_buffer {
         public:
-            ring_buffer();
-            virtual ~ring_buffer();
-            ring_buffer(size_t block_size, size_t samples);
-            virtual float& operator[](size_t input);
+            // Default size 0 (unallocated memory). Read and write ptrs are at position 0. 
+            ring_buffer() {
+                buf_size = 0;
+            }
+            
+            // Initialize ring buffer of length size, with read and write ptrs at position 0.
+            ring_buffer(size_t size) {
+                buf = new T[size];
+                buf_size = size;
+            }
+
+            // Initialize ring buffer of length size, with read_ptr = init_read_ptr and write_ptr = init_write_ptr. Sets all values to 0.
+            ring_buffer(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
+                buf = new T[size];
+                buf_size = size;
+                read_ptr = init_read_ptr;
+                write_ptr = init_write_ptr;
+                for (size_t i = 0; i < size; i++) {
+                    buf[i] = 0;
+                }
+            }
+
+            // All values will be initialized to zero.
+            void reinit(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
+                delete[] buf;
+                buf = new T[size];
+                buf_size = size;
+                read_ptr = init_read_ptr;
+                write_ptr = init_write_ptr;
+                for (size_t i = 0; i < size; i++) {
+                    buf[i] = 0;
+                }
+            }
+
+            ~ring_buffer() {
+                delete[] buf;
+            }
+
+            // Returns value of read_ptr
+            size_t inc_read_ptr() {
+                write_ptr = (write_ptr+1) % buf_size;
+                return write_ptr;
+            }
+
+            // Returns value of write_ptr
+            size_t inc_write_ptr() {
+                read_ptr = (read_ptr+1) % buf_size;
+                return read_ptr;
+            }
+
+            // Returns value of read_ptr
+            size_t get_read_ptr_index() {
+                return read_ptr;
+            }
+
+            // Returns value of write_ptr
+            size_t get_write_ptr_index() {
+                return write_ptr;
+            }
+
+            // Returns buf[read_ptr]
+            T get_read_ptr_value() {
+                return buf[read_ptr];
+            }
+
+            // Returns buf[write_ptr]
+            T get_write_ptr_value() {
+                return buf[write_ptr];
+            }
+            
+            // Sets val at buf[write_ptr]
+            void set_write_ptr_value(T val) {
+                buf[write_ptr] = val;
+            };
+
+            size_t size() {
+                return buf_size;
+            }
+
+        private:
+            size_t read_ptr = 0;
+            size_t write_ptr = 0;
+            size_t buf_size;
+            T *buf;
         };
 
         class blackman_harris_window {

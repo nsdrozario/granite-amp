@@ -82,7 +82,7 @@ void ConvolutionNode::showGui() {
     imnodes::PopColorStyle();
 }
 
-void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames) { 
+void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) { 
     float real_gain = dsp::dbfs_to_f32(this->gain);
     if (!this->bypass) {
         this->impulseLock.lock();

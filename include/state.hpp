@@ -6,7 +6,9 @@
 #include <string>
 #include "AudioProcessorNode.hpp"
 #include <map>
+#include <mutex>
 #include <unordered_map>
+#include <AudioInfo.hpp>
 using namespace guitar_amp;
 
 // global vars
@@ -32,5 +34,10 @@ extern bool audioEnabled;
 
 extern std::vector<const char *> inputNames;
 extern std::vector<const char *> outputNames;
+
+extern std::mutex noise_lock;
+extern std::vector<float> brownian_noise;
+
+extern guitar_amp::AudioInfo globalAudioInfo;
 
 #endif

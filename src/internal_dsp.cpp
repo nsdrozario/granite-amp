@@ -1,9 +1,11 @@
 #include <internal_dsp.hpp>
 #include <algorithm>
 #include <cmath>
+#include "state.hpp"
+using namespace guitar_amp;
 
 float guitar_amp::dsp::f32_to_dbfs(float x) {
-    return 20.0f * log10 ( fabsf(x) );
+    return 20.0f * log10 ( abs(x) );
 }
 
 float guitar_amp::dsp::dbfs_to_f32(float x) {

@@ -19,6 +19,11 @@
 #include <OverdriveNode.hpp>
 #include <ConvolutionNode.hpp>
 #include <CompressorNode.hpp>
+#include <AnalyzerNode.hpp>
+#include <OscillatorNode.hpp>
+#include <DelayNode.hpp>
+#include <ShelfNode.hpp>
+#include <CabSimNode.hpp>
 
 #include <utility>
 #include <set>
@@ -32,10 +37,8 @@
 #include <iostream>
 #include <io_util.hpp>
 #include <implot.h>
-#include <AnalyzerNode.hpp>
-#include <OscillatorNode.hpp>
-#include <DelayNode.hpp>
-#include <ShelfNode.hpp>
+
+#include <AudioInfo.hpp>
 
 using namespace guitar_amp;
 
@@ -64,9 +67,15 @@ std::string dfs_path = "";
 std::vector<const char *> inputNames;
 std::vector<const char *> outputNames;
 
+guitar_amp::AudioInfo globalAudioInfo;
+
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
+    
+    globalAudioInfo.channels = d->capture.channels;
+    globalAudioInfo.period_length = numFrames;
+    globalAudioInfo.sample_rate = d->sampleRate;
 
     if (audioEnabled) {
 	    /*
@@ -84,6 +93,7 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
         float *output_buf = new float[numFrames];
         memcpy(tmp_input, f32_input, buffer_size_in_bytes);
         memcpy(output_buf, tmp_input, buffer_size_in_bytes);
+
         // dfs from vertex 3 (the output attribute of the input node)
         // this assumes that there will be only one inward connection per node, except for input and output (which is correct for the time being)
         // the audio processing has to be done on a node by node basis but the dfs operates on attribute to attribute
@@ -108,7 +118,7 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
                 }
                 MiddleNode *currentNodePtr = dynamic_cast<MiddleNode *>(nodes[current_node]);
                 if (currentNodePtr) {
-                    currentNodePtr->ApplyFX(tmp_input, tmp_output, numFrames);
+                    currentNodePtr->ApplyFX(tmp_input, tmp_output, numFrames, globalAudioInfo); 
                     memcpy(output_buf, tmp_output, buffer_size_in_bytes);
                     memcpy(tmp_input, tmp_output, buffer_size_in_bytes);
                 }
@@ -248,6 +258,12 @@ int main () {
                     nodes[current_node] = new guitar_amp::OscillatorNode(current_node);
                     current_node += 5;
                 }
+
+                if (ImGui::MenuItem("Create Cabinet Simulation Node")) {
+                    nodes[current_node] = new guitar_amp::CabSimNode(current_node);
+                    current_node += 5;
+                }
+
                 #endif
                 ImGui::EndPopup();
             }

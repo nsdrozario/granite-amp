@@ -14,7 +14,7 @@ namespace guitar_amp {
         ~OverdriveNode();
         
         void showGui();
-        void ApplyFX(const float *in, float *out, size_t numFrames); 
+        void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info); 
 
         enum ClippingAlgorithm {
             minmax=0,
