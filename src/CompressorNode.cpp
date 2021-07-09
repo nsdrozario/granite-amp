@@ -2,7 +2,7 @@
 #include <state.hpp>
 using namespace guitar_amp;
 
-CompressorNode::CompressorNode(int id) : MiddleNode(id) { }
+CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) { }
 
 CompressorNode::~CompressorNode() { }
 

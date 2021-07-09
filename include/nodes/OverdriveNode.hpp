@@ -10,7 +10,7 @@ namespace guitar_amp {
     
     public:
         
-        OverdriveNode(int id);
+        OverdriveNode(int id, const AudioInfo current_audio_info);
         ~OverdriveNode();
         
         void showGui();

@@ -30,7 +30,7 @@ ma_loshelf2_config ShelfConfigBuilder::loshelf_cfg() {
     );
 }
 
-ShelfNode::ShelfNode(int id) : MiddleNode(id) {
+ShelfNode::ShelfNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 
     this->high_shelf_cfg = ma_hishelf2_config_init(
         ma_format_f32, 

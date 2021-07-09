@@ -11,7 +11,7 @@
 namespace guitar_amp {
     class AnalyzerNode : public MiddleNode {
     public:
-        AnalyzerNode(int id);
+        AnalyzerNode(int id, const AudioInfo current_audio_info);
         virtual ~AnalyzerNode();    
         virtual void showGui();
         virtual void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info);

@@ -38,6 +38,7 @@ extern std::vector<const char *> outputNames;
 extern std::mutex noise_lock;
 extern std::vector<float> brownian_noise;
 
+extern std::mutex globalAudioInfoMutex;
 extern guitar_amp::AudioInfo globalAudioInfo;
 
 #endif

@@ -5,7 +5,7 @@
 
 using namespace guitar_amp;
 
-EQNode::EQNode(int id) : MiddleNode(id) {
+EQNode::EQNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 
 }
 

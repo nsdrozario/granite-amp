@@ -4,7 +4,7 @@
 using namespace guitar_amp;
 using std::cout;
 
-DelayNode::DelayNode(int id) : MiddleNode(id) {
+DelayNode::DelayNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
     // lets implement the audio info class first
 }
 

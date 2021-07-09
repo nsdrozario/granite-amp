@@ -8,7 +8,7 @@
 namespace guitar_amp {
     class OscillatorNode : public MiddleNode {
     public:
-        OscillatorNode(int id);
+        OscillatorNode(int id, const AudioInfo current_audio_info);
         virtual ~OscillatorNode();
 
         virtual void showGui();

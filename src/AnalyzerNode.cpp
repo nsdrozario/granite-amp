@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace guitar_amp;
 
-AnalyzerNode::AnalyzerNode(int id) : MiddleNode(id) {
+AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
     this->internal_fft.init(fftconvolver::NextPowerOf2(device.capture.internalPeriodSizeInFrames));
     this->fft_size = 0;
 }
@@ -41,9 +41,9 @@ void AnalyzerNode::showGui() {
         if (this->showing_spectrum && this->accept_warning) {
             ImGui::BeginChildFrame(this->id, ImVec2(400,300));
             ImPlot::SetNextPlotLimitsX(0.0f, static_cast<double>(device.sampleRate/2));
-            const double ticks[] = {0.0,50.0,100.0,300.0,500.0,1000.0,2000.0,4000.0,10000.0,20000.0};
+            const double ticks[] = {0.0,0.05,0.2,0.5,1,4,8,20};
             ImPlot::SetNextPlotTicksX(ticks, 10);
-            ImPlot::BeginPlot("FFT", "Frequency", "Power", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
+            ImPlot::BeginPlot("FFT", "Frequency (kHz)", "Power (dBFS+60)", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
             ImPlot::PlotLine("Power", this->freqs.data(), this->output.data(), this->fft_size/2);
             ImPlot::EndPlot();
             ImGui::EndChildFrame();
@@ -90,14 +90,14 @@ void AnalyzerNode::ApplyFX(const float *in, float *out, size_t numFrames, const 
     this->internal_fft.fft(this->signal.data(), this->real.data(), this->imaginary.data());
     this->output_lock.lock();
     for (size_t i = 0; i < this->real.size(); i++) {
-        output[i] = dsp::f32_to_dbfs(sqrtf((this->real[i]*this->real[i]) + (this->imaginary[i]*this->imaginary[i])));
+        output[i] = std::max(0.0f, dsp::f32_to_dbfs(sqrtf((this->real[i]*this->real[i]) + (this->imaginary[i]*this->imaginary[i]))) + 60.0f);
     }
     this->output_lock.unlock();
 
     if (this->freqs.size() != this->output.size()) {
         this->freqs.resize(this->output.size());
         for (size_t i = 0; i < this->output.size(); i++) {
-            freqs[i] = (static_cast<float>(i) * static_cast<float>(device.sampleRate)) / static_cast<float>(needed_size);
+            freqs[i] = ((static_cast<float>(i) * static_cast<float>(device.sampleRate)) / static_cast<float>(needed_size))/1000.0f;
         }
     }
 

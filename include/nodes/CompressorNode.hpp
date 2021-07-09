@@ -6,7 +6,7 @@
 namespace guitar_amp {
     class CompressorNode : public MiddleNode {
     public:
-        CompressorNode(int id);
+        CompressorNode(int id, const AudioInfo current_audio_info);
         ~CompressorNode();    
 
         void showGui();

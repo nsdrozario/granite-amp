@@ -21,7 +21,7 @@ namespace guitar_amp {
 
     class ShelfNode : public MiddleNode {
     public:
-        ShelfNode(int id);
+        ShelfNode(int id, const AudioInfo current_audio_info);
         ~ShelfNode();
 
         void showGui();

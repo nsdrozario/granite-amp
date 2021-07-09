@@ -5,7 +5,7 @@
 #include <thread>
 using namespace guitar_amp;
 
-ConvolutionNode::ConvolutionNode(int id) : MiddleNode(id) { 
+ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) { 
     
     ma_decoder_config decoder_cfg = ma_decoder_config_init(ma_format_f32, 1, device.sampleRate);
 

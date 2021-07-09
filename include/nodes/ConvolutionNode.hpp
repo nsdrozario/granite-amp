@@ -16,7 +16,7 @@ namespace guitar_amp {
     
     public:
         
-        ConvolutionNode(int id);
+        ConvolutionNode(int id, const AudioInfo current_audio_info);
         ~ConvolutionNode();
         
         void showGui();

@@ -8,7 +8,7 @@
 namespace guitar_amp {
     class DelayNode : public MiddleNode {
     public:
-        DelayNode(int id);
+        DelayNode(int id, const AudioInfo current_audio_info);
         ~DelayNode();
 
         void showGui();

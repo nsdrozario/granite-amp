@@ -15,7 +15,7 @@ namespace guitar_amp {
     */
     class CabSimNode : public MiddleNode {
     public:
-        CabSimNode(int id);
+        CabSimNode(int id, const AudioInfo current_audio_info);
         ~CabSimNode();
 
         void showGui();

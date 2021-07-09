@@ -10,7 +10,7 @@ namespace guitar_amp {
     class MiddleNode : public AudioProcessorNode {
     public:
         
-        MiddleNode(int id) : AudioProcessorNode(id) { }
+        MiddleNode(int id, const AudioInfo current_audio_info);
         virtual ~MiddleNode();
         
         virtual void showGui()=0;

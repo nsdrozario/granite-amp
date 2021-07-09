@@ -4,7 +4,7 @@
 
 using namespace guitar_amp;
 
-OverdriveNode::OverdriveNode(int id) : MiddleNode(id) {
+OverdriveNode::OverdriveNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 
     this->lpf_config = ma_lpf2_config_init(ma_format_f32, 1, device.sampleRate, this->lpf_cutoff, 0.9f);
     this->hpf_config = ma_hpf2_config_init(ma_format_f32, 1, device.sampleRate, this->hpf_cutoff, 0.9f);

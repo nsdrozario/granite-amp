@@ -10,7 +10,7 @@
 namespace guitar_amp {
     class EQNode : public MiddleNode {
     public:
-        EQNode(int id);
+        EQNode(int id, const AudioInfo current_audio_info);
         ~EQNode();
 
         void showGui();
