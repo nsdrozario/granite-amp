@@ -30,7 +30,7 @@ Real-time guitar amplifier simulation.
   - [ ] Notch filter
   - [ ] Standalone low pass
   - [ ] Standalone high pass
-  
+ - Delay
 ## Dependencies
 - [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
 - [Imgui-SFML](https://github.com/eliasdaler/imgui-sfml) (contained within this repository already)
