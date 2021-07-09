@@ -12,7 +12,7 @@ namespace guitar_amp {
         virtual ~OscillatorNode();
 
         virtual void showGui();
-        virtual void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info);
+        virtual void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
 
     protected:
         float freq = 440.0f; // A4 = 440hz

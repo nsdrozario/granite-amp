@@ -15,7 +15,7 @@ namespace guitar_amp {
         
         virtual void showGui()=0;
 
-        virtual void ApplyFX(const float *in, float *out, size_t numFrames, const guitar_amp::AudioInfo &info)=0; 
+        virtual void ApplyFX(const float *in, float *out, size_t numFrames, guitar_amp::AudioInfo info)=0; 
 
     protected: 
         AudioInfo internal_info; // in case the node depends on the audio device state

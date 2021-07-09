@@ -25,7 +25,7 @@ namespace guitar_amp {
         ~ShelfNode();
 
         void showGui();
-        void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info);
+        void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
 
     private:
         ma_hishelf2 high_shelf;

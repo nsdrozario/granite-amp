@@ -118,7 +118,7 @@ void ShelfNode::showGui() {
 
 }
 
-void ShelfNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void ShelfNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     if (device.sampleRate != this->low_shelf_cfg.sampleRate || device.sampleRate != this->high_shelf_cfg.sampleRate) {
         this->low_shelf_cfg.sampleRate = device.sampleRate;
         this->high_shelf_cfg.sampleRate = device.sampleRate;

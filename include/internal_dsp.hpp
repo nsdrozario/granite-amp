@@ -5,6 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
+#include <iostream>
 
 #define MAX_DELAY_DURATION 10.0
 
@@ -21,7 +22,6 @@ namespace guitar_amp {
         float dbfs_to_f32(float x);
 
         size_t seconds_to_samples(float time, size_t sample_rate);
-
 
         // Templated ring buffer class, uses new for memory allocation
         template <class T>
@@ -49,16 +49,16 @@ namespace guitar_amp {
                 }
             }
 
-            // All values will be initialized to zero.
             void reinit(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
-                delete[] buf;
+                std::cout << "reset" << std::endl;
+                if (buf_size != 0) {
+                    delete[] buf;
+                }
                 buf = new T[size];
                 buf_size = size;
                 read_ptr = init_read_ptr;
                 write_ptr = init_write_ptr;
-                for (size_t i = 0; i < size; i++) {
-                    buf[i] = 0;
-                }
+                memset(buf, 0, size * sizeof(T));
             }
 
             ~ring_buffer() {

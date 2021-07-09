@@ -65,7 +65,7 @@ void OverdriveNode::showGui() {
 
 }
 
-void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
 
     ma_hpf2_process_pcm_frames(&this->hpf, out, out, numFrames);
 

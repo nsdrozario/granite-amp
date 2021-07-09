@@ -46,7 +46,7 @@ void OscillatorNode::showGui() {
     
 }
 
-void OscillatorNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void OscillatorNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     float linear_amplitude = dsp::dbfs_to_f32(this->amplitude);
 
     if (this->wav_gen.config.sampleRate != device.sampleRate) {

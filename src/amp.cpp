@@ -251,12 +251,12 @@ int main () {
                 #ifdef DEBUG_BUILD
                 // Please don't use this it creates a lot of loud high pitched noise for some reason 
                 // probably pointing to random memory but its using a vector so no idea why
-                /*
+                
                 if (ImGui::MenuItem("Create Delay Node")) {
-                    nodes[current_node] = new guitar_amp::DelayNode(current_node);
+                    nodes[current_node] = new guitar_amp::DelayNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
-                */
+                
                 if (ImGui::MenuItem("Create Oscillator Node")) {
                     nodes[current_node] = new guitar_amp::OscillatorNode(current_node, globalAudioInfo);
                     current_node += 5;

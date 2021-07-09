@@ -60,7 +60,7 @@ void AnalyzerNode::showGui() {
 
 }
 
-void AnalyzerNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void AnalyzerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
 
     memcpy(out, in, numFrames * sizeof(float));
     // size_t needed_size = fftconvolver::NextPowerOf2(numFrames);

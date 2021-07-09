@@ -20,7 +20,7 @@ namespace guitar_amp {
         ~ConvolutionNode();
         
         void showGui();
-        void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info); 
+        void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info); 
 
     private:
 

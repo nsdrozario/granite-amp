@@ -14,7 +14,7 @@ namespace guitar_amp {
         ~EQNode();
 
         void showGui();
-        void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info);
+        void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
     private:
         std::list<ma_peak2> filters;
         ma_hishelf2 hishelf;

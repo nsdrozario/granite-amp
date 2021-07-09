@@ -53,7 +53,7 @@ void CabSimNode::showGui() {
     imnodes::PopColorStyle();
 }
 
-void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
 
     if (device.sampleRate != 0 && device.sampleRate != brownian_noise.size()) {
         noise_lock.lock();

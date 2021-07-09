@@ -12,16 +12,14 @@ namespace guitar_amp {
         ~DelayNode();
 
         void showGui();
-        void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info);
+        void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
 
     private:
 
         dsp::ring_buffer<float> buf;
 
         float time_delay;
-        size_t period_size;
         size_t samples_delay = 0;
-        size_t sample_rate;
         
     };
 }
