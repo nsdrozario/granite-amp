@@ -68,14 +68,17 @@ std::vector<const char *> inputNames;
 std::vector<const char *> outputNames;
 
 guitar_amp::AudioInfo globalAudioInfo;
+std::mutex globalAudioInfoMutex;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
     
+    globalAudioInfoMutex.lock();
     globalAudioInfo.channels = d->capture.channels;
     globalAudioInfo.period_length = numFrames;
     globalAudioInfo.sample_rate = d->sampleRate;
+    globalAudioInfoMutex.unlock();
 
     if (audioEnabled) {
 	    /*
@@ -219,48 +222,46 @@ int main () {
             }
 
             if (ImGui::BeginPopup("Node Creator")) {
-
+                
                 if (ImGui::MenuItem("Create Overdrive Node")) {
-                    nodes[current_node] = new guitar_amp::OverdriveNode(current_node);
+                    nodes[current_node] = new guitar_amp::OverdriveNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
                 if (ImGui::MenuItem("Create Convolution IR Node")) {
-                    nodes[current_node] = new guitar_amp::ConvolutionNode(current_node);
+                    nodes[current_node] = new guitar_amp::ConvolutionNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
                 if (ImGui::MenuItem("Create Compresoor Node")) {
-                    nodes[current_node] = new guitar_amp::CompressorNode(current_node);
+                    nodes[current_node] = new guitar_amp::CompressorNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
                 if (ImGui::MenuItem("Create Analyzer Node")) {
-                    nodes[current_node] = new guitar_amp::AnalyzerNode(current_node);
+                    nodes[current_node] = new guitar_amp::AnalyzerNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
                 if (ImGui::MenuItem("Create Shelf Node")) {
-                    nodes[current_node] = new guitar_amp::ShelfNode(current_node);
+                    nodes[current_node] = new guitar_amp::ShelfNode(current_node, globalAudioInfo);
+                    current_node += 5;
+                }
+
+                if (ImGui::MenuItem("Create Delay Node")) {
+                    nodes[current_node] = new guitar_amp::DelayNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
                 #ifdef DEBUG_BUILD
-                // Please don't use this it creates a lot of loud high pitched noise for some reason 
-                // probably pointing to random memory but its using a vector so no idea why
-                /*
-                if (ImGui::MenuItem("Create Delay Node")) {
-                    nodes[current_node] = new guitar_amp::DelayNode(current_node);
-                    current_node += 5;
-                }
-                */
+                
                 if (ImGui::MenuItem("Create Oscillator Node")) {
-                    nodes[current_node] = new guitar_amp::OscillatorNode(current_node);
+                    nodes[current_node] = new guitar_amp::OscillatorNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
                 if (ImGui::MenuItem("Create Cabinet Simulation Node")) {
-                    nodes[current_node] = new guitar_amp::CabSimNode(current_node);
+                    nodes[current_node] = new guitar_amp::CabSimNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 

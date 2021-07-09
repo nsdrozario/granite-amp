@@ -2,7 +2,7 @@
 #include <state.hpp>
 using namespace guitar_amp;
 
-CompressorNode::CompressorNode(int id) : MiddleNode(id) { }
+CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) { }
 
 CompressorNode::~CompressorNode() { }
 
@@ -50,7 +50,7 @@ void CompressorNode::showGui() {
     imnodes::PopColorStyle();
 }
 
-void CompressorNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void CompressorNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     float linear_threshold = dsp::dbfs_to_f32(this->threshold);
     memcpy(out, in, numFrames*sizeof(float));
     for (size_t i = 0; i < numFrames; i++) {

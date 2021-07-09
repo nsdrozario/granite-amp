@@ -8,11 +8,11 @@
 namespace guitar_amp {
     class OscillatorNode : public MiddleNode {
     public:
-        OscillatorNode(int id);
+        OscillatorNode(int id, const AudioInfo current_audio_info);
         virtual ~OscillatorNode();
 
         virtual void showGui();
-        virtual void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info);
+        virtual void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
 
     protected:
         float freq = 440.0f; // A4 = 440hz

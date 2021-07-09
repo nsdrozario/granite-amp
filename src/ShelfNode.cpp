@@ -30,7 +30,7 @@ ma_loshelf2_config ShelfConfigBuilder::loshelf_cfg() {
     );
 }
 
-ShelfNode::ShelfNode(int id) : MiddleNode(id) {
+ShelfNode::ShelfNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 
     this->high_shelf_cfg = ma_hishelf2_config_init(
         ma_format_f32, 
@@ -118,7 +118,7 @@ void ShelfNode::showGui() {
 
 }
 
-void ShelfNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void ShelfNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     if (device.sampleRate != this->low_shelf_cfg.sampleRate || device.sampleRate != this->high_shelf_cfg.sampleRate) {
         this->low_shelf_cfg.sampleRate = device.sampleRate;
         this->high_shelf_cfg.sampleRate = device.sampleRate;

@@ -5,7 +5,7 @@
 
 using namespace guitar_amp;
 
-EQNode::EQNode(int id) : MiddleNode(id) {
+EQNode::EQNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 
 }
 
@@ -65,6 +65,6 @@ void EQNode::showGui() {
     imnodes::PopColorStyle();
 }
 
-void EQNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void EQNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     memcpy(out, in, numFrames * sizeof(float));
 }

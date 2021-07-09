@@ -5,6 +5,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
+#include <iostream>
+#include <cstring>
 
 #define MAX_DELAY_DURATION 10.0
 
@@ -22,7 +24,6 @@ namespace guitar_amp {
 
         size_t seconds_to_samples(float time, size_t sample_rate);
 
-
         // Templated ring buffer class, uses new for memory allocation
         template <class T>
         class ring_buffer {
@@ -34,31 +35,26 @@ namespace guitar_amp {
             
             // Initialize ring buffer of length size, with read and write ptrs at position 0.
             ring_buffer(size_t size) {
-                buf = new T[size];
+                buf = new T[size]();
                 buf_size = size;
             }
 
             // Initialize ring buffer of length size, with read_ptr = init_read_ptr and write_ptr = init_write_ptr. Sets all values to 0.
             ring_buffer(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
-                buf = new T[size];
+                buf = new T[size]();
                 buf_size = size;
                 read_ptr = init_read_ptr;
                 write_ptr = init_write_ptr;
-                for (size_t i = 0; i < size; i++) {
-                    buf[i] = 0;
-                }
             }
 
-            // All values will be initialized to zero.
             void reinit(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
-                delete[] buf;
-                buf = new T[size];
+                if (buf_size != 0) {
+                    delete[] buf;
+                }
+                buf = new T[size]();
                 buf_size = size;
                 read_ptr = init_read_ptr;
                 write_ptr = init_write_ptr;
-                for (size_t i = 0; i < size; i++) {
-                    buf[i] = 0;
-                }
             }
 
             ~ring_buffer() {
@@ -67,14 +63,14 @@ namespace guitar_amp {
 
             // Returns value of read_ptr
             size_t inc_read_ptr() {
-                write_ptr = (write_ptr+1) % buf_size;
-                return write_ptr;
+                read_ptr = (read_ptr+1) % buf_size;
+                return read_ptr;
             }
 
             // Returns value of write_ptr
             size_t inc_write_ptr() {
-                read_ptr = (read_ptr+1) % buf_size;
-                return read_ptr;
+                write_ptr = (write_ptr+1) % buf_size;
+                return write_ptr;
             }
 
             // Returns value of read_ptr
@@ -100,7 +96,7 @@ namespace guitar_amp {
             // Sets val at buf[write_ptr]
             void set_write_ptr_value(T val) {
                 buf[write_ptr] = val;
-            };
+            }
 
             size_t size() {
                 return buf_size;

@@ -16,11 +16,11 @@ namespace guitar_amp {
     
     public:
         
-        ConvolutionNode(int id);
+        ConvolutionNode(int id, const AudioInfo current_audio_info);
         ~ConvolutionNode();
         
         void showGui();
-        void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info); 
+        void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info); 
 
     private:
 

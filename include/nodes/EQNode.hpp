@@ -10,11 +10,11 @@
 namespace guitar_amp {
     class EQNode : public MiddleNode {
     public:
-        EQNode(int id);
+        EQNode(int id, const AudioInfo current_audio_info);
         ~EQNode();
 
         void showGui();
-        void ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info);
+        void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
     private:
         std::list<ma_peak2> filters;
         ma_hishelf2 hishelf;

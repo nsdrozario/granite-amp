@@ -17,9 +17,23 @@ namespace guitar_amp {
             channels=a.channels;
         }
 
-        ma_uint32 sample_rate;
+        size_t sample_rate;
         size_t period_length;
         size_t channels; // really don't need to worry about this yet the app is in mono for now
+
+
+        bool operator==(const AudioInfo &a) {
+            return this->sample_rate == a.sample_rate &&
+                   this->period_length == a.period_length &&
+                   this->channels == a.channels;
+        }
+
+        bool operator!=(const AudioInfo &a) {
+            return !(*this == a);
+        }
+
+
+
     };
 }
 

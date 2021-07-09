@@ -5,7 +5,7 @@
 #include <thread>
 using namespace guitar_amp;
 
-ConvolutionNode::ConvolutionNode(int id) : MiddleNode(id) { 
+ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) { 
     
     ma_decoder_config decoder_cfg = ma_decoder_config_init(ma_format_f32, 1, device.sampleRate);
 
@@ -82,7 +82,7 @@ void ConvolutionNode::showGui() {
     imnodes::PopColorStyle();
 }
 
-void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) { 
+void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) { 
     float real_gain = dsp::dbfs_to_f32(this->gain);
     if (!this->bypass) {
         this->impulseLock.lock();

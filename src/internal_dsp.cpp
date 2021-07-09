@@ -46,3 +46,6 @@ void guitar_amp::dsp::clip_sin(const float *input, float *output, float gain, fl
         }
     }
 }
+size_t guitar_amp::dsp::seconds_to_samples(float time, size_t sample_rate) {
+    return static_cast<size_t>(static_cast<float>(sample_rate) * time);
+}

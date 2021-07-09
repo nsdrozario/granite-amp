@@ -1,7 +1,7 @@
 #include <OscillatorNode.hpp>
 using namespace guitar_amp;
 
-OscillatorNode::OscillatorNode(int id) : MiddleNode(id) {
+OscillatorNode::OscillatorNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
     ma_waveform_config wave_gen_cfg = ma_waveform_config_init(
         ma_format_f32, 
         device.capture.channels, 
@@ -33,7 +33,7 @@ void OscillatorNode::showGui() {
         ImGui::Combo(
             "Wave type",
             &(this->wave_type),
-            "sine\0square\0triangle\0sawtooth"
+            "sine\0square\0triangle\0sawtooth\0"
         );
 
         ImGui::DragFloat("Amplitude (dB)", &(this->amplitude), 2.0f, -144.0f, 0.0f, "%.3f dB");
@@ -46,7 +46,7 @@ void OscillatorNode::showGui() {
     
 }
 
-void OscillatorNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void OscillatorNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     float linear_amplitude = dsp::dbfs_to_f32(this->amplitude);
 
     if (this->wav_gen.config.sampleRate != device.sampleRate) {

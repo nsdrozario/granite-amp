@@ -4,7 +4,7 @@ using namespace guitar_amp;
 std::mutex noise_lock;
 std::vector<float> brownian_noise;
 
-CabSimNode::CabSimNode(int id) : MiddleNode(id) {
+CabSimNode::CabSimNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 
     // set up noise impulse if it isn't set up already
     if (brownian_noise.size() == 0) {
@@ -53,7 +53,7 @@ void CabSimNode::showGui() {
     imnodes::PopColorStyle();
 }
 
-void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, const AudioInfo &info) {
+void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
 
     if (device.sampleRate != 0 && device.sampleRate != brownian_noise.size()) {
         noise_lock.lock();
