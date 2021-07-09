@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <cstring>
 
 #define MAX_DELAY_DURATION 10.0
 
@@ -44,13 +45,10 @@ namespace guitar_amp {
                 buf_size = size;
                 read_ptr = init_read_ptr;
                 write_ptr = init_write_ptr;
-                for (size_t i = 0; i < size; i++) {
-                    buf[i] = 0;
-                }
+                memset(buf, 0, size * sizeof(T));
             }
 
             void reinit(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
-                std::cout << "reset" << std::endl;
                 if (buf_size != 0) {
                     delete[] buf;
                 }
@@ -67,8 +65,8 @@ namespace guitar_amp {
 
             // Returns value of read_ptr
             size_t inc_read_ptr() {
-                write_ptr = (write_ptr+1) % buf_size;
-                return write_ptr;
+                read_ptr = (read_ptr+1) % buf_size;
+                return read_ptr;
             }
 
             // Returns value of write_ptr
@@ -100,7 +98,7 @@ namespace guitar_amp {
             // Sets val at buf[write_ptr]
             void set_write_ptr_value(T val) {
                 buf[write_ptr] = val;
-            };
+            }
 
             size_t size() {
                 return buf_size;
