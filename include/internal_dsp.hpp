@@ -35,28 +35,26 @@ namespace guitar_amp {
             
             // Initialize ring buffer of length size, with read and write ptrs at position 0.
             ring_buffer(size_t size) {
-                buf = new T[size];
+                buf = new T[size]();
                 buf_size = size;
             }
 
             // Initialize ring buffer of length size, with read_ptr = init_read_ptr and write_ptr = init_write_ptr. Sets all values to 0.
             ring_buffer(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
-                buf = new T[size];
+                buf = new T[size]();
                 buf_size = size;
                 read_ptr = init_read_ptr;
                 write_ptr = init_write_ptr;
-                memset(buf, 0, size * sizeof(T));
             }
 
             void reinit(size_t size, size_t init_read_ptr, size_t init_write_ptr) {
                 if (buf_size != 0) {
                     delete[] buf;
                 }
-                buf = new T[size];
+                buf = new T[size]();
                 buf_size = size;
                 read_ptr = init_read_ptr;
                 write_ptr = init_write_ptr;
-                memset(buf, 0, size * sizeof(T));
             }
 
             ~ring_buffer() {
@@ -71,8 +69,8 @@ namespace guitar_amp {
 
             // Returns value of write_ptr
             size_t inc_write_ptr() {
-                read_ptr = (read_ptr+1) % buf_size;
-                return read_ptr;
+                write_ptr = (write_ptr+1) % buf_size;
+                return write_ptr;
             }
 
             // Returns value of read_ptr

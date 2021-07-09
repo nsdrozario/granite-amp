@@ -23,7 +23,7 @@ void DelayNode::showGui() {
             ImGui::TextUnformatted("Delay");
         imnodes::EndNodeTitleBar();
 
-        ImGui::TextColored(ImVec4(ImColor(150,70,70,255)), "This node WILL cause segfaults and potentially damaging audio. For your safety, this node has been disabled.");
+       // ImGui::TextColored(ImVec4(ImColor(150,70,70,255)), "This node WILL cause segfaults and potentially damaging audio. For your safety, this node has been disabled.");
 
         ImGui::DragFloat("Delay (seconds)", &(this->time_delay), 0.1, 0, 10, "%.3f s");
 
@@ -66,12 +66,12 @@ void DelayNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo
 
     for (size_t i = 0; i < numFrames; i++) {
         // write to ring buffer
-        buf.set_write_ptr_value(in[i]);
+        buf.set_write_ptr_value(in[i] * 0.5); // make the duplicated signal quieter
         buf.inc_write_ptr();
     }
 
     for (size_t i = 0; i < numFrames; i++) {
-        out[i] = buf.get_read_ptr_value();
+        out[i] = in[i] + buf.get_read_ptr_value();
         buf.inc_read_ptr();
     }
     
