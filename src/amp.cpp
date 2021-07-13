@@ -337,6 +337,12 @@ int main () {
             }
         ImGui::End();
 
+        // control panel
+        ImGui::Begin("Control Panel");
+            ImGui::Checkbox("Metronome", &metronomeEnabled);
+            // todo; levels meter
+        ImGui::End();
+
         bool inputChanged = deviceConfig.capture.pDeviceID != &(inputDevices[listBoxSelectedInput].id);
         bool outputChanged = deviceConfig.playback.pDeviceID != &(outputDevices[listBoxSelectedOutput].id);
         
