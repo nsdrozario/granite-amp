@@ -29,7 +29,9 @@ void OscillatorNode::showGui() {
 
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
-
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+        
         ImGui::Combo(
             "Wave type",
             &(this->wave_type),
@@ -38,9 +40,6 @@ void OscillatorNode::showGui() {
 
         ImGui::DragFloat("Amplitude (dB)", &(this->amplitude), 2.0f, -144.0f, 0.0f, "%.3f dB");
         ImGui::DragFloat("Frequency (Hz)", &(this->freq), 100.f, 0.0f, 20000.0f, "%.3f Hz");
-
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
 
     imnodes::EndNode();
     

@@ -50,6 +50,13 @@ void ConvolutionNode::showGui() {
             ImGui::TextUnformatted("Convolution IR");
         imnodes::EndNodeTitleBar();
 
+        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
+        imnodes::BeginInputAttribute(this->id+1);
+        imnodes::EndInputAttribute();
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+        imnodes::PopAttributeFlag();
+
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
         ImGui::Text("Some impulse responses may be much louder than others.\nPlease change impulses in bypass mode,\nand then disable bypass mode, set your gain to -144dB,\nand slowly bring up the gain to a desired degree.");
         ImGui::PopStyleColor();
@@ -68,13 +75,6 @@ void ConvolutionNode::showGui() {
             t.detach(); // Don't hold up the rest of the UI        
         }
 
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
     imnodes::EndNode();
 
     ImGui::PopItemWidth();

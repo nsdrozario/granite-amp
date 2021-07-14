@@ -20,6 +20,9 @@ void CompressorNode::showGui() {
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+        imnodes::PopAttributeFlag();
         /*
         ImGui::DragFloat("Attack", &this->attack, 0.01f, 0.0f, 10.0f, "%.3f s");
         ImGui::DragFloat("Release", &this->release, 0.01f, 0.0f, 10.0f, "%.3f s");
@@ -27,6 +30,8 @@ void CompressorNode::showGui() {
         ImGui::DragFloat("Ratio", &this->ratio, 0.01, 1.0f, 50.0f, "%.3f");
         ImGui::DragFloat("Threshold", &this->threshold, 1.0f, -1440.0f, 0.0f, "%.3f dB");
 
+        /*
+        // consider replacing with LFO
         if (this->sidechain_enabled) {
         
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
@@ -39,10 +44,7 @@ void CompressorNode::showGui() {
         }
 
         ImGui::Checkbox("Sidechain", &this->sidechain_enabled);
-
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
+        */
     imnodes::EndNode();
 
     ImGui::PopItemWidth();

@@ -69,6 +69,14 @@ void ShelfNode::showGui() {
             ImGui::TextUnformatted("Shelf Filter");
         imnodes::EndNodeTitleBar();
 
+        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
+        imnodes::BeginInputAttribute(this->id+1);
+        imnodes::EndInputAttribute();
+
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+        imnodes::PopAttributeFlag();
+
         ImGui::Combo("Filter type", &(this->shelf_type), "Low shelf\0High shelf\0");
 
         if (this->shelf_type == 0) {
@@ -103,13 +111,6 @@ void ShelfNode::showGui() {
             }
         }
 
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
     imnodes::EndNode();
 
     ImGui::PopItemWidth();

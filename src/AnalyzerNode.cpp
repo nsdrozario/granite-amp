@@ -24,6 +24,10 @@ void AnalyzerNode::showGui() {
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+        imnodes::PopAttributeFlag();
+
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
         ImGui::Text("WARNING: The frequency analyzer fluctuates rapidly\nand may cause seizures in some people.\nIf you or any of your relatives have had\na history of epileptic conditions or seizures,\nplease consult a medical professional before using this software\nand DO NOT press the checkbox below.");
         ImGui::PopStyleColor();
@@ -48,10 +52,6 @@ void AnalyzerNode::showGui() {
             ImPlot::EndPlot();
             ImGui::EndChildFrame();
         }
-
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
 
     imnodes::EndNode();
 

@@ -23,10 +23,6 @@ void DelayNode::showGui() {
             ImGui::TextUnformatted("Delay");
         imnodes::EndNodeTitleBar();
 
-       // ImGui::TextColored(ImVec4(ImColor(150,70,70,255)), "This node WILL cause segfaults and potentially damaging audio. For your safety, this node has been disabled.");
-
-        ImGui::DragFloat("Delay (seconds)", &(this->time_delay), 0.1, 0, 10, "%.3f s");
-
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
@@ -34,6 +30,12 @@ void DelayNode::showGui() {
         imnodes::BeginOutputAttribute(this->id+3);
         imnodes::EndOutputAttribute();
         imnodes::PopAttributeFlag();
+
+       // ImGui::TextColored(ImVec4(ImColor(150,70,70,255)), "This node WILL cause segfaults and potentially damaging audio. For your safety, this node has been disabled.");
+
+        ImGui::DragFloat("Delay (seconds)", &(this->time_delay), 0.1, 0, 10, "%.3f s");
+
+
     imnodes::EndNode();
 
     ImGui::PopItemWidth();

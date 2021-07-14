@@ -34,9 +34,13 @@ void OverdriveNode::showGui() {
         imnodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Overdrive");
         imnodes::EndNodeTitleBar();
+        
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+        imnodes::PopAttributeFlag();
 
         ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 20, "%.3f dB");
         ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -144, 0, "%.3f dB");
@@ -53,10 +57,7 @@ void OverdriveNode::showGui() {
 
         // Will be functional after implementing tanh clipping
         ImGui::Combo("Clipping algorithm", &(this->clipping_algorithm), "minmax\0tanh\0sine");
-        
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
+
     imnodes::EndNode();
 
     ImGui::PopItemWidth();
