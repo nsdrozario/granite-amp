@@ -70,6 +70,8 @@ std::vector<const char *> outputNames;
 guitar_amp::AudioInfo globalAudioInfo;
 std::mutex globalAudioInfoMutex;
 
+bool metronomeEnabled;
+
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
