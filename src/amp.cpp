@@ -71,6 +71,7 @@ guitar_amp::AudioInfo globalAudioInfo;
 std::mutex globalAudioInfoMutex;
 
 bool metronomeEnabled;
+bool oversamplingEnabled = false;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -341,8 +342,9 @@ int main () {
 
         // control panel
         ImGui::Begin("Control Panel");
-            ImGui::Checkbox("Metronome", &metronomeEnabled);
-            // todo; levels meter
+            // ImGui::Checkbox("Metronome", &metronomeEnabled);
+            // todo: levels meter
+            ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
         ImGui::End();
 
         bool inputChanged = deviceConfig.capture.pDeviceID != &(inputDevices[listBoxSelectedInput].id);

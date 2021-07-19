@@ -20,8 +20,10 @@ namespace guitar_amp {
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
-        
+
     private:
+
+        static std::vector<float> pink_noise;
 
         fftconvolver::FFTConvolver convolver;
         size_t last_period_size;

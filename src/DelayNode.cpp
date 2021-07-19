@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <iostream>
 #include <internal_dsp.hpp>
+#include <cmath>
+
 using namespace guitar_amp;
 using std::cout;
 
@@ -45,9 +47,14 @@ void DelayNode::showGui() {
 }
 
 void DelayNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
+    float needed_samples_delay = 0;
     
-    float needed_samples_delay = dsp::seconds_to_samples(time_delay, info.sample_rate);
-    
+    if (std::isfinite(time_delay)) {
+        needed_samples_delay = dsp::seconds_to_samples(time_delay, info.sample_rate);
+    } else {
+        time_delay = 0.0f;
+    }
+
     if (samples_delay != needed_samples_delay) {
         samples_delay = needed_samples_delay;
     }

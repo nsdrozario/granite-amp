@@ -47,8 +47,8 @@ void AnalyzerNode::showGui() {
             ImPlot::SetNextPlotLimitsX(0.0f, static_cast<double>(device.sampleRate/2));
             const double ticks[] = {0.0,0.05,0.2,0.5,1,4,8,20};
             ImPlot::SetNextPlotTicksX(ticks, 10);
-            ImPlot::BeginPlot("FFT", "Frequency (kHz)", "Power (dBFS+60)", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
-            ImPlot::PlotLine("Power", this->freqs.data(), this->output.data(), this->fft_size/2);
+            ImPlot::BeginPlot("FFT", "Frequency (kHz)", "Power (dBFS)", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
+            ImPlot::PlotLine("Power", this->freqs.data(), this->output.data()+1, (this->fft_size/2)-1);
             ImPlot::EndPlot();
             ImGui::EndChildFrame();
         }
@@ -63,8 +63,7 @@ void AnalyzerNode::showGui() {
 void AnalyzerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
 
     memcpy(out, in, numFrames * sizeof(float));
-    // size_t needed_size = fftconvolver::NextPowerOf2(numFrames);
-    size_t needed_size = 4096;
+    size_t needed_size = fftconvolver::NextPowerOf2(std::max((size_t)4096,numFrames));
     fft_size = needed_size;
     if (needed_size != this->signal.size()) {
         this->internal_fft.init(needed_size);
@@ -78,19 +77,18 @@ void AnalyzerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioI
         // copy input buffer
         if (i < numFrames) {
             signal[i] = in[i];
+            signal[i] *= dsp::blackman_harris_window(i, signal.size()-1);
         } else {
             signal[i] = 0.0f;
         }
-        // apply hann window
-        float sqrt_hann = sinf(M_PI * static_cast<float>(i) / static_cast<float>(signal.size()-1));
-        signal[i] *= sqrt_hann * sqrt_hann;
     }
 
 
     this->internal_fft.fft(this->signal.data(), this->real.data(), this->imaginary.data());
     this->output_lock.lock();
     for (size_t i = 0; i < this->real.size(); i++) {
-        output[i] = std::max(0.0f, dsp::f32_to_dbfs(sqrtf((this->real[i]*this->real[i]) + (this->imaginary[i]*this->imaginary[i]))) + 60.0f);
+        output[i] = (this->real[i] * this->real[i]) + (this->imaginary[i] * this->imaginary[i]);
+        output[i] = dsp::f32_to_dbfs(sqrt(output[i]));
     }
     this->output_lock.unlock();
 

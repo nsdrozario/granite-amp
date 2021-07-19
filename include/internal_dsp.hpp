@@ -109,17 +109,11 @@ namespace guitar_amp {
             T *buf;
         };
 
-        class blackman_harris_window {
-        public:
-            blackman_harris_window();
-            ~blackman_harris_window();
+        // Computes w[n] of the Blackman-Harris window. Multiply the result of this with the original signal.
+        float blackman_harris_window(size_t n, size_t N);
 
-            void apply_window(const float *in, float *out, size_t num_frames);
+        
 
-        private:
-            size_t sample_size;
-            size_t sample_rate;
-        };
 
     }
 }

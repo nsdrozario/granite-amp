@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cmath>
 #include "state.hpp"
+#include <map>
+#include <numeric>
 using namespace guitar_amp;
 
 float guitar_amp::dsp::f32_to_dbfs(float x) {
@@ -48,4 +50,25 @@ void guitar_amp::dsp::clip_sin(const float *input, float *output, float gain, fl
 }
 size_t guitar_amp::dsp::seconds_to_samples(float time, size_t sample_rate) {
     return static_cast<size_t>(static_cast<float>(sample_rate) * time);
+}
+
+float guitar_amp::dsp::blackman_harris_window(size_t n, size_t N) {
+    // access by mem[N][n]
+    static std::unordered_map<size_t, std::vector<float>> mem;
+    float a_0 = 0.35875;
+    float a_1 = 0.48829;
+    float a_2 = 0.14128;
+    float a_3 = 0.01168;
+
+    if (mem.find(N) == mem.end()) {
+        // this is safe as a default value because 
+        // blackman-harris window shouldn't have negative values
+        mem[N] = std::vector<float>(N, -1.0f); 
+    }
+    if (mem[N][n] == -1.0f) {
+        mem[N][n] = a_0 - (a_1 * cos(2 * M_PI * n / N)) + (a_2 * cos(4 * M_PI * n / N)) - (a_3 * cos(6 * M_PI * n / N));
+        return mem[N][n];
+    } else {
+        return mem[N][n];
+    }
 }
