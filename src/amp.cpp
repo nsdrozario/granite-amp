@@ -94,13 +94,16 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
         const float *f32_input = static_cast<const float *> (input);
         float *f32_output = static_cast<float *> (output);
 
+        // may want to consider moving these to preallocated arrays and only changing their size when the sample rate changes 
+        // further benchmarking probably needed
         float *tmp_input = new float[numFrames];
         float *tmp_output = new float[numFrames];
         float *output_buf = new float[numFrames];
+        
         memcpy(tmp_input, f32_input, buffer_size_in_bytes);
         memcpy(output_buf, tmp_input, buffer_size_in_bytes);
 
-        // dfs from vertex 3 (the output attribute of the input node)
+        // depth first search from vertex 3 (the output attribute of the input node)
         // this assumes that there will be only one inward connection per node, except for input and output (which is correct for the time being)
         // the audio processing has to be done on a node by node basis but the dfs operates on attribute to attribute
         std::stack<int> dfs_stack;
@@ -122,9 +125,12 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
                     reached_end = true;
                     goto processing_done;
                 }
+                // if the current vertex is a valid node
                 MiddleNode *currentNodePtr = dynamic_cast<MiddleNode *>(nodes[current_node]);
                 if (currentNodePtr) {
+                    // apply that node's effects
                     currentNodePtr->ApplyFX(tmp_input, tmp_output, numFrames, globalAudioInfo); 
+                    // copy the output of the node's effects and recycle it
                     memcpy(output_buf, tmp_output, buffer_size_in_bytes);
                     memcpy(tmp_input, tmp_output, buffer_size_in_bytes);
                 }
@@ -133,13 +139,16 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
         }
         
         processing_done:
+        // this is really just for debugging
         if (current_dfs_path.str() != dfs_path) {
             dfs_path = current_dfs_path.str();
             std::cout << current_dfs_path.str() << std::endl;
         }
         if (reached_end) {
+            // sync output_buf with output to return the processed data
             MA_COPY_MEMORY(output, output_buf, buffer_size_in_bytes);
         }
+        // prevent memory leaks (hopefully)
         delete[] output_buf;
         delete[] tmp_input;
         delete[] tmp_output;
@@ -170,6 +179,15 @@ int main () {
     sf::Event e;
     sf::RenderWindow w(sf::VideoMode(800,600), "Guitar Amp");
     sf::Clock dt;
+    
+    sf::Texture bg;
+    if (!bg.loadFromFile("assets/board.png")) {
+        std::cout << "error loading board.png\n";
+    }
+    bg.setRepeated(true);
+    sf::Sprite bgSprite;
+    bgSprite.setTexture(bg);
+
     ImGui::SFML::Init(w);
     imnodes::Initialize();
     ImPlot::CreateContext();
@@ -208,11 +226,14 @@ int main () {
                 w.close();
             }
         }
+        // draw the background
         w.clear();
         ImGui::SFML::Update(w, dt.restart());
-
+        if (w.getSize().x != bgSprite.getTextureRect().width || w.getSize().y != bgSprite.getTextureRect().height) {
+            bgSprite.setTextureRect(sf::IntRect(0,0,w.getSize().x,w.getSize().y));
+        }
+        w.draw(bgSprite);
         // imgui stuff
-
         // draw node 
         ImGui::Begin("Signal Chain");
         imnodes::BeginNodeEditor();
@@ -293,7 +314,7 @@ int main () {
         ImGui::End();
 
         int selected_node = 0;
-        if (imnodes::IsNodeHovered(&selected_node) && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+        if (imnodes::IsNodeHovered(&selected_node) && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
             if (selected_node != 0 && selected_node != 5) {
                 ImGui::OpenPopup("Delete Node");
             }
