@@ -28,7 +28,9 @@ ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info) : M
             this->convolver.init(numFrames/4, this->impulse.data(), numFrames);
             this->impulseLock.unlock();
         }
-
+        
+        ma_decoder_uninit(&file_reader);
+    
     }
 
 }
@@ -116,5 +118,6 @@ void ConvolutionNode::loadIRFile(const std::string &path) {
             this->convolver.init(numFrames/4, this->impulse.data(), numFrames);
             this->impulseLock.unlock();
         }
+        ma_decoder_uninit(&file_reader);
     }
 }

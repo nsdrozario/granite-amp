@@ -70,35 +70,64 @@ std::vector<const char *> outputNames;
 guitar_amp::AudioInfo globalAudioInfo;
 std::mutex globalAudioInfoMutex;
 
+// this is really not worth managing memory over
+// this might need to be a ring buffer
+std::vector<float> metronomeTickSound; 
+dsp::ring_buffer<float> metronomeRingBuffer;
+
 bool metronomeEnabled;
+int metronomeBPM = 120;
 bool oversamplingEnabled = false;
+
+float *tmp_output = nullptr;
+float *tmp_input = nullptr;
+float *output_buf = nullptr;
+
+size_t metronomeSamplesPassed = 0;
+size_t metronomeTickSamples = 0;
+bool metronomeOn = false;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
     
-    globalAudioInfoMutex.lock();
-    globalAudioInfo.channels = d->capture.channels;
-    globalAudioInfo.period_length = numFrames;
-    globalAudioInfo.sample_rate = d->sampleRate;
-    globalAudioInfoMutex.unlock();
+    AudioInfo newInfo;
+    newInfo.channels = d->capture.channels;
+    newInfo.period_length = numFrames;
+    newInfo.sample_rate = d->sampleRate;
 
     if (audioEnabled) {
-	    /*
-        MA_ASSERT(d->capture.format == d->playback.format);
-        MA_ASSERT(d->capture.channels == d->playback.channels);
-        MA_ASSERT(d->capture.internalSampleRate == d->playback.internalSampleRate);
-        MA_ASSERT(d->capture.internalPeriodSizeInFrames == d->playback.internalPeriodSizeInFrames);
-        */
+        // check if audio settings have changed compared to last block of frames
+        bool needReallocation = false;
+        if (newInfo != globalAudioInfo) {
+            // update the global audio settings
+            globalAudioInfoMutex.lock();
+            globalAudioInfo = newInfo;
+            globalAudioInfoMutex.unlock();
+            
+            needReallocation = true;
+
+            // read file assets/metronome_tick.wav
+            metronomeTickSound = io::read_entire_file_wav("assets/metronome_tick.wav", globalAudioInfo.sample_rate);
+            metronomeRingBuffer.reinit(metronomeTickSound.size(), 0, 0);
+            for (size_t i = 0; i < metronomeTickSound.size(); i++) {
+                metronomeRingBuffer.set_write_ptr_value(metronomeTickSound[i]);
+                metronomeRingBuffer.inc_write_ptr();
+            }
+
+        }
+
+        if (needReallocation || !tmp_input || !output_buf || !tmp_output) {
+            delete[] tmp_input;
+            delete[] tmp_output;
+            delete[] output_buf;
+            tmp_input = new float[numFrames];
+            tmp_output = new float[numFrames];
+            output_buf = new float[numFrames];
+        }
        
         const float *f32_input = static_cast<const float *> (input);
         float *f32_output = static_cast<float *> (output);
-
-        // may want to consider moving these to preallocated arrays and only changing their size when the sample rate changes 
-        // further benchmarking probably needed
-        float *tmp_input = new float[numFrames];
-        float *tmp_output = new float[numFrames];
-        float *output_buf = new float[numFrames];
         
         memcpy(tmp_input, f32_input, buffer_size_in_bytes);
         memcpy(output_buf, tmp_input, buffer_size_in_bytes);
@@ -144,14 +173,69 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
             dfs_path = current_dfs_path.str();
             std::cout << current_dfs_path.str() << std::endl;
         }
+
+        if (metronomeEnabled) {
+            if (metronomeTickSamples == 0) {
+                /*  
+                    60 bpm = 1 beat per second
+                    120 bpm = 2 beats per second
+                    180 bpm = 3 beats per second
+                    ...
+                    n bpm = n/60 beats per second
+
+                    1 beat per second = 1 second of delay between beats
+                    2 beats per second = 0.5 seconds of delay between beats
+                    4 beats per second = 0.25 seconds of delay between beats
+                    ...
+                    n beats per second = 1/n seconds of delay between beats
+
+                    therefore 60/bpm = seconds of delay between each beat for a metronome
+                */
+                metronomeTickSamples = dsp::seconds_to_samples(60.0f / static_cast<float>(metronomeBPM), globalAudioInfo.sample_rate);
+                metronomeSamplesPassed = 0;
+            }
+            
+            size_t metronomeIterator = 0;
+
+            // how many samples do we have until we need to output a metronome click?
+            // if the click won't occur in this period
+            if (metronomeTickSamples - metronomeSamplesPassed >= globalAudioInfo.period_length) {
+                // we can simply skip this period of frames
+                metronomeSamplesPassed += globalAudioInfo.period_length;
+            // otherwise we will have to worry about it
+            } else if (metronomeTickSamples - metronomeSamplesPassed < globalAudioInfo.period_length) {
+                metronomeOn = true;
+                // the sound will start at this difference of frame counts
+                metronomeIterator = metronomeTickSamples - metronomeSamplesPassed;
+                metronomeSamplesPassed = 0;
+            }
+
+            if (metronomeOn) {
+                size_t frames_read = 0;
+                while 
+                (
+                    metronomeIterator < globalAudioInfo.period_length 
+                    && metronomeIterator < metronomeTickSamples 
+                    && (metronomeRingBuffer.get_read_ptr_index() != 0 || frames_read == 0)
+                ) 
+                {
+                    frames_read++;
+                    output_buf[metronomeIterator++] += metronomeRingBuffer.get_read_ptr_value();
+                    metronomeRingBuffer.inc_read_ptr();
+                    metronomeSamplesPassed++;
+                }
+                if (metronomeRingBuffer.get_read_ptr_index() == 0) {
+                    metronomeOn = false;
+                }
+            }
+
+        }
+
         if (reached_end) {
             // sync output_buf with output to return the processed data
             MA_COPY_MEMORY(output, output_buf, buffer_size_in_bytes);
         }
-        // prevent memory leaks (hopefully)
-        delete[] output_buf;
-        delete[] tmp_input;
-        delete[] tmp_output;
+
     }
 
 }
@@ -191,7 +275,10 @@ int main () {
     ImGui::SFML::Init(w);
     imnodes::Initialize();
     ImPlot::CreateContext();
+    
+    // if vsync isn't enabled the app will use way too much GPU time
     w.setVerticalSyncEnabled(true);
+    
     /*
         Each node will reserve 5 times it's own zero-indexed ID, plus 4 more spaces.
         The first two IDs after the node's ID * 5 are reserved for input, and the next two for output.
@@ -213,6 +300,7 @@ int main () {
     ImGui::SetNextWindowSize(ImVec2(300,200));
     imnodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
     imnodes::SetNodeEditorSpacePos(5, ImVec2(50, 200));
+
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
             ImGui::SFML::ProcessEvent(e);
@@ -220,19 +308,24 @@ int main () {
                 for (auto it = nodes.begin(); it != nodes.end(); it++) {
                     delete it->second;
                 }
-                imnodes::Shutdown();
                 ImPlot::DestroyContext();
+                imnodes::Shutdown();
                 ImGui::SFML::Shutdown();
                 w.close();
             }
         }
-        // draw the background
-        w.clear();
+
+        w.clear();        
         ImGui::SFML::Update(w, dt.restart());
+
+        // resize the background if necessary
         if (w.getSize().x != bgSprite.getTextureRect().width || w.getSize().y != bgSprite.getTextureRect().height) {
             bgSprite.setTextureRect(sf::IntRect(0,0,w.getSize().x,w.getSize().y));
         }
+
+        // draw the background
         w.draw(bgSprite);
+
         // imgui stuff
         // draw node 
         ImGui::Begin("Signal Chain");
@@ -335,6 +428,7 @@ int main () {
 
             ImGui::EndPopup();
         }
+        
         int start_link; int end_link;
         if (imnodes::IsLinkCreated(&start_link, &end_link)) {
             if (adjlist.find(start_link) != adjlist.end() || adjlist.find(end_link) != adjlist.end()) {
@@ -363,7 +457,10 @@ int main () {
 
         // control panel
         ImGui::Begin("Control Panel");
-            // ImGui::Checkbox("Metronome", &metronomeEnabled);
+            ImGui::Checkbox("Metronome", &metronomeEnabled);
+            if (ImGui::InputInt("Metronome BPM", &metronomeBPM, 1, 10)) {
+                metronomeTickSamples = 0;
+            }
             // todo: levels meter
             ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
         ImGui::End();
@@ -372,29 +469,33 @@ int main () {
         bool outputChanged = deviceConfig.playback.pDeviceID != &(outputDevices[listBoxSelectedOutput].id);
         
         if (inputChanged || outputChanged) {
+            
             ma_device_stop(&device);
             ma_device_uninit(&device);
+            
             if (inputChanged) {
                 deviceConfig.capture.pDeviceID = &(inputDevices[listBoxSelectedInput].id);
             }
+            
             if (outputChanged) {
                 deviceConfig.playback.pDeviceID = &(outputDevices[listBoxSelectedOutput].id);
             }
+            
             deviceConfig.sampleRate = 0; // default sample rate
+            
             ma_device_init(&context, &deviceConfig, &device);
             ma_device_start(&device);
+
+            std::cout << "new device connected" << std::endl;
             std::cout << "sample rate: " << device.sampleRate << std::endl;
             std::cout << "capture sample rate: " << device.capture.internalSampleRate << std::endl;
             std::cout << "playback sample rate: " << device.playback.internalSampleRate << std::endl;
         }
 
-
-        // raw sfml calls
-
         ImGui::SFML::Render(w);
         w.display();
+
     }
 
     return 0;
 }
-
