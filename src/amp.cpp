@@ -90,6 +90,8 @@ float metronomeGainDB = 0.0f;
 
 ma_encoder audioRecorder;
 bool recordingAudio = false;
+imgui_addons::ImGuiFileBrowser recorderFileBrowser;
+std::mutex recorderMutex;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -177,6 +179,17 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
             dfs_path = current_dfs_path.str();
             std::cout << current_dfs_path.str() << std::endl;
         }
+        
+        if (reached_end) {
+            // sync output_buf with output to return the processed data
+            MA_COPY_MEMORY(output, output_buf, buffer_size_in_bytes);
+        }
+
+        if (recordingAudio) {
+            recorderMutex.lock();
+            ma_encoder_write_pcm_frames(&audioRecorder, output, numFrames);
+            recorderMutex.unlock();
+        }
 
         if (metronomeEnabled) {
             if (metronomeTickSamples == 0) {
@@ -225,7 +238,7 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
                 ) 
                 {
                     frames_read++;
-                    output_buf[metronomeIterator++] += (metronomeRingBuffer.get_read_ptr_value() * dsp::dbfs_to_f32(metronomeGainDB));
+                    f32_output[metronomeIterator++] += (metronomeRingBuffer.get_read_ptr_value() * dsp::dbfs_to_f32(metronomeGainDB));
                     metronomeRingBuffer.inc_read_ptr();
                     metronomeSamplesPassed++;
                 }
@@ -236,11 +249,6 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
 
             }
 
-        }
-
-        if (reached_end) {
-            // sync output_buf with output to return the processed data
-            MA_COPY_MEMORY(output, output_buf, buffer_size_in_bytes);
         }
 
     }
@@ -473,7 +481,36 @@ int main () {
             
             ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.3f dB");
 
+            if (ImGui::Button("Record") && !recordingAudio) {
+                ImGui::OpenPopup("Recorder File Explorer");
+            }
 
+            if (
+                recorderFileBrowser.showFileDialog(
+                    "Recorder File Explorer", 
+                    imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, 
+                    ImVec2(100,50), 
+                    "*.wav"
+                )
+            ) 
+            {
+                ma_encoder_config recorderConfig = ma_encoder_config_init(ma_resource_format_wav, ma_format_f32, 1, globalAudioInfo.sample_rate);
+                recorderMutex.lock();
+                if (ma_encoder_init_file(recorderFileBrowser.selected_fn.c_str(), &recorderConfig, &audioRecorder) == MA_SUCCESS) {
+                    recordingAudio = true;
+                }
+                recorderMutex.unlock();
+            }
+
+            if (recordingAudio) {
+                ImGui::TextColored(sf::Color::Red, "Recording audio to %s", recorderFileBrowser.selected_fn.c_str());
+                if (ImGui::Button("Stop Recording")) {
+                    recorderMutex.lock();
+                    ma_encoder_uninit(&audioRecorder);
+                    recorderMutex.unlock();
+                    recordingAudio = false;
+                }
+            }
 
             // todo: levels meter
             ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
