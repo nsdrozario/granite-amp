@@ -86,6 +86,10 @@ float *output_buf = nullptr;
 size_t metronomeSamplesPassed = 0;
 size_t metronomeTickSamples = 0;
 bool metronomeOn = false;
+float metronomeGainDB = 0.0f;
+
+ma_encoder audioRecorder;
+bool recordingAudio = false;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -211,6 +215,7 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
             }
 
             if (metronomeOn) {
+                
                 size_t frames_read = 0;
                 while 
                 (
@@ -220,13 +225,15 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
                 ) 
                 {
                     frames_read++;
-                    output_buf[metronomeIterator++] += metronomeRingBuffer.get_read_ptr_value();
+                    output_buf[metronomeIterator++] += (metronomeRingBuffer.get_read_ptr_value() * dsp::dbfs_to_f32(metronomeGainDB));
                     metronomeRingBuffer.inc_read_ptr();
                     metronomeSamplesPassed++;
                 }
+
                 if (metronomeRingBuffer.get_read_ptr_index() == 0) {
                     metronomeOn = false;
                 }
+
             }
 
         }
@@ -457,10 +464,17 @@ int main () {
 
         // control panel
         ImGui::Begin("Control Panel");
+            
             ImGui::Checkbox("Metronome", &metronomeEnabled);
+            
             if (ImGui::InputInt("Metronome BPM", &metronomeBPM, 1, 10)) {
                 metronomeTickSamples = 0;
             }
+            
+            ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.3f dB");
+
+
+
             // todo: levels meter
             ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
         ImGui::End();
