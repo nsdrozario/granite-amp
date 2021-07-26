@@ -18,7 +18,10 @@ namespace guitar_amp {
 
         dsp::ring_buffer<float> buf;
 
-        float time_delay;
+        float time_delay = 0.0f;
+        // about 50% feedback
+        float delay_gain = -6.0f; 
+        float feedback_gain = -6.0f;
         size_t samples_delay = 0;
         
     };

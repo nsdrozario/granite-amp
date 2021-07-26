@@ -92,6 +92,10 @@ namespace guitar_amp {
             T get_write_ptr_value() {
                 return buf[write_ptr];
             }
+
+            T get(size_t index) {
+                return buf[index];
+            }
             
             // Sets val at buf[write_ptr]
             void set_write_ptr_value(T val) {
