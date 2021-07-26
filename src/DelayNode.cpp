@@ -36,7 +36,8 @@ void DelayNode::showGui() {
        // ImGui::TextColored(ImVec4(ImColor(150,70,70,255)), "This node WILL cause segfaults and potentially damaging audio. For your safety, this node has been disabled.");
 
         ImGui::DragFloat("Delay (seconds)", &(this->time_delay), 0.1, 0, 10, "%.3f s");
-        ImGui::DragFloat("Delay Gain", &delay_gain, 1.0f, -144.0f, 0.0f, "%.3f dB");
+        // for now this is disabled because it makes controlling the feedback weird
+        // ImGui::DragFloat("Delay Gain", &delay_gain, 1.0f, -144.0f, 0.0f, "%.3f dB");
         ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -144.0f, -1.0f, "%.3f dB");
 
     imnodes::EndNode();
@@ -66,20 +67,21 @@ void DelayNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo
         need_reinit = true;
         internal_info = info;
     }
-    if (buf.size() != (samples_delay + internal_info.period_length)) {
+
+    if (buf.size() != samples_delay) {
         need_reinit = true;
     }
 
     if (need_reinit) {
-        buf.reinit(samples_delay + internal_info.period_length, 0, samples_delay);
+        buf.reinit(samples_delay, 0, 0);
     }
 
     for (size_t i = 0; i < numFrames; i++) {
         float rb_val = buf.get_read_ptr_value();
-        out[i] = in[i] + rb_val;
-        buf.set_write_ptr_value( (in[i] * dsp::dbfs_to_f32(delay_gain)) + (rb_val * dsp::dbfs_to_f32(feedback_gain)) );
-        buf.inc_write_ptr();
         buf.inc_read_ptr();
+        out[i] = in[i] + rb_val;
+        buf.set_write_ptr_value( dsp::dbfs_to_f32(feedback_gain) * (rb_val + in[i]) );
+        buf.inc_write_ptr();
     }
     
 }
