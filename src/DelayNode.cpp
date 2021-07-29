@@ -51,6 +51,10 @@ void DelayNode::showGui() {
 void DelayNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     float needed_samples_delay = 0;
     
+    if (time_delay > 10.0f) {
+        time_delay = 10.0f;
+    }
+
     if (std::isfinite(time_delay)) {
         needed_samples_delay = dsp::seconds_to_samples(time_delay, info.sample_rate);
     } else {
@@ -62,26 +66,29 @@ void DelayNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo
     }
 
     // check if the buffer needs to be reinitialized
-    bool need_reinit = false;
-    if ((info != internal_info)){
-        need_reinit = true;
-        internal_info = info;
-    }
+    if (dsp::seconds_to_samples(time_delay, info.sample_rate) != 0) {
+        bool need_reinit = false;
+        if ((info != internal_info)){
+            need_reinit = true;
+            internal_info = info;
+        }
 
-    if (buf.size() != samples_delay) {
-        need_reinit = true;
-    }
+        if (buf.size() != samples_delay) {
+            need_reinit = true;
+        }
 
-    if (need_reinit) {
-        buf.reinit(samples_delay, 0, 0);
-    }
+        if (need_reinit) {
+            buf.reinit(samples_delay, 0, 0);
+        }
 
-    for (size_t i = 0; i < numFrames; i++) {
-        float rb_val = buf.get_read_ptr_value();
-        buf.inc_read_ptr();
-        out[i] = in[i] + rb_val;
-        buf.set_write_ptr_value( dsp::dbfs_to_f32(feedback_gain) * (rb_val + in[i]) );
-        buf.inc_write_ptr();
+        for (size_t i = 0; i < numFrames; i++) {
+            float rb_val = buf.get_read_ptr_value();
+            buf.inc_read_ptr();
+            out[i] = in[i] + rb_val;
+            buf.set_write_ptr_value( dsp::dbfs_to_f32(feedback_gain) * (rb_val + in[i]) );
+            buf.inc_write_ptr();
+        }
+    } else {
+        memcpy(out, in, numFrames * sizeof(float));
     }
-    
 }

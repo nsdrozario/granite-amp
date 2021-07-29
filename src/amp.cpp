@@ -24,6 +24,7 @@
 #include <DelayNode.hpp>
 #include <ShelfNode.hpp>
 #include <CabSimNode.hpp>
+#include <FlangerNode.hpp>
 
 #include <utility>
 #include <set>
@@ -31,6 +32,7 @@
 #include <unordered_set>
 #include <stack>
 #include <state.hpp>
+#include <chrono>
 #include <sstream>
 
 #include <internal_dsp.hpp>
@@ -93,7 +95,11 @@ bool recordingAudio = false;
 imgui_addons::ImGuiFileBrowser recorderFileBrowser;
 std::mutex recorderMutex;
 
+float processTime = 0.0f;
+
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
+
+    std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
     
@@ -253,6 +259,8 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
 
     }
 
+    processTime = std::chrono::duration_cast<std::chrono::duration<double>> (std::chrono::steady_clock::now() - start_time).count() * 1000;
+
 }
 
 int main () {
@@ -360,7 +368,7 @@ int main () {
                     current_node += 5;
                 }
 
-                if (ImGui::MenuItem("Create Convolution IR Node")) {
+                if (ImGui::MenuItem("Create Convolution Reverb Node")) {
                     nodes[current_node] = new guitar_amp::ConvolutionNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
@@ -382,6 +390,11 @@ int main () {
 
                 if (ImGui::MenuItem("Create Delay Node")) {
                     nodes[current_node] = new guitar_amp::DelayNode(current_node, globalAudioInfo);
+                    current_node += 5;
+                }
+
+                if (ImGui::MenuItem("Create Flanger Node")) {
+                    nodes[current_node] = new guitar_amp::FlangerNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
@@ -472,7 +485,9 @@ int main () {
 
         // control panel
         ImGui::Begin("Control Panel");
-            
+
+            ImGui::Text("Time to process: %.1f ms", processTime);
+
             ImGui::Checkbox("Metronome", &metronomeEnabled);
             
             if (ImGui::InputInt("Metronome BPM", &metronomeBPM, 1, 10)) {

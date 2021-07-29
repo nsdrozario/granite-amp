@@ -98,8 +98,10 @@ void OverdriveNode::showGui() {
         imnodes::EndOutputAttribute();
         imnodes::PopAttributeFlag();
 
-        ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 20, "%.3f dB");
-        ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -144, 0, "%.3f dB");
+        ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 70.0f, "%.3f dB");
+        
+        // with how high the gain can go the -8dB limit is for the safety of the user
+        ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -144, -8.0f, "%.3f dB");
         
         if(ImGui::DragFloat("Low pass frequency", &(this->lpf_cutoff), 1, 0, 21000, "%.3f")) {
             lpf_config.cutoffFrequency = lpf_cutoff;

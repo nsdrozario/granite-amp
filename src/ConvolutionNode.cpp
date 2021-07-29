@@ -36,7 +36,7 @@ ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info) : M
 }
 
 ConvolutionNode::~ConvolutionNode() {
-    ma_decoder_uninit(&(this->file_reader));
+    // decoder should already be released at this point
     this->convolver.reset();    
 }
 
@@ -49,7 +49,7 @@ void ConvolutionNode::showGui() {
     imnodes::BeginNode(id);
         
         imnodes::BeginNodeTitleBar();
-            ImGui::TextUnformatted("Convolution IR");
+            ImGui::TextUnformatted("Convolution Reverb");
         imnodes::EndNodeTitleBar();
 
         imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
@@ -63,7 +63,7 @@ void ConvolutionNode::showGui() {
         ImGui::Text("Some impulse responses may be much louder than others.\nPlease change impulses in bypass mode,\nand then disable bypass mode, set your gain to -144dB,\nand slowly bring up the gain to a desired degree.");
         ImGui::PopStyleColor();
 
-        ImGui::DragFloat("Gain (not applied in bypass mode)", &(this->gain), 1.0f, -144.0f, 0.0f, "%.3f dB");
+        ImGui::DragFloat("Gain", &(this->gain), 1.0f, -144.0f, 0.0f, "%.3f dB");
 
         ImGui::Checkbox("Bypass", &this->bypass);
 
@@ -94,7 +94,9 @@ void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames, Aud
             out[i] *= real_gain;
         }
     } else {
-        memcpy(out,in,numFrames*sizeof(float));
+        for (size_t i = 0; i < numFrames; i++) {
+            out[i] = in[i] * real_gain;
+        }
     }
 }
 
