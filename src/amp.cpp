@@ -40,6 +40,8 @@
 #include <io_util.hpp>
 #include <implot.h>
 
+#include <imknob.hpp>
+
 #include <AudioInfo.hpp>
 
 using namespace guitar_amp;
@@ -79,7 +81,7 @@ dsp::ring_buffer<float> metronomeRingBuffer;
 
 bool metronomeEnabled;
 int metronomeBPM = 120;
-bool oversamplingEnabled = false;
+bool oversamplingEnabled = true;
 
 float *tmp_output = nullptr;
 float *tmp_input = nullptr;
@@ -494,9 +496,12 @@ int main () {
             if (ImGui::InputInt("Metronome BPM", &metronomeBPM, 1, 10)) {
                 metronomeTickSamples = 0;
             }
+            if (advancedMode) {
+                ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.3f dB");
+            } else {
+                ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.0f dB");
+            }
             
-            ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.3f dB");
-
             if (ImGui::Button("Record") && !recordingAudio) {
                 ImGui::OpenPopup("Recorder File Explorer");
             }
@@ -505,7 +510,7 @@ int main () {
                 recorderFileBrowser.showFileDialog(
                     "Recorder File Explorer", 
                     imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, 
-                    ImVec2(100,50), 
+                    ImVec2(300,200), 
                     "*.wav"
                 )
             ) 
@@ -529,7 +534,9 @@ int main () {
             }
 
             // todo: levels meter
-            ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
+            if (advancedMode) {
+                ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
+            }
 
             ImGui::Checkbox("Advanced Mode", &advancedMode);
 
