@@ -96,6 +96,7 @@ imgui_addons::ImGuiFileBrowser recorderFileBrowser;
 std::mutex recorderMutex;
 
 float processTime = 0.0f;
+bool advancedMode = false;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -398,15 +399,15 @@ int main () {
                     current_node += 5;
                 }
 
+                if (ImGui::MenuItem("Create Cabinet Simulation Node")) {
+                    nodes[current_node] = new guitar_amp::CabSimNode(current_node, globalAudioInfo);
+                    current_node += 5;
+                }
+
                 #ifdef DEBUG_BUILD
                 
                 if (ImGui::MenuItem("Create Oscillator Node")) {
                     nodes[current_node] = new guitar_amp::OscillatorNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                if (ImGui::MenuItem("Create Cabinet Simulation Node")) {
-                    nodes[current_node] = new guitar_amp::CabSimNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
@@ -486,7 +487,7 @@ int main () {
         // control panel
         ImGui::Begin("Control Panel");
 
-            ImGui::Text("Time to process: %.1f ms", processTime);
+            // ImGui::Text("Time to process: %.1f ms", processTime);
 
             ImGui::Checkbox("Metronome", &metronomeEnabled);
             
@@ -529,6 +530,9 @@ int main () {
 
             // todo: levels meter
             ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
+
+            ImGui::Checkbox("Advanced Mode", &advancedMode);
+
         ImGui::End();
 
         bool inputChanged = deviceConfig.capture.pDeviceID != &(inputDevices[listBoxSelectedInput].id);

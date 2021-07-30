@@ -46,18 +46,25 @@ namespace guitar_amp {
         float presence_freq = 1250.0f;
 
         // magnitudes (in decibels)
-        float presence_magnitude = -1.0f;
-        float mid_scoop_magnitude = -5.0f;
-        float low_mids_boost_magnitude = 1.0f;  
+        float presence_magnitude = -6.0f;
+        float mid_scoop_magnitude = -12.0f;
+        float low_mids_boost_magnitude = 6.0f;  
 
         // q factor
         float lpf_q = 2.0f;
-        float hpf_q = 0.7f;
+        float hpf_q = 2.0;
         float mid_scoop_q = 4.0f;
         float presence_q = 12.0f;
         float low_mids_boost_q = 4.0f;
 
         float delay_time = 1.0f; // in milliseconds
+
+        bool changed_presence = false;
+        bool changed_lpf = false;
+        bool changed_hpf = false;
+        bool changed_low_mids_boost = false;
+        bool changed_mid_scoop = false;
+        bool changed_delay = false;
 
     };
 }

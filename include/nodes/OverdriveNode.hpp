@@ -31,7 +31,7 @@ namespace guitar_amp {
         float lpf_cutoff = 12000.0f;
         float hpf_cutoff = 300.0f;
         float gain = 0.0f;
-        float output_volume = -14.0f;
+        float output_volume = -35.0f;
 
         int clipping_algorithm = 0;
 

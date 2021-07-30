@@ -1,6 +1,7 @@
 #include <OverdriveNode.hpp>
 #include <internal_dsp.hpp>
 #include <iostream>
+#include <imknob.hpp>
 
 using namespace guitar_amp;
 
@@ -98,26 +99,48 @@ void OverdriveNode::showGui() {
         imnodes::EndOutputAttribute();
         imnodes::PopAttributeFlag();
 
-        ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 70.0f, "%.3f dB");
-        
-        // with how high the gain can go the -8dB limit is for the safety of the user
-        ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -144, -8.0f, "%.3f dB");
-        
-        if(ImGui::DragFloat("Low pass frequency", &(this->lpf_cutoff), 1, 0, 21000, "%.3f")) {
-            lpf_config.cutoffFrequency = lpf_cutoff;
-            lpf_config_not_oversampled.cutoffFrequency = lpf_cutoff;
-            ma_lpf2_reinit(&lpf_config,  &lpf);
-            ma_lpf2_reinit(&lpf_config_not_oversampled, &lpf_not_oversampled);
-        }
-        
-        if(ImGui::DragFloat("High pass frequency", &(this->hpf_cutoff), 1, 0, 21000, "%.3f")) {
-            hpf_config.cutoffFrequency = hpf_cutoff;
-            hpf_config_not_oversampled.cutoffFrequency = hpf_cutoff;
-            ma_hpf2_reinit(&hpf_config, &hpf);
-            ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
-        }
+        if (advancedMode) {
+            ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 70.0f, "%.3f dB");
+            
+            // with how high the gain can go the -8dB limit is for the safety of the user
+            ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -144, -8.0f, "%.3f dB");
+            
+            if(ImGui::DragFloat("Low pass frequency", &(this->lpf_cutoff), 1, 0, 21000, "%.3f")) {
+                lpf_config.cutoffFrequency = lpf_cutoff;
+                lpf_config_not_oversampled.cutoffFrequency = lpf_cutoff;
+                ma_lpf2_reinit(&lpf_config,  &lpf);
+                ma_lpf2_reinit(&lpf_config_not_oversampled, &lpf_not_oversampled);
+            }
+            
+            if(ImGui::DragFloat("High pass frequency", &(this->hpf_cutoff), 1, 0, 21000, "%.3f Hz")) {
+                hpf_config.cutoffFrequency = hpf_cutoff;
+                hpf_config_not_oversampled.cutoffFrequency = hpf_cutoff;
+                ma_hpf2_reinit(&hpf_config, &hpf);
+                ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
+            }
+        } else {
 
-        ImGui::Combo("Clipping algorithm", &(this->clipping_algorithm), "minmax\0tanh\0sine\0");
+            ImKnob::Knob("Gain", &gain, 1.0, -144, 70, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+            
+            ImGui::SameLine();
+
+            if(ImKnob::Knob("Treble", &(this->lpf_cutoff), 1, 1000, 21000, "%.0f Hz", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f))) {
+                lpf_config.cutoffFrequency = lpf_cutoff;
+                lpf_config_not_oversampled.cutoffFrequency = lpf_cutoff;
+                ma_lpf2_reinit(&lpf_config,  &lpf);
+                ma_lpf2_reinit(&lpf_config_not_oversampled, &lpf_not_oversampled);
+            }
+            
+            ImGui::SameLine();
+
+            if(ImKnob::Knob("Bass", &(this->hpf_cutoff), 1, 10, 1000, "%.0f Hz", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f))) {
+                hpf_config.cutoffFrequency = hpf_cutoff;
+                hpf_config_not_oversampled.cutoffFrequency = hpf_cutoff;
+                ma_hpf2_reinit(&hpf_config, &hpf);
+                ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
+            }
+
+        }
 
     imnodes::EndNode();
 

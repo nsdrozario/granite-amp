@@ -40,5 +40,6 @@ extern guitar_amp::AudioInfo globalAudioInfo;
 extern bool metronomeEnabled;
 extern bool oversamplingEnabled;
 
+extern bool advancedMode;
 
 #endif
