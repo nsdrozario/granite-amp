@@ -3,6 +3,7 @@
 #include <iostream>
 #include <internal_dsp.hpp>
 #include <cmath>
+#include <imknob.hpp>
 
 using namespace guitar_amp;
 using std::cout;
@@ -14,7 +15,6 @@ DelayNode::~DelayNode() { }
 
 void DelayNode::showGui() {
 
-    ImGui::PushItemWidth(100);
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(80,80,80, 100));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(80,80,80, 255));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(80,80,80, 255));
@@ -35,14 +35,18 @@ void DelayNode::showGui() {
 
        // ImGui::TextColored(ImVec4(ImColor(150,70,70,255)), "This node WILL cause segfaults and potentially damaging audio. For your safety, this node has been disabled.");
 
-        ImGui::DragFloat("Delay (seconds)", &(this->time_delay), 0.1, 0, 10, "%.3f s");
-        // for now this is disabled because it makes controlling the feedback weird
-        // ImGui::DragFloat("Delay Gain", &delay_gain, 1.0f, -144.0f, 0.0f, "%.3f dB");
-        ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -144.0f, -1.0f, "%.3f dB");
-
+        if (advancedMode) {
+            ImGui::DragFloat("Delay (seconds)", &(this->time_delay), 0.1, 0, 10, "%.3f s");
+            // for now this is disabled because it makes controlling the feedback weird
+            // ImGui::DragFloat("Delay Gain", &delay_gain, 1.0f, -144.0f, 0.0f, "%.3f dB");
+            ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -144.0f, -1.0f, "%.3f dB");
+        } else {
+            ImKnob::Knob("Delay (seconds)", &time_delay, 0.1, 0, 10, "%.1f s", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+            ImGui::SameLine();
+            ImKnob::Knob("Feedback Gain",  &feedback_gain, 1.0f, -144.0f, -1.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+        }
     imnodes::EndNode();
 
-    ImGui::PopItemWidth();
     imnodes::PopColorStyle();
     imnodes::PopColorStyle();
 

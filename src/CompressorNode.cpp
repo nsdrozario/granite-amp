@@ -1,5 +1,7 @@
 #include <CompressorNode.hpp>
 #include <state.hpp>
+#include <imknob.hpp>
+
 using namespace guitar_amp;
 
 CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) { }
@@ -7,7 +9,6 @@ CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info) : Mid
 CompressorNode::~CompressorNode() { }
 
 void CompressorNode::showGui() {
-    ImGui::PushItemWidth(100);
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(184,73,0,255));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(255, 111, 0, 255));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(255, 111, 0, 255));
@@ -27,8 +28,19 @@ void CompressorNode::showGui() {
         ImGui::DragFloat("Attack", &this->attack, 0.01f, 0.0f, 10.0f, "%.3f s");
         ImGui::DragFloat("Release", &this->release, 0.01f, 0.0f, 10.0f, "%.3f s");
         */
-        ImGui::DragFloat("Ratio", &this->ratio, 0.01, 1.0f, 50.0f, "%.3f");
-        ImGui::DragFloat("Threshold", &this->threshold, 1.0f, -1440.0f, 0.0f, "%.3f dB");
+
+        if (advancedMode) {
+
+            ImGui::DragFloat("Ratio", &this->ratio, 0.01, 1.0f, 50.0f, "%.3f");
+            ImGui::DragFloat("Threshold", &this->threshold, 1.0f, -1440.0f, 0.0f, "%.3f dB");
+
+        } else {
+
+            ImKnob::Knob("Ratio", &this->ratio, 0.01, 1.0f, 50.0f, "%.1f", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+            ImGui::SameLine();
+            ImKnob::Knob("Threshold", &this->threshold, 1.0f, -1440.0f, 0.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+
+        }
 
         /*
         // consider replacing with LFO
@@ -46,8 +58,6 @@ void CompressorNode::showGui() {
         ImGui::Checkbox("Sidechain", &this->sidechain_enabled);
         */
     imnodes::EndNode();
-
-    ImGui::PopItemWidth();
     imnodes::PopColorStyle();
     imnodes::PopColorStyle();
 }

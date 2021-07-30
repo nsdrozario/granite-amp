@@ -81,7 +81,6 @@ OverdriveNode::~OverdriveNode() {
 
 void OverdriveNode::showGui() {
 
-    ImGui::PushItemWidth(100);
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(201, 4, 126, 100));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(201, 4, 126, 255));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(201, 4, 126, 255));
@@ -144,7 +143,6 @@ void OverdriveNode::showGui() {
 
     imnodes::EndNode();
 
-    ImGui::PopItemWidth();
     imnodes::PopColorStyle();
     imnodes::PopColorStyle();
 

@@ -501,38 +501,52 @@ int main () {
             } else {
                 ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.0f dB");
             }
+
+            if (audioEnabled) {
             
-            if (ImGui::Button("Record") && !recordingAudio) {
-                ImGui::OpenPopup("Recorder File Explorer");
-            }
-
-            if (
-                recorderFileBrowser.showFileDialog(
-                    "Recorder File Explorer", 
-                    imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, 
-                    ImVec2(300,200), 
-                    "*.wav"
-                )
-            ) 
-            {
-                ma_encoder_config recorderConfig = ma_encoder_config_init(ma_resource_format_wav, ma_format_f32, 1, globalAudioInfo.sample_rate);
-                recorderMutex.lock();
-                if (ma_encoder_init_file(recorderFileBrowser.selected_fn.c_str(), &recorderConfig, &audioRecorder) == MA_SUCCESS) {
-                    recordingAudio = true;
+                if (recordingAudio) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(209,30,17,255));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(255,54,54,255));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(255,54,54,255));
+                } else {    
+                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(145,33,25,255));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(255,54,54,255));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(255,54,54,255));
                 }
-                recorderMutex.unlock();
-            }
 
-            if (recordingAudio) {
-                ImGui::TextColored(sf::Color::Red, "Recording audio to %s", recorderFileBrowser.selected_fn.c_str());
-                if (ImGui::Button("Stop Recording")) {
+                if (!recordingAudio && ImGui::Button("Record")) {
+                    ImGui::OpenPopup("Recorder File Explorer");
+                } else if (recordingAudio && ImGui::Button("Stop Recording")) {
                     recorderMutex.lock();
                     ma_encoder_uninit(&audioRecorder);
                     recorderMutex.unlock();
                     recordingAudio = false;
                 }
-            }
 
+                ImGui::PopStyleColor(3);
+                
+                if (
+                    recorderFileBrowser.showFileDialog(
+                        "Recorder File Explorer", 
+                        imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, 
+                        ImVec2(300,200), 
+                        "*.wav"
+                    )
+                ) 
+                {
+                    ma_encoder_config recorderConfig = ma_encoder_config_init(ma_resource_format_wav, ma_format_f32, 1, globalAudioInfo.sample_rate);
+                    recorderMutex.lock();
+                    if (ma_encoder_init_file(recorderFileBrowser.selected_fn.c_str(), &recorderConfig, &audioRecorder) == MA_SUCCESS) {
+                        recordingAudio = true;
+                    }
+                    recorderMutex.unlock();
+                }
+
+                if (recordingAudio) {
+                    ImGui::TextColored(sf::Color::Red, "Recording audio to %s", recorderFileBrowser.selected_fn.c_str());
+                }
+
+            }
             // todo: levels meter
             if (advancedMode) {
                 ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
