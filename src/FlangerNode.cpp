@@ -72,6 +72,7 @@ void FlangerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioIn
 
         rb.set_delay_no_resize(static_cast<float>(max_delay_samples-min_delay_samples)/2); // sin(0) = 0
         internal_timer = 0.0f;
+        internal_info = info;
     }
 
     // read first then apply the delay

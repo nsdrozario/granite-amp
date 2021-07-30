@@ -151,7 +151,19 @@ void OverdriveNode::showGui() {
 void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
 
     if (info != internal_info) {
-        // need to update everything
+        
+        lpf_config.sampleRate = info.sample_rate;
+        
+        ma_lpf2_reinit(&lpf_config,  &lpf);
+        ma_lpf2_reinit(&lpf_config_not_oversampled, &lpf_not_oversampled);
+        
+        hpf_config.sampleRate = info.sample_rate;
+    
+        ma_hpf2_reinit(&hpf_config, &hpf);
+        ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
+    
+        internal_info = info;
+    
     }
 
     if (oversamplingEnabled) {
