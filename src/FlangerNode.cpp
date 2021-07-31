@@ -53,9 +53,9 @@ void FlangerNode::showGui() {
 
 void FlangerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     
-    std::clamp(min_delay_time, 1.0f, 30.0f);
-    std::clamp(max_delay_time, 1.0f, 30.0f);
-    std::clamp(delay_frequency, 0.1f, 10.0f);
+    dsp::clamp(min_delay_time, 1.0f, 30.0f);
+    dsp::clamp(max_delay_time, 1.0f, 30.0f);
+    dsp::clamp(delay_frequency, 0.1f, 10.0f);
 
     min_delay_samples = dsp::seconds_to_samples(min_delay_time / 1000.0f, info.sample_rate);
     max_delay_samples = dsp::seconds_to_samples(max_delay_time / 1000.0f, info.sample_rate);

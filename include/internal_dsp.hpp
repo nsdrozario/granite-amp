@@ -17,13 +17,18 @@ namespace guitar_amp {
         void hardclip_minmax(const float *input, float *transform, float gain, float threshold, ma_uint32 frameCount);
         void clip_tanh(const float *input, float *output, float gain, float output_volume, ma_uint32 frameCount);
         void clip_sin(const float *input, float *output, float gain, float output_volume, ma_uint32 frameCount);
-
+        
         // Utility
         float f32_to_dbfs(float x);
         float dbfs_to_f32(float x);
 
         size_t seconds_to_samples(float time, size_t sample_rate);
-
+    
+        template <class T> 
+        T clamp(T x, T min, T max) {
+            return std::max(min, std::min(x, max));
+        }
+        
         // Templated ring buffer class, uses new for memory allocation
         template <class T>
         class ring_buffer {
