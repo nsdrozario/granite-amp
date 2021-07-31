@@ -21,7 +21,7 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
     float min_angle = 1.25f * 3.141593f; // 5pi/4
     float max_angle = 3.141593f * -0.25f; // -pi/4
 
-    *value = dsp::clamp(*value, min, max);
+    *value = ImKnob::clamp(*value, min, max);
     float norm_position = (*value-min)/(max-min);
     float angle = (1.0f-norm_position) * (min_angle - max_angle) + max_angle;
 
@@ -38,7 +38,7 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
             angle = std::atan(delta_from_center.y / delta_from_center.x) + (3.141593f);
         }
         // normalize the angle then scale to the actual values
-        *value = dsp::clamp((1.0f-((angle - max_angle) / (min_angle - max_angle))) * (max-min) + min, min, max);
+        *value = ImKnob::clamp((1.0f-((angle - max_angle) / (min_angle - max_angle))) * (max-min) + min, min, max);
         interacted = true;
     }
 
@@ -55,9 +55,9 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
             // this prevents an angle 0 issue where the knob immediately goes to one of the maximum positions
             angle = 3.141593 * 0.5;
         }
-        angle = dsp::clamp(angle, max_angle, min_angle);
+        angle = ImKnob::clamp(angle, max_angle, min_angle);
         // normalize the angle then scale to the actual values
-        *value = dsp::clamp((1.0f-((angle - max_angle) / (min_angle - max_angle))) * (max-min) + min, min, max);
+        *value = ImKnob::clamp((1.0f-((angle - max_angle) / (min_angle - max_angle))) * (max-min) + min, min, max);
         interacted = true;
     }
 
