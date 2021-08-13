@@ -5,3 +5,5 @@
 *.ini
 tools/
 tests/
+*.zip
+test.cpp
