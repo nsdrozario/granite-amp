@@ -2,13 +2,16 @@
 #include <internal_dsp.hpp>
 #include <iostream>
 #include <imknob.hpp>
+#include <miniaudio.h>
+
+#define OVERSAMPLIING_FACTOR 8
 
 using namespace guitar_amp;
 
 OverdriveNode::OverdriveNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 
-    this->lpf_config = ma_lpf2_config_init(ma_format_f32, 1, current_audio_info.sample_rate*4, this->lpf_cutoff, 0.9f);
-    this->hpf_config = ma_hpf2_config_init(ma_format_f32, 1, current_audio_info.sample_rate*4, this->hpf_cutoff, 0.9f);
+    this->lpf_config = ma_lpf2_config_init(ma_format_f32, 1, current_audio_info.sample_rate*OVERSAMPLIING_FACTOR, this->lpf_cutoff, 0.9f);
+    this->hpf_config = ma_hpf2_config_init(ma_format_f32, 1, current_audio_info.sample_rate*OVERSAMPLIING_FACTOR, this->hpf_cutoff, 0.9f);
 
     lpf_config_not_oversampled = ma_lpf2_config_init(
         ma_format_f32,
@@ -46,31 +49,31 @@ OverdriveNode::OverdriveNode(int id, const AudioInfo current_audio_info) : Middl
         ma_format_f32, 
         1, 
         current_audio_info.sample_rate, 
-        current_audio_info.sample_rate * 4,  
+        current_audio_info.sample_rate * OVERSAMPLIING_FACTOR,  
         ma_resample_algorithm_linear
     );
     
     ma_resampler_config resampler_cfg_down = ma_resampler_config_init(
         ma_format_f32,
         1,
-        current_audio_info.sample_rate * 4,
+        current_audio_info.sample_rate * OVERSAMPLIING_FACTOR,
         current_audio_info.sample_rate,
         ma_resample_algorithm_linear
     );
 
-    ma_lpf2_config downsample_lpf_cfg = ma_lpf2_config_init(
+    downsample_lpf_config = ma_lpf2_config_init(
         ma_format_f32,
         1,
-        current_audio_info.sample_rate,
+        current_audio_info.sample_rate * OVERSAMPLIING_FACTOR,
         static_cast<double>(current_audio_info.sample_rate) * 0.5,
-        1.0
+        1.0f
     );
 
     ma_resampler_init(&resampler_cfg_up, &upscaler);
     ma_resampler_init(&resampler_cfg_down, &downscaler);
-    ma_lpf2_init(&downsample_lpf_cfg, &downsample_lpf);
+    ma_lpf2_init(&downsample_lpf_config, &downsample_lpf);
 
-    buf_upscale = new float[current_audio_info.period_length * 4];
+    buf_upscale = new float[current_audio_info.period_length * OVERSAMPLIING_FACTOR];
 }
 
 OverdriveNode::~OverdriveNode() {
@@ -84,9 +87,10 @@ void OverdriveNode::showGui() {
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(201, 4, 126, 100));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(201, 4, 126, 255));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(201, 4, 126, 255));
-
+    if (advancedMode) {
+        ImGui::PushItemWidth(150);
+    }
     imnodes::BeginNode(this->id);
-
         imnodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Overdrive");
         imnodes::EndNodeTitleBar();
@@ -142,7 +146,9 @@ void OverdriveNode::showGui() {
         }
 
     imnodes::EndNode();
-
+    if (advancedMode) {
+        ImGui::PopItemWidth();
+    }
     imnodes::PopColorStyle();
     imnodes::PopColorStyle();
 
@@ -152,16 +158,42 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
 
     if (info != internal_info) {
         
-        lpf_config.sampleRate = info.sample_rate;
-        
+        ma_resampler_uninit(&upscaler);
+        ma_resampler_uninit(&downscaler);
+
+        lpf_config.sampleRate = info.sample_rate * OVERSAMPLIING_FACTOR;
+        lpf_config_not_oversampled.sampleRate = info.sample_rate;
         ma_lpf2_reinit(&lpf_config,  &lpf);
         ma_lpf2_reinit(&lpf_config_not_oversampled, &lpf_not_oversampled);
         
-        hpf_config.sampleRate = info.sample_rate;
-    
+        hpf_config.sampleRate = info.sample_rate * OVERSAMPLIING_FACTOR;
+        hpf_config_not_oversampled.sampleRate = info.sample_rate;
+
         ma_hpf2_reinit(&hpf_config, &hpf);
         ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
     
+        downsample_lpf_config.sampleRate = info.sample_rate * OVERSAMPLIING_FACTOR;
+        downsample_lpf_config.cutoffFrequency = static_cast<double>(info.sample_rate) * 0.5; // nyquist frequency = 1/2 the sample rate
+
+        ma_resampler_config upscaler_cfg = ma_resampler_config_init(
+            ma_format_f32,
+            1,
+            info.sample_rate,
+            info.sample_rate * OVERSAMPLIING_FACTOR,
+            ma_resample_algorithm_linear
+        );
+
+        ma_resampler_config downscaler_cfg = ma_resampler_config_init(
+            ma_format_f32,
+            1,
+            info.sample_rate * OVERSAMPLIING_FACTOR,
+            info.sample_rate,
+            ma_resample_algorithm_linear
+        );
+
+        ma_resampler_init(&upscaler_cfg, &upscaler);
+        ma_resampler_init(&downscaler_cfg, &downscaler);
+
         internal_info = info;
     
     }
@@ -169,14 +201,13 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
     if (oversamplingEnabled) {
 
         if (buf_upscale == nullptr) { // this really shouldn't happen
-            buf_upscale = new float[numFrames * 4];
+            buf_upscale = new float[numFrames * OVERSAMPLIING_FACTOR];
         }
 
         ma_uint64 frames_to_process = numFrames;
-        ma_uint64 frames_expected = numFrames * 4;
+        ma_uint64 frames_expected = numFrames * OVERSAMPLIING_FACTOR;
 
         // hopefully this doesn't take too long to run
-        // resample to 4x the sampling rate
         do {
             ma_result resample_1st_result = ma_resampler_process_pcm_frames(
                 &upscaler, 
@@ -190,31 +221,31 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
                 // something went wrong
             }
         } while (
-            (numFrames - frames_to_process != 0) && ((numFrames * 4) - frames_expected) != 0
+            (numFrames - frames_to_process != 0) && ((numFrames * OVERSAMPLIING_FACTOR) - frames_expected) != 0
         );
 
         // get rid of the bass frequencies
-        ma_hpf2_process_pcm_frames(&this->hpf, buf_upscale, buf_upscale, numFrames * 4);
+        ma_hpf2_process_pcm_frames(&this->hpf, buf_upscale, buf_upscale, numFrames * OVERSAMPLIING_FACTOR);
 
         // apply a transfer function for saturation and clipping
         switch(this->clipping_algorithm) {
             case 0:
-                dsp::hardclip_minmax(buf_upscale, buf_upscale, this->gain, this->output_volume, numFrames * 4);
+                dsp::hardclip_minmax(buf_upscale, buf_upscale, this->gain, this->output_volume, numFrames * OVERSAMPLIING_FACTOR);
                 break;
             case 1:
-                dsp::clip_tanh(buf_upscale, buf_upscale, this->gain, this->output_volume, numFrames * 4);
+                dsp::clip_tanh(buf_upscale, buf_upscale, this->gain, this->output_volume, numFrames * OVERSAMPLIING_FACTOR);
                 break;
             case 2:
-                dsp::clip_sin(buf_upscale, buf_upscale, this->gain, this->output_volume, numFrames * 4);
+                dsp::clip_sin(buf_upscale, buf_upscale, this->gain, this->output_volume, numFrames * OVERSAMPLIING_FACTOR);
                 break;
         }
 
-        // low pass at the nyquist frequency 
-        ma_lpf2_process_pcm_frames(&downsample_lpf, buf_upscale, buf_upscale, numFrames * 4);
+        // low pass at the nyquist frequency for the original sample rate 
+        ma_lpf2_process_pcm_frames(&downsample_lpf, buf_upscale, buf_upscale, numFrames * OVERSAMPLIING_FACTOR);
 
-        ma_uint64 frames_to_process_downscale = numFrames * 4;
+        ma_uint64 frames_to_process_downscale = numFrames * OVERSAMPLIING_FACTOR;
         ma_uint64 frames_expected_downscale = numFrames;
-        // resample to the playback sampling rate
+        // downsample to the playback sampling rate
         do {
             ma_result downscale_result = ma_resampler_process_pcm_frames(
             &downscaler, 
@@ -227,8 +258,12 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
                 
             }
         } while (
-            (numFrames * 4) - frames_to_process_downscale != 0 && numFrames - frames_expected_downscale != 0
+            (numFrames * OVERSAMPLIING_FACTOR) - frames_to_process_downscale != 0 && numFrames - frames_expected_downscale != 0
         );
+
+        // apply the regular lpf now
+        ma_lpf2_process_pcm_frames(&lpf_not_oversampled, out, out, numFrames);
+
     } else {
         // if we don't want oversampling, do same thing but with no resampling
 
@@ -246,8 +281,9 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
                 break;
         }
 
-    }
-    // get rid of the treble frequencies as desired
-    ma_lpf2_process_pcm_frames(&this->lpf, out, out, numFrames);
+        // get rid of the treble frequencies as desired
+        ma_lpf2_process_pcm_frames(&this->lpf_not_oversampled, out, out, numFrames);
 
+    }
+    
 }

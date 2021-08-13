@@ -44,6 +44,7 @@ namespace guitar_amp {
         ma_hpf2 hpf_not_oversampled;
 
         ma_lpf2 downsample_lpf;
+        ma_lpf2_config downsample_lpf_config;
 
         ma_lpf2_config lpf_config;
         ma_lpf2_config lpf_config_not_oversampled;

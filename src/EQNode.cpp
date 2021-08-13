@@ -1,3 +1,4 @@
+/*
 #include <EQNode.hpp>
 #include <utility>
 #include <algorithm>
@@ -66,3 +67,4 @@ void EQNode::showGui() {
 void EQNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     memcpy(out, in, numFrames * sizeof(float));
 }
+*/

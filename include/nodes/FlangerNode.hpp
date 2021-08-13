@@ -1,7 +1,7 @@
 #ifndef GUITAR_AMP_FLANGER_NODE_HPP
 #define GUITAR_AMP_FLANGER_NODE_HPP
 
-#define MAX_POSSIBLE_DELAY_MS 50.0f 
+#define MAX_POSSIBLE_DELAY_MS 10.0f
 
 #include "MiddleNode.hpp"
 #include "state.hpp"
@@ -29,8 +29,13 @@ namespace guitar_amp {
 
         float internal_timer = 0.0f;
 
-        size_t min_delay_samples;
-        size_t max_delay_samples;
+        size_t max_delay_samples = 0;
+
+        // honestly using an inbuilt ring buffer may be easier here
+        float *delay_buf = nullptr;
+        size_t delay_buf_size = 0;
+        // read ptr position will have to be continually calculated so no point in storing it
+        size_t write_ptr = 0;
 
     };
 }

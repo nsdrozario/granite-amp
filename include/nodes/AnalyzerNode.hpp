@@ -19,8 +19,8 @@ namespace guitar_amp {
         void reinit();
     
     private:
-        bool showing_spectrum;
-        bool accept_warning;
+        bool showing_spectrum = false;
+        bool accept_warning = false;
         size_t fft_size;
         std::vector<float> signal;
         std::vector<float> real;
@@ -29,6 +29,9 @@ namespace guitar_amp {
         std::vector<float> freqs;
         std::mutex output_lock;
         audiofft::AudioFFT internal_fft;
+        bool freqDomain = true;
+        std::vector<float> time_domain_data;
+        std::vector<float> time_domain_labels;
     };
 }
 

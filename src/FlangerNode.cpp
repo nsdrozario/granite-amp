@@ -3,25 +3,24 @@ using namespace guitar_amp;
 
 FlangerNode::FlangerNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 
-    rb.reinit( 
-        static_cast<size_t>(static_cast<float> (current_audio_info.sample_rate) * MAX_POSSIBLE_DELAY_MS / 1000.0f),
-        0,
-        0
-    );
-
-    min_delay_samples = dsp::seconds_to_samples(min_delay_time / 1000.0f, current_audio_info.sample_rate);
-    max_delay_samples = dsp::seconds_to_samples(max_delay_time / 1000.0f, current_audio_info.sample_rate);
-
-    rb.set_delay_no_resize(static_cast<float>(max_delay_samples-min_delay_samples)/2); // sin(0) = 0
+    if (current_audio_info.sample_rate == 0) {
+        // don't allocate
+    } else {
+        delay_buf_size = static_cast<size_t>(static_cast<float>(current_audio_info.sample_rate) * (MAX_DELAY_DURATION / 1000.0f) + 0.5);
+        delay_buf = new float[delay_buf_size];
+    }
 
 }
 
 FlangerNode::~FlangerNode() {
-
-}
+    if (delay_buf != nullptr) {
+        delete[] delay_buf;
+    }
+}   
 
 void FlangerNode::showGui() {
 
+    ImGui::PushItemWidth(100);
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(93,42,247, 100));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(93,42,247, 255));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(93,42,247, 255));
@@ -40,12 +39,12 @@ void FlangerNode::showGui() {
         imnodes::EndOutputAttribute();
         imnodes::PopAttributeFlag();
 
-        ImGui::DragFloat("Maximum Delay", &max_delay_time, 1.0f, 1.0f, 30.0f, "%.3f ms");
-        ImGui::DragFloat("LFO Frequency", &delay_frequency, 0.1f, 0.1f, 10.0f, "%.3f Hz");
+        ImGui::DragFloat("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS, "%.3f ms");
+        ImGui::DragFloat("LFO Frequency", &delay_frequency, 0.1f, 0.1f, 1.0f, "%.3f Hz");
         ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -144.0f, -1.0f, "%.3f dB");
 
     imnodes::EndNode();
-
+    ImGui::PopItemWidth();
     imnodes::PopColorStyle();
     imnodes::PopColorStyle();
 
@@ -54,37 +53,56 @@ void FlangerNode::showGui() {
 void FlangerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     
     dsp::clamp(min_delay_time, 1.0f, 30.0f);
-    dsp::clamp(max_delay_time, 1.0f, 30.0f);
-    dsp::clamp(delay_frequency, 0.1f, 10.0f);
+    dsp::clamp(max_delay_time, 1.0f, MAX_POSSIBLE_DELAY_MS);
+    dsp::clamp(delay_frequency, 0.1f, 1.0f);
+    
+    max_delay_samples = dsp::seconds_to_samples(max_delay_time, info.sample_rate);
 
-    min_delay_samples = dsp::seconds_to_samples(min_delay_time / 1000.0f, info.sample_rate);
-    max_delay_samples = dsp::seconds_to_samples(max_delay_time / 1000.0f, info.sample_rate);
-
-    if (info != internal_info) {
-        rb.reinit( 
-        static_cast<size_t>(static_cast<float> (info.sample_rate) * MAX_POSSIBLE_DELAY_MS / 1000.0f),
-        0,
-        0
-        );
-
-        min_delay_samples = dsp::seconds_to_samples(min_delay_time / 1000.0f, info.sample_rate);
-        max_delay_samples = dsp::seconds_to_samples(max_delay_time / 1000.0f, info.sample_rate);
-
-        rb.set_delay_no_resize(static_cast<float>(max_delay_samples-min_delay_samples)/2); // sin(0) = 0
-        internal_timer = 0.0f;
-        internal_info = info;
+    if (static_cast<size_t>(static_cast<float>(info.sample_rate) * (max_delay_time / 1000.0f) + 0.5) != delay_buf_size) {
+        delay_buf_size = static_cast<size_t>(static_cast<float>(info.sample_rate) * (max_delay_time / 1000.0f) + 0.5);
+        if (delay_buf != nullptr) {
+            delete[] delay_buf;
+        }
+        delay_buf = new float[delay_buf_size];
+        write_ptr = 0;
     }
 
-    // read first then apply the delay
+    if (internal_info != info) {
+
+        if (delay_buf != nullptr) {
+            delete[] delay_buf;
+        }
+
+        delay_buf_size = static_cast<size_t>(static_cast<float>(info.sample_rate) * (MAX_DELAY_DURATION / 1000.0f) + 0.5);
+        delay_buf = new float[delay_buf_size];
+
+        internal_timer = 0.0f;
+        internal_info = info;
+        
+    }
+
     for (size_t i = 0; i < numFrames; i++) {
-        out[i] = in[i] + rb.get_read_ptr_interpolated();
-        rb.set_write_ptr_value( ( in[i]  ) * dsp::dbfs_to_f32(feedback_gain) );
-        rb.inc_read_ptr( 
-            (static_cast<float>(max_delay_samples)*0.5) * sin (2.0f * M_PI * delay_frequency * i / info.sample_rate)
-            +
-            (static_cast<float>(max_delay_samples)*0.5)
-        );
-        rb.inc_write_ptr();
+
+        float lfo = internal_timer * 500.0f;
+        
+        size_t delay_start = static_cast<size_t>(lfo+0.5f);
+        size_t delay_end = static_cast<size_t>(lfo);
+        float delay_fraction = lfo - std::floor(lfo);
+
+        float y0 = delay_buf[(write_ptr - delay_start + delay_buf_size) % delay_buf_size];
+        float y1 = delay_buf[(write_ptr - delay_end + delay_buf_size) % delay_buf_size];
+        // dx is 1 unit wide
+
+        float interpolated = ((y1 - y0) * delay_fraction) + y0;
+
+        delay_buf[write_ptr] = in[i];
+        write_ptr = (write_ptr + 1) % delay_buf_size;
+    
+        out[i] = interpolated;
+
+        internal_timer += static_cast<float>(i) / static_cast<float>(info.sample_rate);
+        // internal_timer = std::fmod(internal_timer + (1.0f / delay_frequency), 1.0f / delay_frequency);
+        
     }
 
 }

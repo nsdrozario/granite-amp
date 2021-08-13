@@ -14,7 +14,7 @@ DelayNode::DelayNode(int id, const AudioInfo current_audio_info) : MiddleNode(id
 DelayNode::~DelayNode() { }
 
 void DelayNode::showGui() {
-
+    ImGui::PushItemWidth(100);
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(80,80,80, 100));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(80,80,80, 255));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(80,80,80, 255));
@@ -46,7 +46,7 @@ void DelayNode::showGui() {
             ImKnob::Knob("Feedback Gain",  &feedback_gain, 1.0f, -144.0f, -1.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
         }
     imnodes::EndNode();
-
+    ImGui::PopItemWidth();
     imnodes::PopColorStyle();
     imnodes::PopColorStyle();
 
@@ -82,7 +82,14 @@ void DelayNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo
         }
 
         if (need_reinit) {
-            buf.reinit(samples_delay, 0, 0);
+            if (buf.size() < samples_delay) {
+                buf.reinit(samples_delay, 0, 0);
+            } else {
+                size_t write_ptr = buf.get_write_ptr_index();
+                size_t read_ptr = write_ptr - samples_delay + buf.size();
+                read_ptr %= buf.size();
+                buf.set_delay_no_resize(delay_s)
+            }
         }
 
         for (size_t i = 0; i < numFrames; i++) {

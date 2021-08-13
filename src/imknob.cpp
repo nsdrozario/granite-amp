@@ -32,11 +32,14 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
         ImVec2 click_position = io_handle.MouseClickedPos[0]; // 0 is left click
         ImVec2 delta_from_center = ImVec2(click_position.x - center_position.x, -(click_position.y - center_position.y));
+        /*
         if (delta_from_center.x > 0.0f) {
             angle = std::atan(delta_from_center.y / delta_from_center.x);
         } else {
             angle = std::atan(delta_from_center.y / delta_from_center.x) + (3.141593f);
         }
+        */
+        angle = std::atan2(delta_from_center.y, delta_from_center.x);
         // normalize the angle then scale to the actual values
         *value = ImKnob::clamp((1.0f-((angle - max_angle) / (min_angle - max_angle))) * (max-min) + min, min, max);
         interacted = true;

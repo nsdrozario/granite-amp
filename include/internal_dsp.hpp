@@ -67,8 +67,8 @@ namespace guitar_amp {
                 read_ptr = write_ptr - delay_samples;
                 while (read_ptr < 0) {
                     read_ptr += buf_size;
-                    read_ptr %= buf_size; // not necessary but just to be safe
                 }
+                read_ptr %= buf_size; // not necessary but just to be safe
                 delay_fraction = 0.0f;
             }
 

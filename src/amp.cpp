@@ -447,14 +447,16 @@ int main () {
         if (ImGui::BeginPopup("Delete Node")) {
 
             if (ImGui::MenuItem("Delete Node")) {
-                adjlist.erase(adjlist_inward[selected_node+1]);
-                adjlist.erase(adjlist_inward[selected_node+2]);
-                adjlist.erase(selected_node+3);
-                adjlist.erase(selected_node+4);
-                adjlist_inward.erase(selected_node+1);
-                adjlist_inward.erase(selected_node+2);
-                delete nodes[selected_node];
-                nodes.erase(selected_node);
+                if (selected_node != 0 && selected_node != 5) {
+                    adjlist.erase(adjlist_inward[selected_node+1]);
+                    adjlist.erase(adjlist_inward[selected_node+2]);
+                    adjlist.erase(selected_node+3);
+                    adjlist.erase(selected_node+4);
+                    adjlist_inward.erase(selected_node+1);
+                    adjlist_inward.erase(selected_node+2);
+                    delete nodes[selected_node];
+                    nodes.erase(selected_node); 
+                }
             }
 
             ImGui::EndPopup();
