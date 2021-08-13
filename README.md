@@ -10,21 +10,28 @@ Real-time guitar amplifier simulation.
 
 ## Features
 
-- [x] Distortion/Overdrive
+- Distortion/Overdrive
   - [x] Min/max clipping
   - [x] tanh(x) clipping
   - [x] sin(x) clipping 
-- [x] Convolution Reverb
+- Convolution Reverb
   - Note: Impulse responses not included.
-- [x] Compressor
+- Compressor
   - [x] Peak activation
   - [ ] RMS activation
   - [ ] Adjustable attack
   - [ ] Adjustable release
   - [x] Adjustable ratio
-  - [x] Adjustable threshold (in dB)    
+  - [x] Adjustable threshold (in dB)
+- Frequency analyzer (need to double click graph to see spectrum) 
+- EQ utilities
+  - [x] High/low shelf
+  - [ ] Peak filter
+  - [ ] Notch filter
+  - [ ] Standalone low pass
+  - [ ] Standalone high pass
+ - Delay
 ## Dependencies
-
 - [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
 - [Imgui-SFML](https://github.com/eliasdaler/imgui-sfml) (contained within this repository already)
 - [imnodes](https://github.com/Nelarius/imnodes) (contained within this repository already)
