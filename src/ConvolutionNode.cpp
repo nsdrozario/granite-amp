@@ -3,6 +3,8 @@
 #include <iostream>
 #include "internal_dsp.hpp"
 #include <thread>
+#include <imknob.hpp>
+
 using namespace guitar_amp;
 
 ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) { 
@@ -28,33 +30,46 @@ ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info) : M
             this->convolver.init(numFrames/4, this->impulse.data(), numFrames);
             this->impulseLock.unlock();
         }
-
+        
+        ma_decoder_uninit(&file_reader);
+    
     }
 
 }
 
 ConvolutionNode::~ConvolutionNode() {
-    ma_decoder_uninit(&(this->file_reader));
+    // decoder should already be released at this point
     this->convolver.reset();    
 }
 
 void ConvolutionNode::showGui() {
-    ImGui::PushItemWidth(100);
+
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(170,110,220, 100));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(170,110,220, 255));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(170,110,220, 255));
     
     imnodes::BeginNode(id);
-        
+
         imnodes::BeginNodeTitleBar();
-            ImGui::TextUnformatted("Convolution IR");
+            ImGui::TextUnformatted("Convolution Reverb");
         imnodes::EndNodeTitleBar();
 
+        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
+        imnodes::BeginInputAttribute(this->id+1);
+        imnodes::EndInputAttribute();
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+        imnodes::PopAttributeFlag();
+
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
-        ImGui::Text("Some impulse responses may be much louder than others.\nPlease change impulses in bypass mode,\nand then disable bypass mode, set your gain to -144dB,\nand slowly bring up the gain to a desired degree.");
+        ImGui::Text("Keep the gain low and slowly raise the gain\nwhen loading in new impulse responses,\nthey could be louder than expected.");
         ImGui::PopStyleColor();
 
-        ImGui::DragFloat("Gain (not applied in bypass mode)", &(this->gain), 1.0f, -144.0f, 0.0f, "%.3f dB");
+        if (advancedMode) {
+            ImGui::DragFloat("Gain", &(this->gain), 1.0f, -144.0f, 0.0f, "%.3f dB");
+        } else {
+            ImKnob::Knob("Gain", &gain, 1.0f, -144.0f, 0.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+        }
 
         ImGui::Checkbox("Bypass", &this->bypass);
 
@@ -68,16 +83,8 @@ void ConvolutionNode::showGui() {
             t.detach(); // Don't hold up the rest of the UI        
         }
 
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
     imnodes::EndNode();
 
-    ImGui::PopItemWidth();
     imnodes::PopColorStyle();
     imnodes::PopColorStyle();
 }
@@ -92,7 +99,9 @@ void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames, Aud
             out[i] *= real_gain;
         }
     } else {
-        memcpy(out,in,numFrames*sizeof(float));
+        for (size_t i = 0; i < numFrames; i++) {
+            out[i] = in[i] * real_gain;
+        }
     }
 }
 
@@ -116,5 +125,6 @@ void ConvolutionNode::loadIRFile(const std::string &path) {
             this->convolver.init(numFrames/4, this->impulse.data(), numFrames);
             this->impulseLock.unlock();
         }
+        ma_decoder_uninit(&file_reader);
     }
 }

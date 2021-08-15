@@ -1,7 +1,9 @@
 *.exe
 .vscode/
-*.wav
+/*.wav
 *.o
 *.ini
 tools/
 tests/
+*.zip
+test.cpp

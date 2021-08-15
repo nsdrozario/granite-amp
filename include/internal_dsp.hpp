@@ -17,13 +17,18 @@ namespace guitar_amp {
         void hardclip_minmax(const float *input, float *transform, float gain, float threshold, ma_uint32 frameCount);
         void clip_tanh(const float *input, float *output, float gain, float output_volume, ma_uint32 frameCount);
         void clip_sin(const float *input, float *output, float gain, float output_volume, ma_uint32 frameCount);
-
+        
         // Utility
         float f32_to_dbfs(float x);
         float dbfs_to_f32(float x);
 
         size_t seconds_to_samples(float time, size_t sample_rate);
-
+    
+        template <class T> 
+        T clamp(T x, T min, T max) {
+            return std::max(min, std::min(x, max));
+        }
+        
         // Templated ring buffer class, uses new for memory allocation
         template <class T>
         class ring_buffer {
@@ -55,6 +60,21 @@ namespace guitar_amp {
                 buf_size = size;
                 read_ptr = init_read_ptr;
                 write_ptr = init_write_ptr;
+                delay_fraction = 0.0f;
+            }
+
+            void set_delay_no_resize(size_t delay_samples) {
+                read_ptr = write_ptr - delay_samples;
+                while (read_ptr < 0) {
+                    read_ptr += buf_size;
+                }
+                read_ptr %= buf_size; // not necessary but just to be safe
+                delay_fraction = 0.0f;
+            }
+
+            void set_delay_no_resize_float(float delay_samples) {
+                set_delay_no_resize(static_cast<size_t>(delay_samples));
+                delay_fraction = delay_samples - std::floor(delay_samples);
             }
 
             ~ring_buffer() {
@@ -64,7 +84,18 @@ namespace guitar_amp {
             // Returns value of read_ptr
             size_t inc_read_ptr() {
                 read_ptr = (read_ptr+1) % buf_size;
+                read_ptr_float = std::fmod(read_ptr_float + 1, static_cast<float>(buf_size));
                 return read_ptr;
+            }
+
+            float inc_read_ptr(float increment) {
+                size_t full_samples = static_cast<size_t> (increment);
+                float fraction = increment - std::floor(increment);
+                delay_fraction = fraction;
+                read_ptr += 1 - full_samples;
+                read_ptr %= buf_size;
+                read_ptr_float = std::fmod(read_ptr_float + (1 - increment) + static_cast<float>(buf_size), static_cast<float>(buf_size));
+                return read_ptr_float;
             }
 
             // Returns value of write_ptr
@@ -88,9 +119,28 @@ namespace guitar_amp {
                 return buf[read_ptr];
             }
 
+            float get_read_ptr_interpolated() {
+                if (read_ptr_float != std::floor(read_ptr_float)) {
+                    float y0 = static_cast<float>(buf[static_cast<size_t>(read_ptr_float)]);
+                    float y1 = static_cast<float>(buf[static_cast<size_t>(read_ptr_float)+1]);
+                    // x1-x0 = 1
+                    return (y1 - y0) * (read_ptr_float - std::floor(read_ptr_float)) + y0;
+                } else {
+                    return get_read_ptr_value();
+                }
+            }
+
+            float get_fraction_delay() {
+                return delay_fraction;
+            }
+
             // Returns buf[write_ptr]
             T get_write_ptr_value() {
                 return buf[write_ptr];
+            }
+
+            T get(size_t index) {
+                return buf[index];
             }
             
             // Sets val at buf[write_ptr]
@@ -104,22 +154,15 @@ namespace guitar_amp {
 
         private:
             size_t read_ptr = 0;
+            float read_ptr_float = 0.0f;
             size_t write_ptr = 0;
             size_t buf_size;
             T *buf;
+            float delay_fraction = 0.0f;
         };
 
-        class blackman_harris_window {
-        public:
-            blackman_harris_window();
-            ~blackman_harris_window();
-
-            void apply_window(const float *in, float *out, size_t num_frames);
-
-        private:
-            size_t sample_size;
-            size_t sample_rate;
-        };
+        // Computes w[n] of a length-N Blackman-Harris window. Multiply the result of this with the original signal. 
+        float blackman_harris_window(size_t n, size_t N);
 
     }
 }

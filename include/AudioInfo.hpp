@@ -29,7 +29,9 @@ namespace guitar_amp {
         }
 
         bool operator!=(const AudioInfo &a) {
-            return !(*this == a);
+            return  (sample_rate != a.sample_rate) || 
+                    (period_length != a.period_length) ||
+                    (channels != a.channels);
         }
 
 

@@ -69,6 +69,14 @@ void ShelfNode::showGui() {
             ImGui::TextUnformatted("Shelf Filter");
         imnodes::EndNodeTitleBar();
 
+        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
+        imnodes::BeginInputAttribute(this->id+1);
+        imnodes::EndInputAttribute();
+
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+        imnodes::PopAttributeFlag();
+
         ImGui::Combo("Filter type", &(this->shelf_type), "Low shelf\0High shelf\0");
 
         if (this->shelf_type == 0) {
@@ -77,7 +85,7 @@ void ShelfNode::showGui() {
             if (ImGui::InputDouble("Gain (dB)", &(this->low_shelf_cfg.gainDB), 1.0, 10.0)) {
                 changed = true;
             }
-            if (ImGui::InputDouble("Slope", &(this->low_shelf_cfg.shelfSlope), 1.0, 10.0)) {
+            if (ImGui::InputDouble("Slope", &(this->low_shelf_cfg.shelfSlope), 0.1, 0.5)) {
                 changed = true;
             }
             if (ImGui::InputDouble("Frequnecy (Hz)", &(this->low_shelf_cfg.frequency), 10.0, 100.0)) {
@@ -92,7 +100,7 @@ void ShelfNode::showGui() {
             if (ImGui::InputDouble("Gain (dB)", &(this->high_shelf_cfg.gainDB), 1.0, 10.0)) {
                 changed = true;
             }
-            if (ImGui::InputDouble("Slope", &(this->high_shelf_cfg.shelfSlope), 1.0, 10.0)) {
+            if (ImGui::InputDouble("Slope", &(this->high_shelf_cfg.shelfSlope), 0.1, 0.5)) {
                 changed = true;
             }
             if (ImGui::InputDouble("Frequnecy (Hz)", &(this->high_shelf_cfg.frequency), 10.0, 100.0)) {
@@ -103,13 +111,6 @@ void ShelfNode::showGui() {
             }
         }
 
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
     imnodes::EndNode();
 
     ImGui::PopItemWidth();
@@ -122,6 +123,12 @@ void ShelfNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo
     if (device.sampleRate != this->low_shelf_cfg.sampleRate || device.sampleRate != this->high_shelf_cfg.sampleRate) {
         this->low_shelf_cfg.sampleRate = device.sampleRate;
         this->high_shelf_cfg.sampleRate = device.sampleRate;
+        if (this->low_shelf_cfg.shelfSlope <= 0.0) {
+            this->low_shelf_cfg.shelfSlope = 0.01;
+        }
+        if (this->high_shelf_cfg.shelfSlope <= 0.0) {
+            this->high_shelf_cfg.shelfSlope = 0.01;
+        }
         ma_loshelf2_reinit(&(this->low_shelf_cfg), &(this->low_shelf));
         ma_hishelf2_reinit(&(this->high_shelf_cfg), &(this->high_shelf));
     }

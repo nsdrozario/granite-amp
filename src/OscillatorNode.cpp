@@ -29,7 +29,9 @@ void OscillatorNode::showGui() {
 
         imnodes::BeginInputAttribute(this->id+1);
         imnodes::EndInputAttribute();
-
+        imnodes::BeginOutputAttribute(this->id+3);
+        imnodes::EndOutputAttribute();
+        
         ImGui::Combo(
             "Wave type",
             &(this->wave_type),
@@ -38,9 +40,6 @@ void OscillatorNode::showGui() {
 
         ImGui::DragFloat("Amplitude (dB)", &(this->amplitude), 2.0f, -144.0f, 0.0f, "%.3f dB");
         ImGui::DragFloat("Frequency (Hz)", &(this->freq), 100.f, 0.0f, 20000.0f, "%.3f Hz");
-
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
 
     imnodes::EndNode();
     
@@ -52,10 +51,10 @@ void OscillatorNode::ApplyFX(const float *in, float *out, size_t numFrames, Audi
     if (this->wav_gen.config.sampleRate != device.sampleRate) {
         ma_waveform_set_sample_rate(&(this->wav_gen), device.sampleRate);
     }
-    if (abs(this->wav_gen.config.amplitude - linear_amplitude) > 0.001) {
+    if (std::abs(this->wav_gen.config.amplitude - linear_amplitude) > 0.001) {
         ma_waveform_set_amplitude(&(this->wav_gen), linear_amplitude);
     }
-    if(abs(this->wav_gen.config.frequency - this->freq) > 0.001) {
+    if(std::abs(this->wav_gen.config.frequency - this->freq) > 0.001) {
         ma_waveform_set_frequency(&(this->wav_gen), this->freq);
     }
     if(this->wav_gen.config.type != this->wave_type) {

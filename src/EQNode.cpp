@@ -1,3 +1,4 @@
+/*
 #include <EQNode.hpp>
 #include <utility>
 #include <algorithm>
@@ -12,7 +13,6 @@ EQNode::EQNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, curr
 EQNode::~EQNode() { }
 
 void EQNode::showGui() {
-    ImGui::PushItemWidth(100);
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(0, 166, 255, 100));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(0, 166, 255, 255));
     imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(0, 166, 255, 255));
@@ -60,7 +60,6 @@ void EQNode::showGui() {
             ImGui::EndChildFrame();
     imnodes::EndNode();
 
-    ImGui::PopItemWidth();
     imnodes::PopColorStyle();
     imnodes::PopColorStyle();
 }
@@ -68,3 +67,4 @@ void EQNode::showGui() {
 void EQNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     memcpy(out, in, numFrames * sizeof(float));
 }
+*/

@@ -35,10 +35,11 @@ extern bool audioEnabled;
 extern std::vector<const char *> inputNames;
 extern std::vector<const char *> outputNames;
 
-extern std::mutex noise_lock;
-extern std::vector<float> brownian_noise;
-
 extern std::mutex globalAudioInfoMutex;
 extern guitar_amp::AudioInfo globalAudioInfo;
+extern bool metronomeEnabled;
+extern bool oversamplingEnabled;
+
+extern bool advancedMode;
 
 #endif
