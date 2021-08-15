@@ -88,7 +88,7 @@ void DelayNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo
                 size_t write_ptr = buf.get_write_ptr_index();
                 size_t read_ptr = write_ptr - samples_delay + buf.size();
                 read_ptr %= buf.size();
-                buf.set_delay_no_resize(delay_s)
+                buf.set_delay_no_resize(samples_delay);
             }
         }
 
