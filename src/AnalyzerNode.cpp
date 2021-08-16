@@ -45,19 +45,24 @@ void AnalyzerNode::showGui() {
         if (this->showing_spectrum && this->accept_warning) {
             ImGui::Checkbox("Frequency Domain", &freqDomain);
             ImGui::BeginChildFrame(this->id, ImVec2(400,300));
-            if (freqDomain) {
+            #ifdef DEBUG_BUILD
+            if (!freqDomain) {
+
+                ImPlot::BeginPlot("Signal", "Samples", "Amplitude");
+                ImPlot::PlotLine("Signal", time_domain_labels.data(), time_domain_data.data(), time_domain_data.size());
+                ImPlot::EndPlot();
+                
+            } else {
+            #endif
                 ImPlot::SetNextPlotLimitsX(0.0f, static_cast<double>(device.sampleRate/2));
                 const double ticks[] = {0.0,0.05,0.2,0.5,1,4,8,20};
                 ImPlot::SetNextPlotTicksX(ticks, 10);
                 ImPlot::BeginPlot("FFT", "Frequency (kHz)", "Power (dBFS)", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
                 ImPlot::PlotLine("Power", this->freqs.data(), this->output.data()+1, (this->fft_size/2)-1);
                 ImPlot::EndPlot();
-                
-            } else {
-                ImPlot::BeginPlot("Signal", "Samples", "Amplitude");
-                ImPlot::PlotLine("Signal", time_domain_labels.data(), time_domain_data.data(), time_domain_data.size());
-                ImPlot::EndPlot();
+            #ifdef DEBUG_BUILD
             }
+            #endif
             ImGui::EndChildFrame();
         }
 

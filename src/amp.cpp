@@ -13,18 +13,7 @@
 #include "imgui-SFML.h"
 #include "imnodes.h"
 
-#include <AudioProcessorNode.hpp>
-#include <InputNode.hpp>
-#include <OutputNode.hpp>
-#include <OverdriveNode.hpp>
-#include <ConvolutionNode.hpp>
-#include <CompressorNode.hpp>
-#include <AnalyzerNode.hpp>
-#include <OscillatorNode.hpp>
-#include <DelayNode.hpp>
-#include <ShelfNode.hpp>
-#include <CabSimNode.hpp>
-#include <FlangerNode.hpp>
+#include <Nodes.hpp>
 
 #include <utility>
 #include <set>
@@ -290,6 +279,7 @@ int main () {
     sf::RenderWindow w(sf::VideoMode(800,600), "Guitar Amp");
     sf::Clock dt;
     
+    // get images
     sf::Texture bg;
     if (!bg.loadFromFile("assets/board.png")) {
         std::cout << "error loading board.png\n";
@@ -325,7 +315,7 @@ int main () {
     int current_node = 10;
     ImGui::SetNextWindowSize(ImVec2(300,200));
     imnodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
-    imnodes::SetNodeEditorSpacePos(5, ImVec2(50, 200));
+    imnodes::SetNodeEditorSpacePos(5, ImVec2(150, 100));
 
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
@@ -366,48 +356,56 @@ int main () {
 
             if (ImGui::BeginPopup("Node Creator")) {
                 
-                if (ImGui::MenuItem("Create Overdrive Node")) {
+                ImGui::Text("Create Node");
+
+                if (ImGui::MenuItem("Ovedrive/Distortion")) {
                     nodes[current_node] = new guitar_amp::OverdriveNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
-                if (ImGui::MenuItem("Create Convolution Reverb Node")) {
+                if (ImGui::MenuItem("Convolution Reverb")) {
                     nodes[current_node] = new guitar_amp::ConvolutionNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
-                if (ImGui::MenuItem("Create Compresoor Node")) {
+                if (ImGui::MenuItem("Compressor")) {
                     nodes[current_node] = new guitar_amp::CompressorNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
-                if (ImGui::MenuItem("Create Analyzer Node")) {
+                if (ImGui::MenuItem("Analyzer")) {
                     nodes[current_node] = new guitar_amp::AnalyzerNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
-                if (ImGui::MenuItem("Create Shelf Node")) {
+                if (ImGui::MenuItem("Shelf EQ")) {
                     nodes[current_node] = new guitar_amp::ShelfNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
-                if (ImGui::MenuItem("Create Delay Node")) {
+                if (ImGui::MenuItem("Delay")) {
                     nodes[current_node] = new guitar_amp::DelayNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
+                if (ImGui::MenuItem("Cabinet Simulation")) {
+                    nodes[current_node] = new guitar_amp::CabSimNode(current_node, globalAudioInfo);
+                    current_node += 5;
+                }
+
+                if (ImGui::MenuItem("Simple EQ")) {
+                    nodes[current_node] = new guitar_amp::ThreeBandEQ(current_node, globalAudioInfo);
+                    current_node += 5;
+                }
+
+                #ifdef DEBUG_BUILD
+
+                // this still isn't quite safe
                 if (ImGui::MenuItem("Create Flanger Node")) {
                     nodes[current_node] = new guitar_amp::FlangerNode(current_node, globalAudioInfo);
                     current_node += 5;
                 }
 
-                if (ImGui::MenuItem("Create Cabinet Simulation Node")) {
-                    nodes[current_node] = new guitar_amp::CabSimNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                #ifdef DEBUG_BUILD
-                
                 if (ImGui::MenuItem("Create Oscillator Node")) {
                     nodes[current_node] = new guitar_amp::OscillatorNode(current_node, globalAudioInfo);
                     current_node += 5;
@@ -492,7 +490,6 @@ int main () {
         ImGui::Begin("Control Panel");
 
             // ImGui::Text("Time to process: %.1f ms", processTime);
-
             ImGui::Checkbox("Metronome", &metronomeEnabled);
             
             if (ImGui::InputInt("Metronome BPM", &metronomeBPM, 1, 10)) {
@@ -501,7 +498,7 @@ int main () {
             if (advancedMode) {
                 ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.3f dB");
             } else {
-                ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.0f dB");
+                ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -60.0f, 0.0f, "%.0f dB");
             }
 
             if (audioEnabled) {
