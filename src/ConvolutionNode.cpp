@@ -44,22 +44,22 @@ ConvolutionNode::~ConvolutionNode() {
 
 void ConvolutionNode::showGui() {
 
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(170,110,220, 100));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(170,110,220, 255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(170,110,220, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(170,110,220, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(170,110,220, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(170,110,220, 255));
     
-    imnodes::BeginNode(id);
+    ImNodes::BeginNode(id);
 
-        imnodes::BeginNodeTitleBar();
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Convolution Reverb");
-        imnodes::EndNodeTitleBar();
+        ImNodes::EndNodeTitleBar();
 
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
+        ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
+        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::EndInputAttribute();
+        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::EndOutputAttribute();
+        ImNodes::PopAttributeFlag();
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
         ImGui::Text("Keep the gain low and slowly raise the gain\nwhen loading in new impulse responses,\nthey could be louder than expected.");
@@ -83,10 +83,10 @@ void ConvolutionNode::showGui() {
             t.detach(); // Don't hold up the rest of the UI        
         }
 
-    imnodes::EndNode();
+    ImNodes::EndNode();
 
-    imnodes::PopColorStyle();
-    imnodes::PopColorStyle();
+    ImNodes::PopColorStyle();
+    ImNodes::PopColorStyle();
 }
 
 void ConvolutionNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) { 

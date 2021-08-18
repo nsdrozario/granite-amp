@@ -21,23 +21,23 @@ FlangerNode::~FlangerNode() {
 void FlangerNode::showGui() {
 
     ImGui::PushItemWidth(100);
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(93,42,247, 100));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(93,42,247, 255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(93,42,247, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(93,42,247, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(93,42,247, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(93,42,247, 255));
     
-    imnodes::BeginNode(id);
+    ImNodes::BeginNode(id);
         
-        imnodes::BeginNodeTitleBar();
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Flanger");
-        imnodes::EndNodeTitleBar();
+        ImNodes::EndNodeTitleBar();
 
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
+        ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
+        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::EndInputAttribute();
 
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
+        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::EndOutputAttribute();
+        ImNodes::PopAttributeFlag();
 
         ImGui::DragFloat("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS, "%.3f ms");
         // ImGui::DragFloat("LFO Frequency", &delay_frequency, 0.1f, 0.1f, 1.0f, "%.3f Hz");
@@ -45,10 +45,10 @@ void FlangerNode::showGui() {
 
         // ImGui::Text("%.2f", ((static_cast<float>(max_delay_samples) * 0.5) - 1.0f) * (std::cos(2.0f * 3.1415927f * delay_frequency * internal_timer) + 1));
 
-    imnodes::EndNode();
+    ImNodes::EndNode();
     ImGui::PopItemWidth();
-    imnodes::PopColorStyle();
-    imnodes::PopColorStyle();
+    ImNodes::PopColorStyle();
+    ImNodes::PopColorStyle();
 
 }
 

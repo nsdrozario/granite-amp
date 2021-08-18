@@ -11,22 +11,23 @@ AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info) : MiddleN
 AnalyzerNode::~AnalyzerNode() { }
 
 void AnalyzerNode::showGui() {
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(0,171,142,255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(0,222,207,255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(0,222,207,255));
 
-    imnodes::BeginNode(this->id);
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(0,171,142,255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(0,222,207,255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(0,222,207,255));
 
-        imnodes::BeginNodeTitleBar();
+    ImNodes::BeginNode(this->id);
+
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Spectral Analyzer");
-        imnodes::EndNodeTitleBar();
+        ImNodes::EndNodeTitleBar();
 
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
+        ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
+        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::EndInputAttribute();
+        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::EndOutputAttribute();
+        ImNodes::PopAttributeFlag();
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
         ImGui::Text("WARNING: The frequency analyzer fluctuates rapidly\nand may cause seizures in some people.\nIf you or any of your relatives have had\na history of epileptic conditions or seizures,\nplease consult a medical professional before using this software\nand DO NOT press the checkbox below.");
@@ -66,10 +67,10 @@ void AnalyzerNode::showGui() {
             ImGui::EndChildFrame();
         }
 
-    imnodes::EndNode();
+    ImNodes::EndNode();
 
-    imnodes::PopColorStyle();
-    imnodes::PopColorStyle();
+    ImNodes::PopColorStyle();
+    ImNodes::PopColorStyle();
 
 }
 

@@ -9,21 +9,21 @@ CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info) : Mid
 CompressorNode::~CompressorNode() { }
 
 void CompressorNode::showGui() {
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(184,73,0,255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(255, 111, 0, 255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(255, 111, 0, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(184,73,0,255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(255, 111, 0, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(255, 111, 0, 255));
 
-    imnodes::BeginNode(this->id);
+    ImNodes::BeginNode(this->id);
 
-        imnodes::BeginNodeTitleBar();
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Compressor");
-        imnodes::EndNodeTitleBar();
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
+        ImNodes::EndNodeTitleBar();
+        ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
+        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::EndInputAttribute();
+        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::EndOutputAttribute();
+        ImNodes::PopAttributeFlag();
         /*
         ImGui::DragFloat("Attack", &this->attack, 0.01f, 0.0f, 10.0f, "%.3f s");
         ImGui::DragFloat("Release", &this->release, 0.01f, 0.0f, 10.0f, "%.3f s");
@@ -50,16 +50,16 @@ void CompressorNode::showGui() {
         ImGui::Text("Note: Sidechaining is unimplemented for the time being.\nNothing different will happen if you attach a node here!");
         ImGui::PopStyleColor();
 
-            imnodes::BeginInputAttribute(this->id+2);
+            ImNodes::BeginInputAttribute(this->id+2);
                 ImGui::Text("Sidechain Signal");
-            imnodes::EndInputAttribute();
+            ImNodes::EndInputAttribute();
         }
 
         ImGui::Checkbox("Sidechain", &this->sidechain_enabled);
         */
-    imnodes::EndNode();
-    imnodes::PopColorStyle();
-    imnodes::PopColorStyle();
+    ImNodes::EndNode();
+    ImNodes::PopColorStyle();
+    ImNodes::PopColorStyle();
 }
 
 void CompressorNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {

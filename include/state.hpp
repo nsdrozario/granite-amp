@@ -41,5 +41,7 @@ extern bool metronomeEnabled;
 extern bool oversamplingEnabled;
 
 extern bool advancedMode;
+extern int current_node;
+extern int last_node_hovered;
 
 #endif

@@ -47,19 +47,19 @@ ThreeBandEQ::~ThreeBandEQ() {
 
 void ThreeBandEQ::showGui() {
     ImGui::PushItemWidth(100);
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(240, 222, 29, 100));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(240, 222, 29, 255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(240, 222, 29, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(240, 222, 29, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(240, 222, 29, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(240, 222, 29, 255));
     
-    imnodes::BeginNode(this->id);
-        imnodes::BeginNodeTitleBar();
+    ImNodes::BeginNode(this->id);
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextColored(ImVec4(ImColor(18,18,18,255)), "Simple EQ");
-        imnodes::EndNodeTitleBar();
+        ImNodes::EndNodeTitleBar();
 
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
+        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::EndInputAttribute();
+        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::EndOutputAttribute();
         
         if (advancedMode) {
 
@@ -71,7 +71,7 @@ void ThreeBandEQ::showGui() {
             ImKnob::Knob("Treble", &treble_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
         }
 
-    imnodes::EndNode();
+    ImNodes::EndNode();
 }
 
 void ThreeBandEQ::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {

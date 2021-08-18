@@ -42,23 +42,23 @@ CabSimNode::~CabSimNode() { }
 
 void CabSimNode::showGui() {
     ImGui::PushItemWidth(100);
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(170,110,220, 100));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(170,110,220, 255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(170,110,220, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(170,110,220, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(170,110,220, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(170,110,220, 255));
     
-    imnodes::BeginNode(id);
+    ImNodes::BeginNode(id);
         
-        imnodes::BeginNodeTitleBar();
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Cabinet Simulation");
-        imnodes::EndNodeTitleBar();
+        ImNodes::EndNodeTitleBar();
 
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
+        ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
+        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::EndInputAttribute();
 
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
+        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::EndOutputAttribute();
+        ImNodes::PopAttributeFlag();
         
         if(ImGui::DragFloat("Delay Time", &delay_time, 1.0f, 1.0f, 10.0f, "%.3f ms")) {
             changed_delay = true;
@@ -111,11 +111,11 @@ void CabSimNode::showGui() {
             changed_presence = true;
         }
 
-    imnodes::EndNode();
+    ImNodes::EndNode();
 
     ImGui::PopItemWidth();
-    imnodes::PopColorStyle();
-    imnodes::PopColorStyle();
+    ImNodes::PopColorStyle();
+    ImNodes::PopColorStyle();
 }
 
 void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
