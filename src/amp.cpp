@@ -367,7 +367,7 @@ int main () {
                     ImNodes::Link((it->first/5)*5, it->first, it->second);
                 }
             }
-
+        ImNodes::MiniMap(0.2f, 3);
         ImNodes::EndNodeEditor();
 
         // node editing popups
