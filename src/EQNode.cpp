@@ -13,15 +13,15 @@ EQNode::EQNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, curr
 EQNode::~EQNode() { }
 
 void EQNode::showGui() {
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(0, 166, 255, 100));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(0, 166, 255, 255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(0, 166, 255, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(0, 166, 255, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(0, 166, 255, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(0, 166, 255, 255));
     
-    imnodes::BeginNode(id);
+    ImNodes::BeginNode(id);
         
-        imnodes::BeginNodeTitleBar();
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("EQ");
-        imnodes::EndNodeTitleBar();
+        ImNodes::EndNodeTitleBar();
 
             ImGui::BeginChildFrame(this->id, ImVec2(400,300));
             ImPlot::SetNextPlotLimitsX(0.0f, static_cast<double>(device.sampleRate/2));
@@ -58,10 +58,10 @@ void EQNode::showGui() {
                 ImGui::Text("Dummy text");
             }
             ImGui::EndChildFrame();
-    imnodes::EndNode();
+    ImNodes::EndNode();
 
-    imnodes::PopColorStyle();
-    imnodes::PopColorStyle();
+    ImNodes::PopColorStyle();
+    ImNodes::PopColorStyle();
 }
 
 void EQNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {

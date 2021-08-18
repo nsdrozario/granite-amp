@@ -60,22 +60,22 @@ ShelfNode::~ShelfNode() { }
 void ShelfNode::showGui() { 
 
     ImGui::PushItemWidth(100);
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(80,80,80, 100));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(80,80,80, 255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(80,80,80, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(80,80,80, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(80,80,80, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(80,80,80, 255));
     
-    imnodes::BeginNode(id);
-        imnodes::BeginNodeTitleBar();
+    ImNodes::BeginNode(id);
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Shelf Filter");
-        imnodes::EndNodeTitleBar();
+        ImNodes::EndNodeTitleBar();
+        
+        ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
+        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::EndInputAttribute();
 
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
+        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::EndOutputAttribute();
+        ImNodes::PopAttributeFlag();
 
         ImGui::Combo("Filter type", &(this->shelf_type), "Low shelf\0High shelf\0");
 
@@ -111,11 +111,11 @@ void ShelfNode::showGui() {
             }
         }
 
-    imnodes::EndNode();
+    ImNodes::EndNode();
 
     ImGui::PopItemWidth();
-    imnodes::PopColorStyle();
-    imnodes::PopColorStyle();
+    ImNodes::PopColorStyle();
+    ImNodes::PopColorStyle();
 
 }
 

@@ -18,19 +18,19 @@ OscillatorNode::~OscillatorNode() { };
 void OscillatorNode::showGui() {
     
     ImGui::PushItemWidth(100);
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(232, 232, 232, 100));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(232, 232, 232, 255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(232, 232, 232, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(232, 232, 232, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(232, 232, 232, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(232, 232, 232, 255));
     
-    imnodes::BeginNode(this->id);
-        imnodes::BeginNodeTitleBar();
+    ImNodes::BeginNode(this->id);
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextColored(ImVec4(ImColor(18,18,18,255)), "Oscillator");
-        imnodes::EndNodeTitleBar();
+        ImNodes::EndNodeTitleBar();
 
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
+        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::EndInputAttribute();
+        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::EndOutputAttribute();
         
         ImGui::Combo(
             "Wave type",
@@ -41,7 +41,7 @@ void OscillatorNode::showGui() {
         ImGui::DragFloat("Amplitude (dB)", &(this->amplitude), 2.0f, -144.0f, 0.0f, "%.3f dB");
         ImGui::DragFloat("Frequency (Hz)", &(this->freq), 100.f, 0.0f, 20000.0f, "%.3f Hz");
 
-    imnodes::EndNode();
+    ImNodes::EndNode();
     
 }
 

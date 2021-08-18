@@ -84,23 +84,23 @@ OverdriveNode::~OverdriveNode() {
 
 void OverdriveNode::showGui() {
 
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBar, IM_COL32(201, 4, 126, 100));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarSelected, IM_COL32(201, 4, 126, 255));
-    imnodes::PushColorStyle(imnodes::ColorStyle_TitleBarHovered, IM_COL32(201, 4, 126, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(201, 4, 126, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(201, 4, 126, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(201, 4, 126, 255));
     if (advancedMode) {
         ImGui::PushItemWidth(150);
     }
-    imnodes::BeginNode(this->id);
-        imnodes::BeginNodeTitleBar();
+    ImNodes::BeginNode(this->id);
+        ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Overdrive");
-        imnodes::EndNodeTitleBar();
+        ImNodes::EndNodeTitleBar();
         
-        imnodes::PushAttributeFlag(imnodes::AttributeFlags::AttributeFlags_EnableLinkDetachWithDragClick);
-        imnodes::BeginInputAttribute(this->id+1);
-        imnodes::EndInputAttribute();
-        imnodes::BeginOutputAttribute(this->id+3);
-        imnodes::EndOutputAttribute();
-        imnodes::PopAttributeFlag();
+        ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
+        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::EndInputAttribute();
+        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::EndOutputAttribute();
+        ImNodes::PopAttributeFlag();
 
         if (advancedMode) {
             ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 70.0f, "%.3f dB");
@@ -122,9 +122,8 @@ void OverdriveNode::showGui() {
                 ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
             }
         } else {
-
-            ImKnob::Knob("Gain", &gain, 1.0, -144, 70, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
-            
+            ImKnob::Knob("Gain", &gain, 1.0, -14, 70, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImKnob::Knob("Volume", &output_volume, 1.0, -50, -10, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             ImGui::SameLine();
 
             if(ImKnob::Knob("Treble", &(this->lpf_cutoff), 1, 1000, 21000, "%.0f Hz", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f))) {
@@ -145,12 +144,12 @@ void OverdriveNode::showGui() {
 
         }
 
-    imnodes::EndNode();
+    ImNodes::EndNode();
     if (advancedMode) {
         ImGui::PopItemWidth();
     }
-    imnodes::PopColorStyle();
-    imnodes::PopColorStyle();
+    ImNodes::PopColorStyle();
+    ImNodes::PopColorStyle();
 
 }
 

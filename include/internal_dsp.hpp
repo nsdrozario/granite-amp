@@ -78,7 +78,9 @@ namespace guitar_amp {
             }
 
             ~ring_buffer() {
-                delete[] buf;
+                if (buf != nullptr) {
+                    delete[] buf;
+                }
             }
 
             // Returns value of read_ptr
@@ -157,7 +159,7 @@ namespace guitar_amp {
             float read_ptr_float = 0.0f;
             size_t write_ptr = 0;
             size_t buf_size;
-            T *buf;
+            T *buf = nullptr;
             float delay_fraction = 0.0f;
         };
 

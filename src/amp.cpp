@@ -13,18 +13,7 @@
 #include "imgui-SFML.h"
 #include "imnodes.h"
 
-#include <AudioProcessorNode.hpp>
-#include <InputNode.hpp>
-#include <OutputNode.hpp>
-#include <OverdriveNode.hpp>
-#include <ConvolutionNode.hpp>
-#include <CompressorNode.hpp>
-#include <AnalyzerNode.hpp>
-#include <OscillatorNode.hpp>
-#include <DelayNode.hpp>
-#include <ShelfNode.hpp>
-#include <CabSimNode.hpp>
-#include <FlangerNode.hpp>
+#include <Nodes.hpp>
 
 #include <utility>
 #include <set>
@@ -43,6 +32,7 @@
 #include <imknob.hpp>
 
 #include <AudioInfo.hpp>
+#include <MainUI.hpp>
 
 using namespace guitar_amp;
 
@@ -99,10 +89,9 @@ std::mutex recorderMutex;
 
 float processTime = 0.0f;
 bool advancedMode = false;
+int current_node = 10;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
-
-    std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
     
@@ -158,19 +147,19 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
         bool reached_end = false;
         while (!dfs_stack.empty()) {
             int current_attribute = dfs_stack.top(); dfs_stack.pop();
-            int current_node = (current_attribute / 5) * 5;
+            int current_node_dfs = (current_attribute / 5) * 5;
             int next_attribute = -1;
             int next_node = -1;
             
-            if (!visited_nodes[current_node]) {
-                visited_nodes[current_node] = true;
-                current_dfs_path << current_node << " -> ";
-                if (current_node == 5) {
+            if (!visited_nodes[current_node_dfs]) {
+                visited_nodes[current_node_dfs] = true;
+                current_dfs_path << current_node_dfs << " -> ";
+                if (current_node_dfs == 5) {
                     reached_end = true;
                     goto processing_done;
                 }
                 // if the current vertex is a valid node
-                MiddleNode *currentNodePtr = dynamic_cast<MiddleNode *>(nodes[current_node]);
+                MiddleNode *currentNodePtr = dynamic_cast<MiddleNode *>(nodes[current_node_dfs]);
                 if (currentNodePtr) {
                     // apply that node's effects
                     currentNodePtr->ApplyFX(tmp_input, tmp_output, numFrames, globalAudioInfo); 
@@ -178,7 +167,7 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
                     memcpy(output_buf, tmp_output, buffer_size_in_bytes);
                     memcpy(tmp_input, tmp_output, buffer_size_in_bytes);
                 }
-                dfs_stack.push(adjlist[current_node+3]);
+                dfs_stack.push(adjlist[current_node_dfs+3]);
             }
         }
         
@@ -262,14 +251,14 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
 
     }
 
-    processTime = std::chrono::duration_cast<std::chrono::duration<double>> (std::chrono::steady_clock::now() - start_time).count() * 1000;
-
 }
+
+
 
 int main () {
 
     // Initialize Miniaudio
-    
+    {
     if (ma_context_init(NULL, 0, NULL, &context) != MA_SUCCESS) {
         std::cout << "miniaudio init failed\n";
         exit(-1);
@@ -284,12 +273,13 @@ int main () {
     deviceConfig.playback.channels = 1;
     deviceConfig.playback.format = ma_format_f32;
     deviceConfig.dataCallback = callback; 
-
+    }
     // Initialize ImGui
     sf::Event e;
     sf::RenderWindow w(sf::VideoMode(800,600), "Guitar Amp");
     sf::Clock dt;
     
+    // get images
     sf::Texture bg;
     if (!bg.loadFromFile("assets/board.png")) {
         std::cout << "error loading board.png\n";
@@ -299,7 +289,7 @@ int main () {
     bgSprite.setTexture(bg);
 
     ImGui::SFML::Init(w);
-    imnodes::Initialize();
+    ImNodes::CreateContext();
     ImPlot::CreateContext();
     
     // if vsync isn't enabled the app will use way too much GPU time
@@ -322,10 +312,9 @@ int main () {
     nodes[0] = new guitar_amp::InputNode(0);
     nodes[5] = new guitar_amp::OutputNode(5);
 
-    int current_node = 10;
     ImGui::SetNextWindowSize(ImVec2(300,200));
-    imnodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
-    imnodes::SetNodeEditorSpacePos(5, ImVec2(50, 200));
+    ImNodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
+    ImNodes::SetNodeEditorSpacePos(5, ImVec2(150, 100));
 
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
@@ -335,7 +324,7 @@ int main () {
                     delete it->second;
                 }
                 ImPlot::DestroyContext();
-                imnodes::Shutdown();
+                ImNodes::DestroyContext();
                 ImGui::SFML::Shutdown();
                 w.close();
             }
@@ -355,67 +344,7 @@ int main () {
         // imgui stuff
         // draw node 
         ImGui::Begin("Signal Chain");
-        imnodes::BeginNodeEditor();
-
-            // node creation
-
-            bool should_open_popup = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && imnodes::IsEditorHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right);
-            if (!ImGui::IsAnyItemHovered() && should_open_popup) {
-                ImGui::OpenPopup("Node Creator");
-            }
-
-            if (ImGui::BeginPopup("Node Creator")) {
-                
-                if (ImGui::MenuItem("Create Overdrive Node")) {
-                    nodes[current_node] = new guitar_amp::OverdriveNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                if (ImGui::MenuItem("Create Convolution Reverb Node")) {
-                    nodes[current_node] = new guitar_amp::ConvolutionNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                if (ImGui::MenuItem("Create Compresoor Node")) {
-                    nodes[current_node] = new guitar_amp::CompressorNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                if (ImGui::MenuItem("Create Analyzer Node")) {
-                    nodes[current_node] = new guitar_amp::AnalyzerNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                if (ImGui::MenuItem("Create Shelf Node")) {
-                    nodes[current_node] = new guitar_amp::ShelfNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                if (ImGui::MenuItem("Create Delay Node")) {
-                    nodes[current_node] = new guitar_amp::DelayNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                if (ImGui::MenuItem("Create Flanger Node")) {
-                    nodes[current_node] = new guitar_amp::FlangerNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                if (ImGui::MenuItem("Create Cabinet Simulation Node")) {
-                    nodes[current_node] = new guitar_amp::CabSimNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                #ifdef DEBUG_BUILD
-                
-                if (ImGui::MenuItem("Create Oscillator Node")) {
-                    nodes[current_node] = new guitar_amp::OscillatorNode(current_node, globalAudioInfo);
-                    current_node += 5;
-                }
-
-                #endif
-                ImGui::EndPopup();
-            }
+        ImNodes::BeginNodeEditor();
 
             // draw nodes
 
@@ -430,40 +359,19 @@ int main () {
             // draw links
             for (auto it = adjlist.begin(); it != adjlist.end(); it++) {
                 if (it->second != 0) {
-                    imnodes::Link((it->first/5)*5, it->first, it->second);
+                    ImNodes::Link((it->first/5)*5, it->first, it->second);
                 }
             }
 
-        imnodes::EndNodeEditor();
+        ImNodes::EndNodeEditor();
+
+        // node editing popups
+        ui::node_popups();
+
         ImGui::End();
-
-        int selected_node = 0;
-        if (imnodes::IsNodeHovered(&selected_node) && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-            if (selected_node != 0 && selected_node != 5) {
-                ImGui::OpenPopup("Delete Node");
-            }
-        }
-
-        if (ImGui::BeginPopup("Delete Node")) {
-
-            if (ImGui::MenuItem("Delete Node")) {
-                if (selected_node != 0 && selected_node != 5) {
-                    adjlist.erase(adjlist_inward[selected_node+1]);
-                    adjlist.erase(adjlist_inward[selected_node+2]);
-                    adjlist.erase(selected_node+3);
-                    adjlist.erase(selected_node+4);
-                    adjlist_inward.erase(selected_node+1);
-                    adjlist_inward.erase(selected_node+2);
-                    delete nodes[selected_node];
-                    nodes.erase(selected_node); 
-                }
-            }
-
-            ImGui::EndPopup();
-        }
         
         int start_link; int end_link;
-        if (imnodes::IsLinkCreated(&start_link, &end_link)) {
+        if (ImNodes::IsLinkCreated(&start_link, &end_link)) {
             if (adjlist.find(start_link) != adjlist.end() || adjlist.find(end_link) != adjlist.end()) {
                 std::cout << "Deleting link from " << start_link << "->" << adjlist[start_link]  << std::endl;
                 adjlist.erase(start_link);
@@ -492,7 +400,6 @@ int main () {
         ImGui::Begin("Control Panel");
 
             // ImGui::Text("Time to process: %.1f ms", processTime);
-
             ImGui::Checkbox("Metronome", &metronomeEnabled);
             
             if (ImGui::InputInt("Metronome BPM", &metronomeBPM, 1, 10)) {
@@ -501,7 +408,7 @@ int main () {
             if (advancedMode) {
                 ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.3f dB");
             } else {
-                ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.0f dB");
+                ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -60.0f, 0.0f, "%.0f dB");
             }
 
             if (audioEnabled) {

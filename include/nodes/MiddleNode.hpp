@@ -5,6 +5,10 @@
 #include "internal_dsp.hpp"
 
 #include <AudioInfo.hpp>
+#include <imgui.h>
+
+const ImVec4 COLOR_KNOB_DARK (0.1f,0.1f,0.1f,1.0f);
+const ImVec4 COLOR_KNOB_DARK_SELECTED  (0.15f,0.15f,0.15f,1.0f);
 
 namespace guitar_amp {
     class MiddleNode : public AudioProcessorNode {
