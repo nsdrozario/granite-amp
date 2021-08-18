@@ -51,7 +51,6 @@ void CabSimNode::showGui() {
         ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Cabinet Simulation");
         ImNodes::EndNodeTitleBar();
-
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
         ImNodes::BeginInputAttribute(this->id+1);
         ImNodes::EndInputAttribute();
