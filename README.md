@@ -31,6 +31,7 @@ Real-time guitar amplifier simulation.
   - [ ] Standalone low pass
   - [ ] Standalone high pass
  - Delay
+ - Flanger
  - Cabinet Simulation
 ## Dependencies
 - [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
