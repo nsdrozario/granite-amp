@@ -57,7 +57,7 @@ void FlangerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioIn
     dsp::clamp(min_delay_time, 1.0f, 30.0f);
     dsp::clamp(max_delay_time, 1.0f, MAX_POSSIBLE_DELAY_MS);
     dsp::clamp(delay_frequency, 0.1f, 1.0f);
-    delay_frequency = 0.001f;
+    delay_frequency = 1.0f;
     max_delay_samples = dsp::seconds_to_samples(max_delay_time, info.sample_rate);
 
     if (static_cast<size_t>(static_cast<float>(info.sample_rate) * (max_delay_time / 1000.0f) + 0.5) != delay_buf_size) {
@@ -85,24 +85,21 @@ void FlangerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioIn
 
     for (size_t i = 0; i < numFrames; i++) {
 
-        float lfo = ((static_cast<float>(max_delay_samples) * 0.5) - 1.0f) * (std::cos(2.0f * 3.1415927f * delay_frequency * internal_timer)+1);
-        size_t delay_start = static_cast<size_t>(lfo+0.5f);
-        size_t delay_end = static_cast<size_t>(lfo);
+        float lfo = ((static_cast<float>(max_delay_samples) * 0.5) - 1.0f) * (std::cos(2.0f * 3.1415927f * delay_frequency * static_cast<float>(internal_timer) / static_cast<float>(info.sample_rate))+1);
+        size_t delay_start = static_cast<size_t>(lfo);
+        size_t delay_end = delay_start + 1;
         float delay_fraction = lfo - std::floor(lfo);
 
-        float y0 = delay_buf[(write_ptr - delay_start + delay_buf_size) % delay_buf_size];
-        float y1 = delay_buf[(write_ptr - delay_end + delay_buf_size) % delay_buf_size];
+        float y1 = delay_buf[(write_ptr - delay_start + delay_buf_size) % delay_buf_size];
+        float y0 = delay_buf[(write_ptr - delay_end + delay_buf_size) % delay_buf_size];
         // dx is 1 unit wide
 
         float interpolated = ((y1 - y0) * (1.0f-delay_fraction)) + y0;
 
         delay_buf[write_ptr] = in[i];
         write_ptr = (write_ptr + 1) % delay_buf_size;
-    
-        out[i] = in[i] + interpolated;
 
-        internal_timer += static_cast<float>(i) / static_cast<float>(info.sample_rate);
-        internal_timer = std::fmod(internal_timer, 1.0f/delay_frequency);
+        internal_timer = (internal_timer + 1) % info.sample_rate;
     }
     
 }

@@ -286,6 +286,7 @@ int main () {
     
     // get images
     sf::Texture bg;
+    
     if (!bg.loadFromFile("assets/board.png")) {
         std::cout << "error loading board.png\n";
     }
@@ -350,9 +351,7 @@ int main () {
         // draw node 
         ImGui::Begin("Signal Chain");
         ImNodes::BeginNodeEditor();
-
             // draw nodes
-
             for (auto it = nodes.begin(); it != nodes.end(); it++) {
                 int node_id = it->first;
                 AudioProcessorNode *node = it->second;
