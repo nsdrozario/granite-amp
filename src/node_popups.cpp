@@ -83,13 +83,14 @@ void ui::node_popups() {
             current_node += 5;
         }
 
-        #ifdef DEBUG_BUILD
-
-        // this still isn't quite safe
         if (ImGui::MenuItem("Create Flanger Node")) {
             nodes[current_node] = new guitar_amp::FlangerNode(current_node, globalAudioInfo);
             current_node += 5;
         }
+
+        #ifdef DEBUG_BUILD
+
+        // this still isn't quite safe
 
         if (ImGui::MenuItem("Create Oscillator Node")) {
             nodes[current_node] = new guitar_amp::OscillatorNode(current_node, globalAudioInfo);

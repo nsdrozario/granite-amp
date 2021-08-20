@@ -1,7 +1,7 @@
 #ifndef GUITAR_AMP_FLANGER_NODE_HPP
 #define GUITAR_AMP_FLANGER_NODE_HPP
 
-#define MAX_POSSIBLE_DELAY_MS 10.0f
+#define MAX_POSSIBLE_DELAY_MS 30.0f
 
 #include "MiddleNode.hpp"
 #include "state.hpp"
@@ -21,13 +21,13 @@ namespace guitar_amp {
     private:
     
         dsp::ring_buffer<float> rb;
-        float delay_frequency = 0.5f; // measured in Hz
+        float delay_frequency = 1.0f; // measured in Hz
         
         float min_delay_time = 1.0f; // 1 millisecond
         float max_delay_time = 10.0f;
         float feedback_gain = -6.0f;
 
-        float internal_timer = 0.0f;
+        size_t internal_timer = 0;
 
         size_t max_delay_samples = 0;
 

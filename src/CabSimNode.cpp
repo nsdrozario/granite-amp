@@ -1,5 +1,6 @@
 #include <CabSimNode.hpp>
 #include <iostream>
+#include <imknob.hpp>
 using namespace guitar_amp;
 
 CabSimNode::CabSimNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
@@ -51,7 +52,6 @@ void CabSimNode::showGui() {
         ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Cabinet Simulation");
         ImNodes::EndNodeTitleBar();
-
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
         ImNodes::BeginInputAttribute(this->id+1);
         ImNodes::EndInputAttribute();
@@ -60,55 +60,59 @@ void CabSimNode::showGui() {
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
         
-        if(ImGui::DragFloat("Delay Time", &delay_time, 1.0f, 1.0f, 10.0f, "%.3f ms")) {
-            changed_delay = true;
-        }
-        
-        bool lpf_freq_changed = ImGui::DragFloat("Treble Cut (Low Pass) Frequency", &lpf_freq, 500.0f, 1000.0f, 6000.0f, "%.3f Hz");
-        bool lpf_q_changed = ImGui::DragFloat("Treble Cut (Low Pass) Q", &lpf_q, 0.1f, 1.0f, 2.0f, "%.3f");
+        if (advancedMode) {
+            if(ImGui::DragFloat("Delay Time", &delay_time, 1.0f, 1.0f, 10.0f, "%.3f ms")) {
+                changed_delay = true;
+            }
+            
+            bool lpf_freq_changed = ImGui::DragFloat("Treble Cut (Low Pass) Frequency", &lpf_freq, 500.0f, 1000.0f, 6000.0f, "%.3f Hz");
+            bool lpf_q_changed = ImGui::DragFloat("Treble Cut (Low Pass) Q", &lpf_q, 0.1f, 1.0f, 2.0f, "%.3f");
 
-        if (lpf_freq_changed || lpf_q_changed) {
-            changed_lpf = true;
-        }
+            if (lpf_freq_changed || lpf_q_changed) {
+                changed_lpf = true;
+            }
 
-        ImGui::NewLine();
+            ImGui::NewLine();
 
 
-        bool hpf_freq_changed = ImGui::DragFloat("Bass Cut (High Pass) Frequency", &hpf_freq, 10.0f, 10.0f, 120.0f, "%.3f Hz");
-        bool hpf_q_changed = ImGui::DragFloat("Bass Cut (High Pass) Q", &hpf_q, 0.1f, 0.4f, 2.0f, "%.3f");
+            bool hpf_freq_changed = ImGui::DragFloat("Bass Cut (High Pass) Frequency", &hpf_freq, 10.0f, 10.0f, 120.0f, "%.3f Hz");
+            bool hpf_q_changed = ImGui::DragFloat("Bass Cut (High Pass) Q", &hpf_q, 0.1f, 0.4f, 2.0f, "%.3f");
 
-        if (hpf_freq_changed || hpf_q_changed) {
-            changed_hpf = true;
-        }
+            if (hpf_freq_changed || hpf_q_changed) {
+                changed_hpf = true;
+            }
 
-        ImGui::NewLine();
+            ImGui::NewLine();
 
-        bool low_mids_freq_changed = ImGui::DragFloat("Low Mid Scoop/Boost Frequency", &low_mids_boost_freq, 50.0f, 200.0f, 400.0f, "%.3f Hz");
-        bool low_mids_magnitude_changed = ImGui::DragFloat("Low Mid Scoop/Boost Magnitude", &low_mids_boost_magnitude, 1.0f, -3.0f, 3.0f, "%.3f dB");
-        bool low_mids_q_changed = ImGui::DragFloat("Low Mid Scoop/Boost Q", &low_mids_boost_q, 0.2f, 2.0f, 7.0f, "%.3f");
+            bool low_mids_freq_changed = ImGui::DragFloat("Low Mid Scoop/Boost Frequency", &low_mids_boost_freq, 50.0f, 200.0f, 400.0f, "%.3f Hz");
+            bool low_mids_magnitude_changed = ImGui::DragFloat("Low Mid Scoop/Boost Magnitude", &low_mids_boost_magnitude, 1.0f, -3.0f, 3.0f, "%.3f dB");
+            bool low_mids_q_changed = ImGui::DragFloat("Low Mid Scoop/Boost Q", &low_mids_boost_q, 0.2f, 2.0f, 7.0f, "%.3f");
 
-        if (low_mids_freq_changed || low_mids_magnitude_changed || low_mids_q_changed) {
-            changed_low_mids_boost = true;
-        }
+            if (low_mids_freq_changed || low_mids_magnitude_changed || low_mids_q_changed) {
+                changed_low_mids_boost = true;
+            }
 
-        ImGui::NewLine();
+            ImGui::NewLine();
 
-        bool mid_freq_changed = ImGui::DragFloat("Mid Scoop/Boost Frequency", &mid_scoop_freq, 100.0f, 400.0f, 800.0f, "%.3f Hz");
-        bool mid_magnitude_changed = ImGui::DragFloat("Mid Scoop/Boost Magnitude", &mid_scoop_magnitude, 1.0f, -6.0f, 2.0f, "%.3f dB");
-        bool mid_q_changed = ImGui::DragFloat("Mid Scoop/Boost Q", &mid_scoop_q, 0.2f, 2.0f, 7.0f, "%.3f");
+            bool mid_freq_changed = ImGui::DragFloat("Mid Scoop/Boost Frequency", &mid_scoop_freq, 100.0f, 400.0f, 800.0f, "%.3f Hz");
+            bool mid_magnitude_changed = ImGui::DragFloat("Mid Scoop/Boost Magnitude", &mid_scoop_magnitude, 1.0f, -6.0f, 2.0f, "%.3f dB");
+            bool mid_q_changed = ImGui::DragFloat("Mid Scoop/Boost Q", &mid_scoop_q, 0.2f, 2.0f, 7.0f, "%.3f");
 
-        if (mid_freq_changed || mid_magnitude_changed || mid_q_changed) {
-            changed_mid_scoop = true;
-        }
+            if (mid_freq_changed || mid_magnitude_changed || mid_q_changed) {
+                changed_mid_scoop = true;
+            }
 
-        ImGui::NewLine();
+            ImGui::NewLine();
 
-        bool presence_freq_changed = ImGui::DragFloat("Presence Frequency", &presence_freq, 50.0f, 900.0f, 1600.0f, "%.3f Hz");
-        bool presence_magnitude_changed = ImGui::DragFloat("Presence Magnitude", &presence_magnitude, 1.0f, -6.0f, 3.0f, "%.3f dB");
-        bool presence_q_changed = ImGui::DragFloat("Presence Q", &presence_q, 1.0f, 5.0f, 20.0f, "%.3f");
+            bool presence_freq_changed = ImGui::DragFloat("Presence Frequency", &presence_freq, 50.0f, 900.0f, 1600.0f, "%.3f Hz");
+            bool presence_magnitude_changed = ImGui::DragFloat("Presence Magnitude", &presence_magnitude, 1.0f, -6.0f, 3.0f, "%.3f dB");
+            bool presence_q_changed = ImGui::DragFloat("Presence Q", &presence_q, 1.0f, 5.0f, 20.0f, "%.3f");
 
-        if (presence_freq_changed || presence_magnitude_changed || presence_q_changed) {
-            changed_presence = true;
+            if (presence_freq_changed || presence_magnitude_changed || presence_q_changed) {
+                changed_presence = true;
+            }
+        } else {
+            // use presets; there will be too many knobs
         }
 
     ImNodes::EndNode();

@@ -253,7 +253,12 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
 
 }
 
-
+void print_adjlist() {
+    std::cout <<"adjlist: \n";
+    for (auto it = adjlist.begin(); it != adjlist.end(); it++) {
+        std::cout << it->first << "->" << it->second << std::endl;
+    }
+}
 
 int main () {
 
@@ -281,6 +286,7 @@ int main () {
     
     // get images
     sf::Texture bg;
+    
     if (!bg.loadFromFile("assets/board.png")) {
         std::cout << "error loading board.png\n";
     }
@@ -345,9 +351,7 @@ int main () {
         // draw node 
         ImGui::Begin("Signal Chain");
         ImNodes::BeginNodeEditor();
-
             // draw nodes
-
             for (auto it = nodes.begin(); it != nodes.end(); it++) {
                 int node_id = it->first;
                 AudioProcessorNode *node = it->second;
@@ -362,7 +366,7 @@ int main () {
                     ImNodes::Link((it->first/5)*5, it->first, it->second);
                 }
             }
-
+        ImNodes::MiniMap(0.2f, 3);
         ImNodes::EndNodeEditor();
 
         // node editing popups
@@ -380,10 +384,20 @@ int main () {
             std::cout << "Create " << start_link << " -> " << end_link << std::endl;
             adjlist[start_link] = end_link;
             adjlist_inward[end_link] = start_link;
-            std::cout <<"adjlist: \n";
-            for (auto it = adjlist.begin(); it != adjlist.end(); it++) {
-                std::cout << it->first << "->" << it->second << std::endl;
-            }
+            /*
+                std::cout <<"adjlist: \n";
+                for (auto it = adjlist.begin(); it != adjlist.end(); it++) {
+                    std::cout << it->first << "->" << it->second << std::endl;
+                }
+            */
+           print_adjlist();
+        }
+        int destroyed_link = -1;
+        if (ImNodes::IsLinkDestroyed(&destroyed_link)) {
+            int forward = adjlist[destroyed_link+3];
+            adjlist.erase(destroyed_link+3);
+            adjlist_inward.erase(forward);
+            print_adjlist();
         }
 
         // consider using ListBoxHeader
