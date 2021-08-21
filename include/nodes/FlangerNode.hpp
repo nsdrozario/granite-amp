@@ -24,7 +24,7 @@ namespace guitar_amp {
         float delay_frequency = 1.0f; // measured in Hz
         
         float min_delay_time = 1.0f; // 1 millisecond
-        float max_delay_time = 10.0f;
+        float max_delay_time = 1.0f;
         float feedback_gain = -6.0f;
 
         size_t internal_timer = 0;
