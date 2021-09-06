@@ -5,6 +5,8 @@
 #include "internal_dsp.hpp"
 #include "state.hpp"
 #include "MiddleNode.hpp"
+#include "../ConfigManager.hpp"
+#include <filesystem>
 
 namespace guitar_amp {
     /* 
@@ -13,6 +15,7 @@ namespace guitar_amp {
     */
     class CabSimNode : public MiddleNode {
     public:
+
         CabSimNode(int id, const AudioInfo current_audio_info);
         ~CabSimNode();
 
@@ -20,6 +23,8 @@ namespace guitar_amp {
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
 
     private:
+
+        std::vector<std::string> preset_files;
 
         // for comb filtering
         dsp::ring_buffer<float> delay;
@@ -39,7 +44,7 @@ namespace guitar_amp {
         ma_peak2 mid_scoop;
 
         // frequencies
-        float lpf_freq = 6000.0f;
+        float lpf_freq = 4000.0f;
         float hpf_freq = 60.0f; // 80hz is about an E2 but when we pile up distortion it really doesn't matter to have the fundamental frequency
         float mid_scoop_freq = 500.0f;
         float low_mids_boost_freq = 250.0f;

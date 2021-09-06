@@ -26,10 +26,10 @@ SOFTWARE.
 
 namespace mindsp {
     namespace util {
-        float float_to_db(float val) {
+        inline float float_to_db(float val) {
             return 20.0f * std::log10(std::abs(val));
         }
-        float db_to_float(float val) {
+        inline float db_to_float(float val) {
             return std::pow(10, val / 20.0f);
         }
     }

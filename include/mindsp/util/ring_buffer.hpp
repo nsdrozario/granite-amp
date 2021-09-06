@@ -36,7 +36,7 @@ namespace mindsp {
          * @param max Maximum value
          * 
          */
-        std::size_t wrap_index(std::size_t val, std::size_t max) {
+        inline std::size_t wrap_index(std::size_t val, std::size_t max) {
             return (val + max) % max;
         }
         

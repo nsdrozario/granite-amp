@@ -27,7 +27,7 @@ namespace guitar_amp {
         float max_delay_time = 1.0f;
         float feedback_gain = -6.0f;
 
-        size_t internal_timer = 0;
+        float internal_timer = 0;
 
         size_t max_delay_samples = 0;
 

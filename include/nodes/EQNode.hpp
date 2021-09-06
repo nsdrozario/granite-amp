@@ -1,12 +1,13 @@
 #ifndef GUITAR_AMP_EQNODE_HPP
 #define GUITAR_AMP_EQNODE_HPP
 
-/*#include "MiddleNode.hpp"
+#include "MiddleNode.hpp"
 #include "state.hpp"
 #include <list>
 #include <utility>
 #include "internal_dsp.hpp"
 #include "miniaudio.h"
+#include <mindsp/filter.hpp>
 
 namespace guitar_amp {
 
@@ -19,10 +20,13 @@ namespace guitar_amp {
         Notch
     };
 
-    class EQFilter {
-    public:
-        EQType type;
-        ma_biquad biquad;
+    class FilterWrapper {
+        EQType filterType;
+        mindsp::filter::biquad_filter filter;
+        float gain;
+        float sample_rate;
+        float q;
+        float freq;
     };
 
     class EQNode : public MiddleNode {
@@ -33,8 +37,8 @@ namespace guitar_amp {
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
     private:
-        
+        std::list<FilterWrapper> filters;  
     };
 }
-*/
+
 #endif

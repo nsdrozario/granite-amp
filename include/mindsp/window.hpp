@@ -33,7 +33,7 @@ namespace mindsp {
          * @param N window size
          * 
          */
-        float hann(std::size_t n, std::size_t N) {
+        inline float hann(std::size_t n, std::size_t N) {
             float sqrt_hann = std::sin(3.141592654f * n / (N-1));
             return sqrt_hann * sqrt_hann;
         }
@@ -45,7 +45,7 @@ namespace mindsp {
          * @param N window size
          *
          */
-        float bartlett(std::size_t n, std::size_t N) {
+        inline float bartlett(std::size_t n, std::size_t N) {
             return 1.0f - std::abs( (n-(N*0.5)) / (N * 0.5) );
         }
 
@@ -59,7 +59,7 @@ namespace mindsp {
          * 
          */
 
-        float cosine_sum(std::size_t n, std::size_t N, float *a, std::size_t k) {
+        inline float cosine_sum(std::size_t n, std::size_t N, float *a, std::size_t k) {
             float out = 0.0f;
             for (std::size_t i = 0; i < k; i++) {
                 float term = a[i] * std::cos(2.0f * i * 3.1415927f * n / N);
@@ -79,7 +79,7 @@ namespace mindsp {
          * @param N window size
          * 
          */
-        float blackman_harris(std::size_t n, std::size_t N) {
+        inline float blackman_harris(std::size_t n, std::size_t N) {
             float a[4] = {0.35875, 0.48829, 0.14128, 0.01168};
             return cosine_sum(n, N, a, 4);
         }
@@ -91,7 +91,7 @@ namespace mindsp {
          * @param N window size
          * 
          */
-        float hamming(std::size_t n, std::size_t N) {
+        inline float hamming(std::size_t n, std::size_t N) {
             float a[2] = {0.54, 0.46};
             return cosine_sum(n, N, a, 2);
         }
