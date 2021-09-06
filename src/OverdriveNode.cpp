@@ -103,7 +103,7 @@ void OverdriveNode::showGui() {
         ImNodes::PopAttributeFlag();
 
         if (advancedMode) {
-            ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 70.0f, "%.3f dB");
+            ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 40.0f, "%.3f dB");
             
             // with how high the gain can go the -8dB limit is for the safety of the user
             ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -144, -8.0f, "%.3f dB");
@@ -122,9 +122,11 @@ void OverdriveNode::showGui() {
                 ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
             }
         } else {
-            ImKnob::Knob("Gain", &gain, 1.0, -14, 70, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
-            ImKnob::Knob("Volume", &output_volume, 1.0, -50, -10, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImKnob::Knob("Gain", &gain, 1.0, -14, 40, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+
             ImGui::SameLine();
+
+            ImKnob::Knob("Volume", &output_volume, 1.0, -50, -14, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
 
             if(ImKnob::Knob("Treble", &(this->lpf_cutoff), 1, 1000, 21000, "%.0f Hz", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f))) {
                 lpf_config.cutoffFrequency = lpf_cutoff;

@@ -43,7 +43,7 @@ ConvolutionNode::~ConvolutionNode() {
 }
 
 void ConvolutionNode::showGui() {
-
+    ImGui::PushItemWidth(100);
     ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(170,110,220, 100));
     ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(170,110,220, 255));
     ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(170,110,220, 255));
@@ -84,7 +84,7 @@ void ConvolutionNode::showGui() {
         }
 
     ImNodes::EndNode();
-
+    ImGui::PopItemWidth();
     ImNodes::PopColorStyle();
     ImNodes::PopColorStyle();
 }

@@ -10,6 +10,9 @@ namespace guitar_amp {
         bool refresh_devices();
         std::vector<float> read_entire_file_wav(std::string file_name, size_t sample_rate);
     }
+
+    
+
 }
 
 #endif
