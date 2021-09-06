@@ -1,2 +1,2 @@
-external_headers/ -linguist-documentation
-src/external/ -linguist-documentation
+external_headers/ -linguist-detectable
+src/external/ -linguist-detectable
