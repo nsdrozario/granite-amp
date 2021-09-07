@@ -1,0 +1,17 @@
+LowPassFreq: 4000
+LowPassQ: 2
+
+HighPassFreq: 60
+HighPassQ: 2
+
+MidFreq: 500
+MidGain: -12
+MidQ: 4
+
+LowMidFreq: 250
+LowMidGain = 6
+LowMidQ = 4
+
+PresenceFreq: 1250
+PresenceGain: -6
+PresenceQ: 12
