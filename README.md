@@ -38,6 +38,8 @@ Real-time guitar amplifier simulation.
 - [Imgui-SFML](https://github.com/eliasdaler/imgui-sfml) (contained within this repository already)
 - [imnodes](https://github.com/Nelarius/imnodes) (contained within this repository already)
 - [implot](https://github.com/epezent/implot) (contained within this repository already)
+- [Imgui-Addons](https://github.com/gallickgunner/ImGui-Addons) (contained within this repository already)
+- [dirent](https://github.com/tronkko/dirent) (contained within this repository already)
 - [Miniaudio](https://github.com/mackron/miniaudio) (contained within this repository already)
 - [FFTConvolver](https://github.com/HiFi-LoFi/FFTConvolver) (contained within this repository already)
     - [AudioFFT](https://github.com/HiFi-LoFi/AudioFFT) (contained within this repository already)
