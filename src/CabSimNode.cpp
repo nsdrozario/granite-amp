@@ -41,6 +41,10 @@ CabSimNode::CabSimNode(int id, const AudioInfo current_audio_info) : MiddleNode(
 
 CabSimNode::~CabSimNode() { }
 
+void CabSimNode::reinit(CabSimSettings settings) {
+    
+}
+
 void CabSimNode::showGui() {
     ImGui::PushItemWidth(100);
     ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(170,110,220, 100));

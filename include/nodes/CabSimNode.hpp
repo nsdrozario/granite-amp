@@ -6,18 +6,17 @@
 #include "state.hpp"
 #include "MiddleNode.hpp"
 #include "../ConfigManager.hpp"
-#include <filesystem>
+#include <sol/sol.hpp>
 
 namespace guitar_amp {
-    /* 
-        This is NOT replacing the convolver! This is an algorithmic cabinet simulation so that you
-        don't necessarily need to obtain your own impulse responses to get a functional sound.
-    */
+
     class CabSimNode : public MiddleNode {
     public:
 
         CabSimNode(int id, const AudioInfo current_audio_info);
         ~CabSimNode();
+
+        void reinit(CabSimSettings settings);
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
@@ -72,6 +71,7 @@ namespace guitar_amp {
         bool changed_delay = false;
 
     };
+
 }
 
 #endif
