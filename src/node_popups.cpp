@@ -63,11 +63,6 @@ void ui::node_popups() {
             current_node += 5;
         }
 
-        if (ImGui::MenuItem("Shelf EQ")) {
-            nodes[current_node] = new guitar_amp::ShelfNode(current_node, globalAudioInfo);
-            current_node += 5;
-        }
-
         if (ImGui::MenuItem("Delay")) {
             nodes[current_node] = new guitar_amp::DelayNode(current_node, globalAudioInfo);
             current_node += 5;

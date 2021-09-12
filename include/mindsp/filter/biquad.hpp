@@ -113,7 +113,7 @@ namespace mindsp {
 
         };
 
-        biquad_coefficients low_pass_filter(float frequency, float sample_rate, float q, bool normalize=true) {
+        inline biquad_coefficients low_pass_filter(float frequency, float sample_rate, float q, bool normalize=true) {
             biquad_coefficients out;
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
             float alpha = std::sin(sin_arg) / (2 * q);
@@ -129,7 +129,7 @@ namespace mindsp {
             return out;
         }
 
-        biquad_coefficients high_pass_filter(float frequency, float sample_rate, float q, bool normalize=true) {
+        inline biquad_coefficients high_pass_filter(float frequency, float sample_rate, float q, bool normalize=true) {
             biquad_coefficients out;
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
             float alpha = std::sin(sin_arg) / (2 * q);
@@ -145,7 +145,7 @@ namespace mindsp {
             return out;
         }
 
-        biquad_coefficients peak_filter(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
+        inline biquad_coefficients peak_filter(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
             biquad_coefficients out;
             float a = std::pow(10, gain_db / 40);
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
@@ -162,7 +162,7 @@ namespace mindsp {
             return out;
         }
         
-        biquad_coefficients low_shelf(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
+        inline biquad_coefficients low_shelf(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
             biquad_coefficients out;
             float a = std::pow(10, gain_db / 40);
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
@@ -179,7 +179,7 @@ namespace mindsp {
             return out;
         }
 
-        biquad_coefficients high_shelf(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
+        inline biquad_coefficients high_shelf(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
             biquad_coefficients out;
             float a = std::pow(10, gain_db / 40);
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;

@@ -32,7 +32,6 @@ namespace guitar_amp {
         l.script_file("scripts/io_module.lua");
         
         sol::function parse = l["read_config_file"];
-        std::cout << (parse.get_type() == sol::type::function) << std::endl;
         sol::table config = parse.call<sol::table>(file_contents);
         if (!config.empty()) {
             out.delay_ms = 1.0f;

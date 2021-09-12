@@ -10,40 +10,21 @@ using namespace guitar_amp;
 
 OverdriveNode::OverdriveNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 
-    this->lpf_config = ma_lpf2_config_init(ma_format_f32, 1, current_audio_info.sample_rate*OVERSAMPLIING_FACTOR, this->lpf_cutoff, 0.9f);
-    this->hpf_config = ma_hpf2_config_init(ma_format_f32, 1, current_audio_info.sample_rate*OVERSAMPLIING_FACTOR, this->hpf_cutoff, 0.9f);
-
-    lpf_config_not_oversampled = ma_lpf2_config_init(
-        ma_format_f32,
-        1,
-        current_audio_info.sample_rate,
-        this->lpf_cutoff,
-        0.9f
-    );
-    
-    hpf_config_not_oversampled = ma_hpf2_config_init(
-        ma_format_f32,
-        1,
-        current_audio_info.sample_rate,
-        this->hpf_cutoff,
-        0.9f
+    low_pass.set_coefficients(
+       mindsp::filter::low_pass_filter(
+           lpf_cutoff, 
+           (current_audio_info.sample_rate) ? static_cast<float>(current_audio_info.sample_rate) : 48000, 
+           1.0f
+        )
     );
 
-    if (ma_lpf2_init(&lpf_config, &this->lpf) != MA_SUCCESS) {
-        std::cout << "lpf failed\n";
-    }
-
-    if (ma_lpf2_init(&lpf_config_not_oversampled, &lpf_not_oversampled) != MA_SUCCESS) {
-        std::cout << "lpf failed\n";
-    }
-
-    if (ma_hpf2_init(&hpf_config, &this->hpf) != MA_SUCCESS) {
-        std::cout << "hpf failed\n";
-    }
-
-    if (ma_hpf2_init(&hpf_config_not_oversampled, &hpf_not_oversampled) != MA_SUCCESS) {
-        std::cout << "hpf failed\n";
-    }
+    high_pass.set_coefficients(
+        mindsp::filter::high_pass_filter(
+            hpf_cutoff,
+            (current_audio_info.sample_rate) ? static_cast<float>(current_audio_info.sample_rate) : 48000,
+            1.0f
+        )
+    );
 
     ma_resampler_config resampler_cfg_up = ma_resampler_config_init(
         ma_format_f32, 
@@ -61,17 +42,9 @@ OverdriveNode::OverdriveNode(int id, const AudioInfo current_audio_info) : Middl
         ma_resample_algorithm_linear
     );
 
-    downsample_lpf_config = ma_lpf2_config_init(
-        ma_format_f32,
-        1,
-        current_audio_info.sample_rate * OVERSAMPLIING_FACTOR,
-        static_cast<double>(current_audio_info.sample_rate) * 0.5,
-        1.0f
-    );
 
     ma_resampler_init(&resampler_cfg_up, &upscaler);
     ma_resampler_init(&resampler_cfg_down, &downscaler);
-    ma_lpf2_init(&downsample_lpf_config, &downsample_lpf);
 
     buf_upscale = new float[current_audio_info.period_length * OVERSAMPLIING_FACTOR];
 }
@@ -109,18 +82,13 @@ void OverdriveNode::showGui() {
             ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -144, -8.0f, "%.3f dB");
             
             if(ImGui::DragFloat("Low pass frequency", &(this->lpf_cutoff), 1, 0, 21000, "%.3f")) {
-                lpf_config.cutoffFrequency = lpf_cutoff;
-                lpf_config_not_oversampled.cutoffFrequency = lpf_cutoff;
-                ma_lpf2_reinit(&lpf_config,  &lpf);
-                ma_lpf2_reinit(&lpf_config_not_oversampled, &lpf_not_oversampled);
+                low_pass.set_coefficients(mindsp::filter::low_pass_filter(lpf_cutoff, device.sampleRate ? device.sampleRate : 48000, 1.0f));
             }
             
-            if(ImGui::DragFloat("High pass frequency", &(this->hpf_cutoff), 1, 0, 21000, "%.3f Hz")) {
-                hpf_config.cutoffFrequency = hpf_cutoff;
-                hpf_config_not_oversampled.cutoffFrequency = hpf_cutoff;
-                ma_hpf2_reinit(&hpf_config, &hpf);
-                ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
+            if(ImGui::DragFloat("High pass frequency", &(this->hpf_cutoff), 1, 0, 21000, "%.3f Hz")) {  
+                high_pass.set_coefficients(mindsp::filter::high_pass_filter(hpf_cutoff, device.sampleRate ? device.sampleRate : 48000, 1.0f));
             }
+
         } else {
             ImKnob::Knob("Gain", &gain, 1.0, -14, 40, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
 
@@ -129,19 +97,13 @@ void OverdriveNode::showGui() {
             ImKnob::Knob("Volume", &output_volume, 1.0, -50, -14, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
 
             if(ImKnob::Knob("Treble", &(this->lpf_cutoff), 1, 1000, 21000, "%.0f Hz", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f))) {
-                lpf_config.cutoffFrequency = lpf_cutoff;
-                lpf_config_not_oversampled.cutoffFrequency = lpf_cutoff;
-                ma_lpf2_reinit(&lpf_config,  &lpf);
-                ma_lpf2_reinit(&lpf_config_not_oversampled, &lpf_not_oversampled);
+                low_pass.set_coefficients(mindsp::filter::low_pass_filter(lpf_cutoff, device.sampleRate ? device.sampleRate : 48000, 1.0f));
             }
             
             ImGui::SameLine();
 
             if(ImKnob::Knob("Bass", &(this->hpf_cutoff), 1, 10, 1000, "%.0f Hz", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f))) {
-                hpf_config.cutoffFrequency = hpf_cutoff;
-                hpf_config_not_oversampled.cutoffFrequency = hpf_cutoff;
-                ma_hpf2_reinit(&hpf_config, &hpf);
-                ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
+                high_pass.set_coefficients(mindsp::filter::high_pass_filter(hpf_cutoff, device.sampleRate ? device.sampleRate : 48000, 1.0f));
             }
 
         }
@@ -162,20 +124,6 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
         ma_resampler_uninit(&upscaler);
         ma_resampler_uninit(&downscaler);
 
-        lpf_config.sampleRate = info.sample_rate * OVERSAMPLIING_FACTOR;
-        lpf_config_not_oversampled.sampleRate = info.sample_rate;
-        ma_lpf2_reinit(&lpf_config,  &lpf);
-        ma_lpf2_reinit(&lpf_config_not_oversampled, &lpf_not_oversampled);
-        
-        hpf_config.sampleRate = info.sample_rate * OVERSAMPLIING_FACTOR;
-        hpf_config_not_oversampled.sampleRate = info.sample_rate;
-
-        ma_hpf2_reinit(&hpf_config, &hpf);
-        ma_hpf2_reinit(&hpf_config_not_oversampled, &hpf_not_oversampled);
-    
-        downsample_lpf_config.sampleRate = info.sample_rate * OVERSAMPLIING_FACTOR;
-        downsample_lpf_config.cutoffFrequency = static_cast<double>(info.sample_rate) * 0.5; // nyquist frequency = 1/2 the sample rate
-
         ma_resampler_config upscaler_cfg = ma_resampler_config_init(
             ma_format_f32,
             1,
@@ -195,10 +143,15 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
         ma_resampler_init(&upscaler_cfg, &upscaler);
         ma_resampler_init(&downscaler_cfg, &downscaler);
 
+        low_pass.set_coefficients(mindsp::filter::low_pass_filter(lpf_cutoff, device.sampleRate ? device.sampleRate : 48000, 1.0f));
+        high_pass.set_coefficients(mindsp::filter::high_pass_filter(hpf_cutoff, device.sampleRate ? device.sampleRate : 48000, 1.0f));
+
         internal_info = info;
     
     }
 
+    high_pass.apply(out, in, numFrames);
+    /*
     if (oversamplingEnabled) {
 
         if (buf_upscale == nullptr) { // this really shouldn't happen
@@ -212,7 +165,7 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
         do {
             ma_result resample_1st_result = ma_resampler_process_pcm_frames(
                 &upscaler, 
-                in, 
+                out, 
                 &frames_to_process, 
                 buf_upscale, 
                 &frames_expected
@@ -224,9 +177,6 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
         } while (
             (numFrames - frames_to_process != 0) && ((numFrames * OVERSAMPLIING_FACTOR) - frames_expected) != 0
         );
-
-        // get rid of the bass frequencies
-        ma_hpf2_process_pcm_frames(&this->hpf, buf_upscale, buf_upscale, numFrames * OVERSAMPLIING_FACTOR);
 
         // apply a transfer function for saturation and clipping
         switch(this->clipping_algorithm) {
@@ -240,9 +190,6 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
                 dsp::clip_sin(buf_upscale, buf_upscale, this->gain, this->output_volume, numFrames * OVERSAMPLIING_FACTOR);
                 break;
         }
-
-        // low pass at the nyquist frequency for the original sample rate 
-        ma_lpf2_process_pcm_frames(&downsample_lpf, buf_upscale, buf_upscale, numFrames * OVERSAMPLIING_FACTOR);
 
         ma_uint64 frames_to_process_downscale = numFrames * OVERSAMPLIING_FACTOR;
         ma_uint64 frames_expected_downscale = numFrames;
@@ -262,14 +209,8 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
             (numFrames * OVERSAMPLIING_FACTOR) - frames_to_process_downscale != 0 && numFrames - frames_expected_downscale != 0
         );
 
-        // apply the regular lpf now
-        ma_lpf2_process_pcm_frames(&lpf_not_oversampled, out, out, numFrames);
-
     } else {
-        // if we don't want oversampling, do same thing but with no resampling
-
-        ma_hpf2_process_pcm_frames(&hpf_not_oversampled, out, in, numFrames);
-
+        */
         switch(this->clipping_algorithm) {
             case 0:
                 dsp::hardclip_minmax(out, out, this->gain, this->output_volume, numFrames);
@@ -281,10 +222,10 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
                 dsp::clip_sin(out, out, this->gain, this->output_volume, numFrames);
                 break;
         }
-
-        // get rid of the treble frequencies as desired
-        ma_lpf2_process_pcm_frames(&this->lpf_not_oversampled, out, out, numFrames);
-
+    /*
     }
+    */
+   
+    low_pass.apply(out, out, numFrames);
     
 }

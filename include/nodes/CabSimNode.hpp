@@ -5,6 +5,7 @@
 #include "internal_dsp.hpp"
 #include "state.hpp"
 #include "MiddleNode.hpp"
+#include <mindsp/filter.hpp>
 #include "../ConfigManager.hpp"
 #include <sol/sol.hpp>
 
@@ -28,6 +29,7 @@ namespace guitar_amp {
         // for comb filtering
         dsp::ring_buffer<float> delay;
 
+        /*
         // cabs typically output around 6khz at most
         ma_lpf2 lpf;
 
@@ -41,6 +43,13 @@ namespace guitar_amp {
         ma_peak2 presence;
 
         ma_peak2 mid_scoop;
+        */
+
+        mindsp::filter::biquad_filter lpf;
+        mindsp::filter::biquad_filter hpf;
+        mindsp::filter::biquad_filter low_mid;
+        mindsp::filter::biquad_filter mid;
+        mindsp::filter::biquad_filter presence;
 
         // frequencies
         float lpf_freq = 4000.0f;

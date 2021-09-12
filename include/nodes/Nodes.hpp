@@ -13,7 +13,6 @@
 #include <OutputNode.hpp>
 #include <OscillatorNode.hpp>
 #include <OverdriveNode.hpp>
-#include <ShelfNode.hpp>
 #include <ThreeBandEQ.hpp>
 #include <AnalyzerNode.hpp>
 #include <ChorusNode.hpp>
