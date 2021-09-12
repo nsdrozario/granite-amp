@@ -113,7 +113,7 @@ namespace mindsp {
 
         };
 
-        inline biquad_coefficients low_pass_filter(float frequency, float sample_rate, float q, bool normalize=true) {
+        biquad_coefficients low_pass_filter(float frequency, float sample_rate, float q, bool normalize=true) {
             biquad_coefficients out;
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
             float alpha = std::sin(sin_arg) / (2 * q);
@@ -129,7 +129,7 @@ namespace mindsp {
             return out;
         }
 
-        inline biquad_coefficients high_pass_filter(float frequency, float sample_rate, float q, bool normalize=true) {
+        biquad_coefficients high_pass_filter(float frequency, float sample_rate, float q, bool normalize=true) {
             biquad_coefficients out;
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
             float alpha = std::sin(sin_arg) / (2 * q);
@@ -137,7 +137,7 @@ namespace mindsp {
             out.a1 = -2 * std::cos(sin_arg);
             out.a2 = 1 - alpha;
             out.b0 = (1 + std::cos(sin_arg)) * 0.5;
-            out.b1 = 1 + std::cos(sin_arg);
+            out.b1 = -(1 + std::cos(sin_arg));
             out.b2 = out.b0;
             if (normalize) {
                 out.normalize();
@@ -145,12 +145,12 @@ namespace mindsp {
             return out;
         }
 
-        inline biquad_coefficients peak_filter(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
+        biquad_coefficients peak_filter(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
             biquad_coefficients out;
             float a = std::pow(10, gain_db / 40);
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
             float alpha = std::sin(sin_arg) / (2 * q);
-            out.a0 = 1 + (alpha/a);
+            out.a0 = 1 + (alpha / a);
             out.a1 = -2 * std::cos(sin_arg);
             out.a2 = 1 - (alpha/a);
             out.b0 = 1 + (alpha * a);
@@ -162,35 +162,36 @@ namespace mindsp {
             return out;
         }
         
-        inline biquad_coefficients low_shelf(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
+        biquad_coefficients low_shelf(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
             biquad_coefficients out;
             float a = std::pow(10, gain_db / 40);
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
             float alpha = std::sin(sin_arg) / (2 * q);
-            out.a0 = (a+1) + ( (a-1) * std::cos(sin_arg) ) + (2 * std::sqrt(a) * alpha);
-            out.a1 = -2 * ( (a-1) + ( (a+1) * std::cos(sin_arg) ) );
-            out.a2 = (a+1) + ( (a-1) * std::cos(sin_arg) ) - (2 * std::sqrt(a) * alpha);
-            out.b0 = a * ( (a+1) - ((a-1) * std::cos(sin_arg)) + (2 * std::sqrt(a) * alpha) );
-            out.b1 = 2 * a * ( (a-1) - ((a+1) * std::cos(sin_arg)) );
-            out.b2 = a * ( (a+1) - ((a-1) * std::cos(sin_arg)) + (2 * std::sqrt(a) * alpha));
+            out.b0 = a * ( (a+1) - ((a-1) * std::cos(sin_arg)) + (2 * alpha * std::sqrt(a)) );
+            out.b1 = (2 * a) * ( (a-1) - ((a+1) * std::cos(sin_arg)) );
+            out.b2 = a * ((a+1) - ((a-1) * std::cos(sin_arg)) - (2.0f * alpha * std::sqrt(a)));
+            out.a0 = (a+1) + ((a-1) * std::cos(sin_arg)) - (2 * alpha * std::sqrt(a));
+            out.a1 = -2 * ((a-1) + ((a+1) * std::cos(sin_arg)));
+            out.a2 = (a+1) + ((a-1) * std::cos(sin_arg)) - (2 * alpha * std::sqrt(a));
             if (normalize) {
                 out.normalize();
             }
             return out;
         }
 
-        inline biquad_coefficients high_shelf(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
+        biquad_coefficients high_shelf(float frequency, float sample_rate, float q, float gain_db, bool normalize=true) {
             biquad_coefficients out;
             float a = std::pow(10, gain_db / 40);
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
             float alpha = std::sin(sin_arg) / (2 * q);
 
-            out.a0 = (a+1) - ((a-1) * std::cos(sin_arg)) + (2 * std::sqrt(a) * alpha);
+            out.a0 = (a+1) - ((a-1) * std::cos(sin_arg)) + (2 * alpha * std::sqrt(a));
             out.a1 = 2 * ( (a-1) - ( (a+1) * std::cos(sin_arg) ) );
-            out.a2 = (a+1) - ((a-1) * std::cos(sin_arg)) - (2 * std::sqrt(a) * alpha);
-            out.b0 = a * ((a+1) + ((a-1) * std::cos(sin_arg)) + (2 * std::sqrt(a) * alpha));
+            out.a2 = (a+1) - ((a-1) * std::cos(sin_arg)) - (2 * alpha * std::sqrt(a));
+            out.b0 = a * ((a+1) + ((a-1) * std::cos(sin_arg)) + (2 * alpha * std::sqrt(a)));
             out.b1 = -2 * a * ( (a-1) + ((a+1) * std::cos(sin_arg)));
-            out.b2 = a * ( (a+1) + ((a-1) * std::cos(sin_arg)) - (2 * std::sqrt(a) * alpha));
+            out.b2 = a * ( (a+1) + ((a-1) * std::cos(sin_arg)) - (2 * alpha * std::sqrt(a)));
+        
             if (normalize) {
                 out.normalize();
             }
