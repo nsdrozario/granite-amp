@@ -46,4 +46,6 @@ function table_to_str(t)
         end
         out = out .. ","
     end
+    out = out .. "}"
+    return out
 end
