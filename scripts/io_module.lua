@@ -33,3 +33,17 @@ function serialize(t)
     end
     return str;
 end
+
+function table_to_str(t)
+    local out = ""
+    out = out .. "{"
+    for k,v in pairs(t) do
+        out = out .. "[" .. k .. "]="
+        if type(v) == "table" then
+            out = out .. table_to_str(v)
+        else
+            out = out .. v
+        end
+        out = out .. ","
+    end
+end
