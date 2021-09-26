@@ -15,6 +15,38 @@ FlangerNode::FlangerNode(int id, const AudioInfo current_audio_info) : MiddleNod
 
 }
 
+FlangerNode::FlangerNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) {
+
+    /*
+        Example info:
+
+        {
+            ["DelayTimeMilliseconds"]=1,
+            ["DelayFrequency"]=1,
+            ["FeedbackGain"]=-6
+        }
+    */
+
+    max_delay_time = init_table.get_or("DelayTimeMilliseconds", 1.0);
+    delay_frequency = init_table.get_or("DelayFrequency", 1.0);
+    feedback_gain = init_table.get_or("FeeedbackGain", -6.0);
+
+    if (current_audio_info.sample_rate == 0) {
+        // don't allocate
+    } else {
+        delay_buf_size = static_cast<size_t>(static_cast<float>(current_audio_info.sample_rate) * (MAX_DELAY_DURATION / 1000.0f) + 0.5);
+        delay_buf = new float[delay_buf_size];
+    }
+
+}
+
+void FlangerNode::luaInit(const sol::table &init_table) {
+    max_delay_time = init_table.get_or("DelayTimeMilliseconds", 1.0);
+    delay_frequency = init_table.get_or("DelayFrequency", 1.0);
+    feedback_gain = init_table.get_or("FeeedbackGain", -6.0);
+    // applyfx should take care of the reallocation
+}
+
 FlangerNode::~FlangerNode() {
     if (delay_buf != nullptr) {
         delete[] delay_buf;

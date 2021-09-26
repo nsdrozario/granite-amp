@@ -12,10 +12,13 @@ namespace guitar_amp {
     class AnalyzerNode : public MiddleNode {
     public:
         AnalyzerNode(int id, const AudioInfo current_audio_info);
+        AnalyzerNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
+
         virtual ~AnalyzerNode();    
         virtual void showGui();
         virtual void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
 
+        void luaInit(const sol::table &init_table);
         void reinit();
     
     private:

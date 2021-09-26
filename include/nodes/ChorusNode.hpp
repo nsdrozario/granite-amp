@@ -9,10 +9,12 @@ namespace guitar_amp {
     public:
         
         ChorusNode(int id, const AudioInfo info);
+        ChorusNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
         virtual ~ChorusNode();
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
+        void luaInit(const sol::table &init_table);
 
     private:
         mindsp::util::ring_buffer<float> delay_line;

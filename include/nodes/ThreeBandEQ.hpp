@@ -10,10 +10,12 @@ namespace guitar_amp {
     class ThreeBandEQ : public MiddleNode {
     public:
         ThreeBandEQ(int id, const AudioInfo current_audio_info);
+        ThreeBandEQ(int id, const AudioInfo current_audio_info, const sol::table &init_table);
         virtual ~ThreeBandEQ();
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
+        void luaInit(const sol::table &init_table);
 
     private:
 

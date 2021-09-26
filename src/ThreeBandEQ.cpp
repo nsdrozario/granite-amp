@@ -35,8 +35,79 @@ ThreeBandEQ::ThreeBandEQ(int id, const AudioInfo current_audio_info) : MiddleNod
 
 }
 
+ThreeBandEQ::ThreeBandEQ(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) {
+
+        /*
+            Example config:
+
+            {
+                ["BassGain"]=0,
+                ["TrebleGain"]=0,
+                ["MidGain"]=0
+            }
+
+        */
+
+        low_shelf.set_coefficients(
+            mindsp::filter::low_shelf(
+                250, 
+                current_audio_info.sample_rate ? current_audio_info.sample_rate : 48000, 
+                2.0f, 
+                init_table.get_or("BassGain", 0.0)
+            )
+        );
+
+        high_shelf.set_coefficients(
+            mindsp::filter::high_shelf(
+                4000,
+                current_audio_info.sample_rate ? current_audio_info.sample_rate : 48000,
+                2.0f,
+                init_table.get_or("TrebleGain", 0.0)
+            )
+        );
+
+        mid_range.set_coefficients(
+            mindsp::filter::peak_filter(
+                900,
+                current_audio_info.sample_rate ? current_audio_info.sample_rate : 48000,
+                0.5,
+                init_table.get_or("MidGain", 0.0)
+            )
+        );
+
+}
+
 ThreeBandEQ::~ThreeBandEQ() {
 
+}
+
+void ThreeBandEQ::luaInit(const sol::table &init_table) {
+            low_shelf.set_coefficients(
+            mindsp::filter::low_shelf(
+                250, 
+                internal_info.sample_rate ? internal_info.sample_rate : 48000, 
+                2.0f, 
+                init_table.get_or("BassGain", 0.0)
+            )
+        );
+
+        high_shelf.set_coefficients(
+            mindsp::filter::high_shelf(
+                4000,
+                internal_info.sample_rate ? internal_info.sample_rate : 48000,
+                2.0f,
+                init_table.get_or("TrebleGain", 0.0)
+            )
+        );
+
+        mid_range.set_coefficients(
+            mindsp::filter::peak_filter(
+                900,
+                internal_info.sample_rate ? internal_info.sample_rate : 48000,
+                0.5,
+                init_table.get_or("MidGain", 0.0)
+            )
+        );
 }
 
 void ThreeBandEQ::showGui() {

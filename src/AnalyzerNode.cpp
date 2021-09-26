@@ -8,6 +8,11 @@ AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info) : MiddleN
     this->fft_size = 0;
 }
 
+AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) {
+    this->internal_fft.init(fftconvolver::NextPowerOf2(device.capture.internalPeriodSizeInFrames));
+    this->fft_size = 0;
+}
+
 AnalyzerNode::~AnalyzerNode() { }
 
 void AnalyzerNode::showGui() {

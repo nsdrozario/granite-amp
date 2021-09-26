@@ -12,10 +12,13 @@ namespace guitar_amp {
     public:
         
         OverdriveNode(int id, const AudioInfo current_audio_info);
-        ~OverdriveNode();
+        OverdriveNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
+        virtual ~OverdriveNode();
         
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info); 
+
+        void luaInit(const sol::table &init_table);
 
         enum ClippingAlgorithm {
             minmax=0,

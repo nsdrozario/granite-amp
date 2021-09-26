@@ -9,6 +9,9 @@
 #include <mutex>
 #include <unordered_map>
 #include <AudioInfo.hpp>
+
+#include <sol/sol.hpp>
+
 using namespace guitar_amp;
 
 // global vars
@@ -43,5 +46,7 @@ extern bool oversamplingEnabled;
 extern bool advancedMode;
 extern int current_node;
 extern int last_node_hovered;
+
+std::string adjlist_to_lua();
 
 #endif

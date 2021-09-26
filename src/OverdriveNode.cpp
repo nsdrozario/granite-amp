@@ -55,6 +55,117 @@ OverdriveNode::~OverdriveNode() {
 
 }
 
+OverdriveNode::OverdriveNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) {
+
+    /*
+
+        Exmaple config:
+
+        {
+            ["HPF"]=12000,
+            ["LPF"]=300,
+            ["Gain"]=0,
+            ["Volume"]=-35
+        }
+
+    */
+
+    lpf_cutoff = init_table.get_or("LPF", 12000.0);
+    hpf_cutoff = init_table.get_or("HPF", 300.0);
+    gain = init_table.get_or("Gain", 0.0);
+    output_volume = init_table.get_or("Volume", -35.0);
+
+    low_pass.set_coefficients(
+       mindsp::filter::low_pass_filter(
+           lpf_cutoff, 
+           (current_audio_info.sample_rate) ? static_cast<float>(current_audio_info.sample_rate) : 48000, 
+           1.0f
+        )
+    );
+
+    high_pass.set_coefficients(
+        mindsp::filter::high_pass_filter(
+            hpf_cutoff,
+            (current_audio_info.sample_rate) ? static_cast<float>(current_audio_info.sample_rate) : 48000,
+            1.0f
+        )
+    );
+
+    ma_resampler_config resampler_cfg_up = ma_resampler_config_init(
+        ma_format_f32, 
+        1, 
+        current_audio_info.sample_rate, 
+        current_audio_info.sample_rate * OVERSAMPLIING_FACTOR,  
+        ma_resample_algorithm_linear
+    );
+    
+    ma_resampler_config resampler_cfg_down = ma_resampler_config_init(
+        ma_format_f32,
+        1,
+        current_audio_info.sample_rate * OVERSAMPLIING_FACTOR,
+        current_audio_info.sample_rate,
+        ma_resample_algorithm_linear
+    );
+
+
+    ma_resampler_init(&resampler_cfg_up, &upscaler);
+    ma_resampler_init(&resampler_cfg_down, &downscaler);
+
+    buf_upscale = new float[current_audio_info.period_length * OVERSAMPLIING_FACTOR];
+
+}
+
+OverdriveNode::~OverdriveNode() {
+
+    delete[] buf_upscale;
+
+}
+
+void OverdriveNode::luaInit(const sol::table &init_table) {
+    lpf_cutoff = init_table.get_or("LPF", 12000.0);
+    hpf_cutoff = init_table.get_or("HPF", 300.0);
+    gain = init_table.get_or("Gain", 0.0);
+    output_volume = init_table.get_or("Volume", -35.0);
+
+    low_pass.set_coefficients(
+       mindsp::filter::low_pass_filter(
+           lpf_cutoff, 
+           (internal_info.sample_rate) ? static_cast<float>(internal_info.sample_rate) : 48000, 
+           1.0f
+        )
+    );
+
+    high_pass.set_coefficients(
+        mindsp::filter::high_pass_filter(
+            hpf_cutoff,
+            (internal_info.sample_rate) ? static_cast<float>(internal_info.sample_rate) : 48000,
+            1.0f
+        )
+    );
+
+    ma_resampler_config resampler_cfg_up = ma_resampler_config_init(
+        ma_format_f32, 
+        1, 
+        internal_info.sample_rate, 
+        internal_info.sample_rate * OVERSAMPLIING_FACTOR,  
+        ma_resample_algorithm_linear
+    );
+    
+    ma_resampler_config resampler_cfg_down = ma_resampler_config_init(
+        ma_format_f32,
+        1,
+        internal_info.sample_rate * OVERSAMPLIING_FACTOR,
+        internal_info.sample_rate,
+        ma_resample_algorithm_linear
+    );
+
+
+    ma_resampler_init(&resampler_cfg_up, &upscaler);
+    ma_resampler_init(&resampler_cfg_down, &downscaler);
+
+    buf_upscale = new float[internal_info.period_length * OVERSAMPLIING_FACTOR];
+}
+
 void OverdriveNode::showGui() {
 
     ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(201, 4, 126, 100));

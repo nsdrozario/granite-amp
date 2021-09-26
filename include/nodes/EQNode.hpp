@@ -32,10 +32,12 @@ namespace guitar_amp {
     class EQNode : public MiddleNode {
     public:
         EQNode(int id, const AudioInfo current_audio_info);
-        ~EQNode();
+        EQNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
+        virtual ~EQNode();
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
+        void luaInit(const sol::table &init_table);
     private:
         std::list<FilterWrapper> filters;  
     };

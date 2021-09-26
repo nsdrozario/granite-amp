@@ -17,10 +17,12 @@ namespace guitar_amp {
     public:
         
         ConvolutionNode(int id, const AudioInfo current_audio_info);
-        ~ConvolutionNode();
+        ConvolutionNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
+        virtual ~ConvolutionNode();
         
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info); 
+        void luaInit(const sol::table &init_table);
 
     private:
 

@@ -15,12 +15,14 @@ namespace guitar_amp {
     public:
 
         CabSimNode(int id, const AudioInfo current_audio_info);
-        ~CabSimNode();
+        CabSimNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
+        virtual ~CabSimNode();
 
         void reinit(CabSimSettings settings);
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
+        void luaInit(sol::table init_lua);
 
     private:
 

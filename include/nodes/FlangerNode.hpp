@@ -13,10 +13,12 @@ namespace guitar_amp {
     public:
         
         FlangerNode(int id, const AudioInfo current_audio_info);
-        ~FlangerNode();
+        FlangerNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
+        virtual ~FlangerNode();
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
+        void luaInit(const sol::table &init_table);
 
     private:
     
