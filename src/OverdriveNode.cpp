@@ -115,12 +115,6 @@ OverdriveNode::OverdriveNode(int id, const AudioInfo current_audio_info, const s
 
 }
 
-OverdriveNode::~OverdriveNode() {
-
-    delete[] buf_upscale;
-
-}
-
 void OverdriveNode::luaInit(const sol::table &init_table) {
     lpf_cutoff = init_table.get_or("LPF", 12000.0);
     hpf_cutoff = init_table.get_or("HPF", 300.0);

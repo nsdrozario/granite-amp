@@ -13,38 +13,6 @@ OscillatorNode::OscillatorNode(int id, const AudioInfo current_audio_info) : Mid
     ma_waveform_init(&wave_gen_cfg, &(this->wav_gen));
 }
 
-OscillatorNode::~OscillatorNode() { };
-
-void OscillatorNode::showGui() {
-    
-    ImGui::PushItemWidth(100);
-    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(232, 232, 232, 100));
-    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(232, 232, 232, 255));
-    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(232, 232, 232, 255));
-    
-    ImNodes::BeginNode(this->id);
-        ImNodes::BeginNodeTitleBar();
-            ImGui::TextColored(ImVec4(ImColor(18,18,18,255)), "Oscillator");
-        ImNodes::EndNodeTitleBar();
-
-        ImNodes::BeginInputAttribute(this->id+1);
-        ImNodes::EndInputAttribute();
-        ImNodes::BeginOutputAttribute(this->id+3);
-        ImNodes::EndOutputAttribute();
-        
-        ImGui::Combo(
-            "Wave type",
-            &(this->wave_type),
-            "sine\0square\0triangle\0sawtooth\0"
-        );
-
-        ImGui::DragFloat("Amplitude (dB)", &(this->amplitude), 2.0f, -144.0f, 0.0f, "%.3f dB");
-        ImGui::DragFloat("Frequency (Hz)", &(this->freq), 100.f, 0.0f, 20000.0f, "%.3f Hz");
-
-    ImNodes::EndNode();
-    
-}
-
 OscillatorNode::OscillatorNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) {
     ma_waveform_config wave_gen_cfg = ma_waveform_config_init(
         ma_format_f32, 
@@ -92,7 +60,6 @@ void OscillatorNode::showGui() {
     ImNodes::EndNode();
     
 }
-
 
 void OscillatorNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     float linear_amplitude = dsp::dbfs_to_f32(this->amplitude);

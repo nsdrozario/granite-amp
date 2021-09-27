@@ -17,6 +17,11 @@ CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info, const
     ratio = init_table.get_or("Ratio", 1.0);
 }
 
+void CompressorNode::luaInit(const sol::table &init_table) {
+    threshold = init_table.get_or("Threshold", 0.0);
+    ratio = init_table.get_or("Ratio", 1.0);  
+}
+
 CompressorNode::~CompressorNode() { }
 
 void CompressorNode::showGui() {
