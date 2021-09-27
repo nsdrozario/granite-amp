@@ -13,6 +13,8 @@ AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info, const sol
     this->fft_size = 0;
 }
 
+void AnalyzerNode::luaInit(const sol::table &init_table) { }
+
 AnalyzerNode::~AnalyzerNode() { }
 
 void AnalyzerNode::showGui() {

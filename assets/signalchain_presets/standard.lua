@@ -1,29 +1,29 @@
 nodes = {
     {
-        ["type"] = "overdrive",
+        ["type"] = "Overdrive",
         ["state"] = {
-            ["gain"]=0,
-            ["lpf_freq"]=12000,
-            ["hpf_freq"]=300,
-            ["algorithm"]="tanh"
+            ["Gain"]=0,
+            ["Volume"]=-35,
+            ["LPF"]=12000,
+            ["HPF"]=300,
         }
     },
     {
-        ["type"] = "cabsim",
+        ["type"] = "CabSim",
         ["state"] = {
-            ["hpf"] = 60,
-            ["lpf"] = 12000,
-            ["lowmid"] = {
+            ["HPF"] = 60,
+            ["LPF"] = 12000,
+            ["LowMid"] = {
                 ["freq"] = 250,
                 ["q"] = 4,
                 ["gain"] = 6
             },
-            ["mid"] = {
+            ["Mid"] = {
                 ["freq"] = 500,
                 ["q"] = 4,
                 ["gain"] = -12
             },
-            ["presence"] = {
+            ["Presence"] = {
                 ["freq"] = 1250,
                 ["q"] = 12,
                 ["gain"] = -6

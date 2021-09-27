@@ -37,6 +37,14 @@ ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info) : M
 
 }
 
+ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : ConvolutionNode(id, current_audio_info) { 
+    // presets involving ConvolutionNode are kind of useless unless you want to bundle the files somehow
+}
+
+void ConvolutionNode::luaInit(const sol::table &init_table) {
+
+}
+
 ConvolutionNode::~ConvolutionNode() {
     // decoder should already be released at this point
     this->convolver.reset();    

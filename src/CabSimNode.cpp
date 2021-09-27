@@ -53,6 +53,163 @@ CabSimNode::CabSimNode(int id, const AudioInfo info) : MiddleNode(id, info) {
 
 }
 
+CabSimNode::CabSimNode(int id, const AudioInfo info, const sol::table &init_table) : MiddleNode(id, info) {
+    
+    /*
+        Example:
+        {
+            ["HPF"] = 60,
+            ["LPF"] = 12000,
+            ["LowMid"] = {
+                ["freq"] = 250,
+                ["q"] = 4,
+                ["gain"] = 6
+            },
+            ["Mid"] = {
+                ["freq"] = 500,
+                ["q"] = 4,
+                ["gain"] = -12
+            },
+            ["Presence"] = {
+                ["freq"] = 1250,
+                ["q"] = 12,
+                ["gain"] = -6
+            }
+        }
+    */
+
+    lpf_freq = init_table.get_or("LPF", 12000.0);
+    hpf_freq = init_table.get_or("HPF", 60.0);
+
+    if (init_table.get<sol::table>("LowMid")) {
+        low_mids_boost_freq = init_table.get<sol::table>("LowMid").get_or("freq", 250.0);
+        low_mids_boost_magnitude = init_table.get<sol::table>("LowMid").get_or("gain", 6.0);
+        low_mids_boost_q = init_table.get<sol::table>("LowMid").get_or("q", 4.0);
+    }
+
+    if (init_table["Mid"]) {
+        mid_scoop_freq = init_table.get<sol::table>("Mid").get_or("freq", 500.0);
+        mid_scoop_magnitude = init_table.get<sol::table>("Mid").get_or("gain", -12.0);
+        mid_scoop_q = init_table.get<sol::table>("Mid").get_or("q", 4.0);
+    }
+
+    if (init_table["Presence"]) {
+        presence_freq = init_table.get<sol::table>("Presence").get_or("freq", 1250.0);
+        presence_magnitude = init_table.get<sol::table>("Presence").get_or("gain", -6.0);
+        presence_q = init_table.get<sol::table>("Presence").get_or("q", 12.0);
+    }
+
+    lpf.set_coefficients(
+        mindsp::filter::low_pass_filter(
+            lpf_freq,
+            info.sample_rate,
+            2.0f
+        )
+    );
+
+    hpf.set_coefficients(
+        mindsp::filter::high_pass_filter(
+            hpf_freq,
+            info.sample_rate,
+            2.0f
+        )
+    );
+
+    low_mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            low_mids_boost_freq,
+            info.sample_rate,
+            low_mids_boost_q,
+            low_mids_boost_magnitude
+        )
+    );
+
+    mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            mid_scoop_freq,
+            info.sample_rate,
+            mid_scoop_q,
+            mid_scoop_magnitude
+        )
+    );
+
+    presence.set_coefficients(
+        mindsp::filter::peak_filter(
+            presence_freq,
+            info.sample_rate,
+            presence_q,
+            presence_magnitude
+        )
+    );
+
+}
+
+void CabSimNode::luaInit(const sol::table &init_table) {
+    lpf_freq = init_table.get_or("LPF", 12000.0);
+    hpf_freq = init_table.get_or("HPF", 60.0);
+
+    if (init_table.get<sol::table>("LowMid")) {
+        low_mids_boost_freq = init_table.get<sol::table>("LowMid").get_or("freq", 250.0);
+        low_mids_boost_magnitude = init_table.get<sol::table>("LowMid").get_or("gain", 6.0);
+        low_mids_boost_q = init_table.get<sol::table>("LowMid").get_or("q", 4.0);
+    }
+
+    if (init_table["Mid"]) {
+        mid_scoop_freq = init_table.get<sol::table>("Mid").get_or("freq", 500.0);
+        mid_scoop_magnitude = init_table.get<sol::table>("Mid").get_or("gain", -12.0);
+        mid_scoop_q = init_table.get<sol::table>("Mid").get_or("q", 4.0);
+    }
+
+    if (init_table["Presence"]) {
+        presence_freq = init_table.get<sol::table>("Presence").get_or("freq", 1250.0);
+        presence_magnitude = init_table.get<sol::table>("Presence").get_or("gain", -6.0);
+        presence_q = init_table.get<sol::table>("Presence").get_or("q", 12.0);
+    }
+
+    lpf.set_coefficients(
+        mindsp::filter::low_pass_filter(
+            lpf_freq,
+            internal_info.sample_rate,
+            2.0f
+        )
+    );
+
+    hpf.set_coefficients(
+        mindsp::filter::high_pass_filter(
+            hpf_freq,
+            internal_info.sample_rate,
+            2.0f
+        )
+    );
+
+    low_mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            low_mids_boost_freq,
+            internal_info.sample_rate,
+            low_mids_boost_q,
+            low_mids_boost_magnitude
+        )
+    );
+
+    mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            mid_scoop_freq,
+            internal_info.sample_rate,
+            mid_scoop_q,
+            mid_scoop_magnitude
+        )
+    );
+
+    presence.set_coefficients(
+        mindsp::filter::peak_filter(
+            presence_freq,
+            internal_info.sample_rate,
+            presence_q,
+            presence_magnitude
+        )
+    );
+}
+
 CabSimNode::~CabSimNode() { }
 
 void CabSimNode::reinit(CabSimSettings settings) {

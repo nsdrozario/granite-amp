@@ -5,6 +5,17 @@
 using namespace guitar_amp;
 
 CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) { }
+CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) { 
+    /*
+        Example config:
+        {
+            ["Threshold"]=0,
+            ["Ratio"]=1
+        }
+    */
+    threshold = init_table.get_or("Threshold", 0.0);
+    ratio = init_table.get_or("Ratio", 1.0);
+}
 
 CompressorNode::~CompressorNode() { }
 

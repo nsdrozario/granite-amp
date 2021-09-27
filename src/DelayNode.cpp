@@ -11,7 +11,25 @@ using std::cout;
 DelayNode::DelayNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 }
 
+DelayNode::DelayNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) {
+    /*
+        example config:
+        {
+            ["DelayTimeSeconds"]=0,
+            ["FeedbackGain"]=-6
+        }
+    */
+   time_delay = init_table.get_or("DelayTimeSeconds", 0.0);
+   feedback_gain = init_table.get_or("FeedbackGain", -6.0);
+}
+
 DelayNode::~DelayNode() { }
+
+void DelayNode::luaInit(const sol::table &init_table) {
+   time_delay = init_table.get_or("DelayTimeSeconds", 0.0);
+   feedback_gain = init_table.get_or("FeedbackGain", -6.0);   
+}
+
 
 void DelayNode::showGui() {
     ImGui::PushItemWidth(100);
