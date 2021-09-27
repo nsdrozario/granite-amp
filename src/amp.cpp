@@ -91,6 +91,12 @@ float processTime = 0.0f;
 bool advancedMode = false;
 int current_node = 10;
 
+std::vector<std::string> config_paths;
+std::vector<std::string> config_names;
+
+bool *config_selected = nullptr;
+int config_selected_id;
+
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
@@ -260,6 +266,18 @@ void print_adjlist() {
     }
 }
 
+std::vector<const char *> config_paths_c_str;
+std::vector<const char *> config_names_c_str;
+
+void align_c_str_vector(std::vector<std::string> &in, std::vector<const char *> &out) {
+    if (in.size() != out.size()) {
+        out.resize(in.size());
+    }
+    for (std::size_t i = 0; i < in.size(); i++) {
+        out[i] = in[i].c_str();
+    }
+}
+
 int main () {
 
     // Initialize Miniaudio
@@ -270,6 +288,11 @@ int main () {
     }
 
     io::refresh_devices();
+    io::file_paths(config_paths, "assets/signalchain_presets/");
+    io::file_names(config_names, "assets/signalchain_presets");
+    config_selected = new bool[config_names.size()];
+    align_c_str_vector(config_paths, config_paths_c_str);
+    align_c_str_vector(config_names, config_names_c_str);
 
     deviceConfig = ma_device_config_init(ma_device_type_duplex);
     deviceConfig.periodSizeInFrames = 512;
@@ -410,20 +433,41 @@ int main () {
             }
         ImGui::End();
 
-        // control panel
-        ImGui::Begin("Control Panel");
-
-            // ImGui::Text("Time to process: %.1f ms", processTime);
-            ImGui::Checkbox("Metronome", &metronomeEnabled);
+        ImGui::Begin("Metronome");
+            ImGui::Checkbox("Enabled", &metronomeEnabled);
             
             if (ImGui::InputInt("Metronome BPM", &metronomeBPM, 1, 10)) {
                 metronomeTickSamples = 0;
             }
             if (advancedMode) {
-                ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.3f dB");
+                ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 6.0f, "%.3f dB");
             } else {
-                ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -60.0f, 0.0f, "%.0f dB");
+                ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -60.0f, 6.0f, "%.0f dB");
             }
+        ImGui::End();
+
+        ImGui::Begin("Preset Manager");
+            // preset loader
+            if (ImGui::ListBox("Presets", &config_selected_id, config_names_c_str.data(), config_names.size())) {
+                
+            }
+
+            if (ImGui::Button("Refresh Preset List")) {
+                io::file_paths(config_paths, "assets/signalchain_presets/");
+                io::file_names(config_names, "assets/signalchain_presets");
+                if (config_selected != nullptr) {
+                    delete[] config_selected;
+                }
+                config_selected = new bool[config_names.size()];
+                align_c_str_vector(config_paths, config_paths_c_str);
+                align_c_str_vector(config_names, config_names_c_str);
+            }
+        ImGui::End();
+
+        // control panel
+        ImGui::Begin("Control Panel");
+
+            // ImGui::Text("Time to process: %.1f ms", processTime);
 
             if (audioEnabled) {
             
@@ -472,7 +516,7 @@ int main () {
             }
             // todo: levels meter
             if (advancedMode) {
-                ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
+            //    ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
             }
 
             ImGui::Checkbox("Advanced Mode", &advancedMode);

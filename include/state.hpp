@@ -9,7 +9,6 @@
 #include <mutex>
 #include <unordered_map>
 #include <AudioInfo.hpp>
-
 #include <sol/sol.hpp>
 
 using namespace guitar_amp;
@@ -47,6 +46,17 @@ extern bool advancedMode;
 extern int current_node;
 extern int last_node_hovered;
 
+extern std::vector<std::string> config_paths;
+extern std::vector<std::string> config_names;
+extern bool *config_selected;
+extern int config_selected_id;
+
 std::string adjlist_to_lua();
+std::string nodes_to_lua();
+
+void lua_to_adjlist();
+void lua_to_nodes();
+
+
 
 #endif
