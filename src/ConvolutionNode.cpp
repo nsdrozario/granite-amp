@@ -45,6 +45,12 @@ void ConvolutionNode::luaInit(const sol::table &init_table) {
 
 }
 
+sol::table ConvolutionNode::serializeLua() {
+    sol::table out;
+    out["type"] = "Convolution";
+    out["state"] = sol::table();
+}
+
 ConvolutionNode::~ConvolutionNode() {
     // decoder should already be released at this point
     this->convolver.reset();    

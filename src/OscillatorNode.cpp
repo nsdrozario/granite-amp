@@ -61,6 +61,13 @@ void OscillatorNode::showGui() {
     
 }
 
+sol::table OscillatorNode::serializeLua() {
+    sol::table out;
+    out["type"] = "Oscillator";
+    out["state"] = sol::table();
+    return out;
+}
+
 void OscillatorNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     float linear_amplitude = dsp::dbfs_to_f32(this->amplitude);
 

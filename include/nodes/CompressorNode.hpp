@@ -14,7 +14,8 @@ namespace guitar_amp {
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
         void luaInit(const sol::table &init_table);
-
+        virtual sol::table serializeLua();
+    
     private:
         static const int COMPRESSOR_PEAK = 0;
         // might add more metering types later

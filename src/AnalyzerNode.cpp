@@ -14,6 +14,11 @@ AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info, const sol
 }
 
 void AnalyzerNode::luaInit(const sol::table &init_table) { }
+sol::table AnalyzerNode::serializeLua() { 
+    sol::table out;
+    out["type"] = "Analyzer";
+    out["state"] = sol::table();
+}
 
 AnalyzerNode::~AnalyzerNode() { }
 

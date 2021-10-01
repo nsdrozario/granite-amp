@@ -40,6 +40,30 @@ FlangerNode::FlangerNode(int id, const AudioInfo current_audio_info, const sol::
 
 }
 
+sol::table FlangerNode::serializeLua() {
+    /*
+        Example info:
+
+        {
+            ["DelayTimeMilliseconds"]=1,
+            ["DelayFrequency"]=1,
+            ["FeedbackGain"]=-6
+        }
+    */
+    sol::table out;
+    sol::table state;
+    out["type"] = "Flanger";
+
+    state["DelayTimeMilliseconds"] = max_delay_time;
+    state["DelayFrequency"] = delay_frequency;
+    state["FeedbackGain"] = feedback_gain;
+    
+    out["state"] = state;
+    
+    return out;
+
+}
+
 void FlangerNode::luaInit(const sol::table &init_table) {
     max_delay_time = init_table.get_or("DelayTimeMilliseconds", 1.0);
     delay_frequency = init_table.get_or("DelayFrequency", 1.0);

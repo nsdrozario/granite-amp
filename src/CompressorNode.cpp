@@ -22,6 +22,17 @@ void CompressorNode::luaInit(const sol::table &init_table) {
     ratio = init_table.get_or("Ratio", 1.0);  
 }
 
+sol::table CompressorNode::serializeLua() {
+    sol::table out;
+    sol::table state;
+    out["type"] = "Compressor";
+
+    state["Threshold"] = threshold;
+    state["Ratio"] = ratio;
+
+    out["state"] = state;
+}
+
 CompressorNode::~CompressorNode() { }
 
 void CompressorNode::showGui() {

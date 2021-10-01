@@ -20,7 +20,8 @@ namespace guitar_amp {
 
         void luaInit(const sol::table &init_table);
         void reinit();
-    
+        virtual sol::table serializeLua();
+
     private:
         bool showing_spectrum = false;
         bool accept_warning = false;

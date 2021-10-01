@@ -25,6 +25,8 @@ namespace guitar_amp {
 
         virtual void luaInit(const sol::table &init_table) = 0;
 
+        virtual sol::table serializeLua() = 0;
+
     protected: 
         AudioInfo internal_info; // in case the node depends on the audio device state
     };

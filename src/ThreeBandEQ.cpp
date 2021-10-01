@@ -110,6 +110,33 @@ void ThreeBandEQ::luaInit(const sol::table &init_table) {
         );
 }
 
+sol::table ThreeBandEQ::serializeLua() {
+
+    /*
+        Example config:
+
+        {
+            ["BassGain"]=0,
+            ["TrebleGain"]=0,
+            ["MidGain"]=0
+        }
+
+    */
+
+    sol::table out;
+    sol::table state;
+    out["type"] = "ThreeBandEQ";
+
+    state["BassGain"] = bass_gain;
+    state["TrebleGain"] = treble_gain;
+    state["MidGain"] = mid_gain;
+    
+    out["state"] = state;
+
+    return out;
+
+}
+
 void ThreeBandEQ::showGui() {
     ImGui::PushItemWidth(100);
     ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(240, 222, 29, 100));

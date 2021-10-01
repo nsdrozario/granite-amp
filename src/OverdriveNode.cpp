@@ -115,6 +115,37 @@ OverdriveNode::OverdriveNode(int id, const AudioInfo current_audio_info, const s
 
 }
 
+sol::table OverdriveNode::serializeLua() {
+    
+    /*
+
+        Exmaple config:
+
+        {
+            ["HPF"]=12000,
+            ["LPF"]=300,
+            ["Gain"]=0,
+            ["Volume"]=-35
+        }
+
+    */
+
+    sol::table out;
+    sol::table state;
+
+    out["type"] = "Overdrive";
+
+    state["HPF"] = hpf_cutoff;
+    state["LPF"] = lpf_cutoff;
+    state["Gain"] = gain;
+    state["Volume"] = output_volume;
+
+    out["state"] = state;
+
+    return out;
+
+}
+
 void OverdriveNode::luaInit(const sol::table &init_table) {
     lpf_cutoff = init_table.get_or("LPF", 12000.0);
     hpf_cutoff = init_table.get_or("HPF", 300.0);

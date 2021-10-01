@@ -30,6 +30,15 @@ void DelayNode::luaInit(const sol::table &init_table) {
    feedback_gain = init_table.get_or("FeedbackGain", -6.0);   
 }
 
+sol::table DelayNode::serializeLua() {
+    sol::table out;
+    sol::table state;
+    out["type"] = "Delay";
+    state["DelayTimeSeconds"] = time_delay;
+    state["FeedbackGain"] = feedback_gain;
+    out["state"] = state;
+    return out;
+}
 
 void DelayNode::showGui() {
     ImGui::PushItemWidth(100);

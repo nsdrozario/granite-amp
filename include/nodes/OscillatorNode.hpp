@@ -15,6 +15,7 @@ namespace guitar_amp {
         virtual void showGui();
         virtual void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
         virtual void luaInit(const sol::table &init_table);
+        virtual sol::table serializeLua();
 
     protected:
         float freq = 440.0f; // A4 = 440hz

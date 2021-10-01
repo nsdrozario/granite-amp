@@ -210,6 +210,62 @@ void CabSimNode::luaInit(const sol::table &init_table) {
     );
 }
 
+sol::table CabSimNode::serializeLua() {
+    /*
+        Example:
+        {
+            ["HPF"] = 60,
+            ["LPF"] = 12000,
+            ["LowMid"] = {
+                ["freq"] = 250,
+                ["q"] = 4,
+                ["gain"] = 6
+            },
+            ["Mid"] = {
+                ["freq"] = 500,
+                ["q"] = 4,
+                ["gain"] = -12
+            },
+            ["Presence"] = {
+                ["freq"] = 1250,
+                ["q"] = 12,
+                ["gain"] = -6
+            }
+        }
+    */
+
+    sol::table out;
+    sol::table state;
+    sol::table low_mid_config;
+    sol::table mid_config;
+    sol::table presence_config;
+
+    out["type"] = "CabSim";
+    state["HPF"] = hpf_freq;
+    state["LPF"] = lpf_freq;
+
+    low_mid_config["freq"] = low_mids_boost_freq;
+    low_mid_config["q"] = low_mids_boost_q;
+    low_mid_config["gain"] = low_mids_boost_magnitude;
+
+    mid_config["freq"] = mid_scoop_freq;
+    mid_config["q"] = mid_scoop_q;
+    mid_config["gain"] = mid_scoop_magnitude;
+
+    presence_config["freq"] = presence_freq;
+    presence_config["q"] = mid_scoop_q;
+    presence_config["gain"] = mid_scoop_magnitude;
+
+    state["LowMid"] = low_mid_config;
+    state["Mid"] = mid_config;
+    state["Presence"] = presence_config;
+
+    out["state"] = state;
+
+    return out;
+
+}
+
 CabSimNode::~CabSimNode() { }
 
 void CabSimNode::reinit(CabSimSettings settings) {

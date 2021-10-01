@@ -17,7 +17,7 @@ namespace guitar_amp {
         
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info); 
-
+        virtual sol::table serializeLua();
         void luaInit(const sol::table &init_table);
 
         enum ClippingAlgorithm {
