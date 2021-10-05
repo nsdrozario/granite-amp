@@ -449,7 +449,8 @@ int main () {
         ImGui::Begin("Preset Manager");
             // preset loader
             if (ImGui::ListBox("Presets", &config_selected_id, config_names_c_str.data(), config_names.size())) {
-                
+                // load preset
+                amp_load_preset(config_paths[config_selected_id]);
             }
 
             if (ImGui::Button("Refresh Preset List")) {

@@ -56,7 +56,7 @@ std::string nodes_to_lua();
 
 void lua_to_adjlist(const sol::table &adjlist_p, const sol::table &adjlist_inward_p);
 void lua_to_nodes(const sol::table &data);
-
+void amp_load_preset(const std::string &name);
 
 
 #endif

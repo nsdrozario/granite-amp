@@ -40,6 +40,7 @@ std::string nodes_to_lua() {
         }
     }
     out << " };\n";
+    return out.str();
 }
 
 
@@ -72,7 +73,7 @@ void lua_to_nodes(const sol::table &data) {
         sol::object index = o.first;
         sol::object value = o.second;
         if (index.get_type() == sol::type::number && value.get_type() == sol::type::table) {
-            std::string node_type = value.as<sol::table>().get_or("type", "invalid");
+            std::string node_type = value.as<sol::table>().get_or<std::string>("type", "invalid");
             sol::table node_state = value.as<sol::table>().get_or("state", sol::table());
             if (node_type == "Overdrive") {
                 nodes[node_i] = new guitar_amp::OverdriveNode(node_i, globalAudioInfo);
@@ -95,8 +96,19 @@ void lua_to_nodes(const sol::table &data) {
             } else {
 
             }
-            MiddleNode *real_node;
+            MiddleNode *real_node = dynamic_cast<MiddleNode *>(nodes[node_i]);
+            if (real_node) {
+                real_node->luaInit(node_state);
+            }
             node_i += 5;
         }
     }
+}
+
+void amp_load_preset(const std::string &file_name) {
+    sol::state l;
+    l.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::table);
+    l.script_file(file_name);
+    lua_to_nodes(l.get_or("nodes", sol::table()));
+    lua_to_adjlist(l.get_or("adjlist", sol::table()), l.get_or("adjlist_inward", sol::table()));
 }
