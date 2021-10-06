@@ -1,7 +1,7 @@
 #include <state.hpp>
 #include <sstream>
 #include <Nodes.hpp>
-
+#include <fstream>
 
 std::string adjlist_to_lua() {
     sol::state l;
@@ -41,6 +41,14 @@ std::string nodes_to_lua() {
     }
     out << " };\n";
     return out.str();
+}
+
+void amp_save_preset(const std::string &file_path) {
+    std::ofstream output_file (file_path);
+    if (output_file.good() && output_file.is_open()) {
+        output_file << nodes_to_lua() << "\n" << adjlist_to_lua() << "\n";
+    }
+    output_file.close();
 }
 
 
