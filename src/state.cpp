@@ -53,6 +53,8 @@ void amp_save_preset(const std::string &file_path) {
 
 
 void lua_to_adjlist(const sol::table &adjlist_p, const sol::table &adjlist_inward_p) {
+    adjlist.clear();
+    adjlist_inward.clear();
     for (const auto &o : adjlist_p) {
         sol::object index = o.first;
         sol::object value = o.second;
@@ -76,6 +78,12 @@ void lua_to_adjlist(const sol::table &adjlist_p, const sol::table &adjlist_inwar
 // call this before lua_to_adjlist otherwise you'll get a segfault
 void lua_to_nodes(const sol::table &data) {
     // the first real node is id 10 since input node is id 0 and output onde is id 5
+    for (const auto &p : nodes) {
+        if (p.first != 0 && p.first != 5) {
+            delete p.second;
+            nodes.erase(p.first);
+        }
+    }
     int node_i = 10;
     for (const auto &o : data) {
         sol::object index = o.first;
