@@ -18,6 +18,7 @@ sol::table AnalyzerNode::serializeLua() {
     sol::table out;
     out["type"] = "Analyzer";
     out["state"] = sol::table();
+    return out;
 }
 
 AnalyzerNode::~AnalyzerNode() { }

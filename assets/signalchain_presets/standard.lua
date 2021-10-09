@@ -2,8 +2,8 @@ nodes = {
     {
         ["type"] = "Overdrive",
         ["state"] = {
-            ["Gain"]=20,
-            ["Volume"]=-35,
+            ["Gain"]=40,
+            ["Volume"]=-20,
             ["LPF"]=12000,
             ["HPF"]=300,
         }

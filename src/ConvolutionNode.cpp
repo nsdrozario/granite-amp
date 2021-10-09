@@ -49,6 +49,7 @@ sol::table ConvolutionNode::serializeLua() {
     sol::table out;
     out["type"] = "Convolution";
     out["state"] = sol::table();
+    return out;
 }
 
 ConvolutionNode::~ConvolutionNode() {

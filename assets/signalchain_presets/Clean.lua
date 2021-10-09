@@ -3,7 +3,7 @@ nodes = {
         ["type"] = "Overdrive",
         ["state"] = {
             ["Gain"]=0,
-            ["Volume"]=-35,
+            ["Volume"]=-20,
             ["LPF"]=12000,
             ["HPF"]=300,
         }

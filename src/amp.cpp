@@ -453,13 +453,9 @@ int main () {
                 amp_load_preset(config_paths[config_selected_id]);
             }
 
-            /*
-            static char preset_name[256]{};
-            
-            ImGui::InputText("Preset Name", preset_name, 256);
 
             if (ImGui::Button("Save as Preset")) {
-                amp_save_preset(std::string(preset_name, 256));
+                amp_save_preset("NewPreset.lua");
                 io::file_paths(config_paths, "assets/signalchain_presets/");
                 io::file_names(config_names, "assets/signalchain_presets");
                 if (config_selected != nullptr) {
@@ -469,7 +465,7 @@ int main () {
                 align_c_str_vector(config_paths, config_paths_c_str);
                 align_c_str_vector(config_names, config_names_c_str);
             }
-            */
+            
             if (ImGui::Button("Refresh Preset List")) {
                 io::file_paths(config_paths, "assets/signalchain_presets/");
                 io::file_names(config_names, "assets/signalchain_presets");

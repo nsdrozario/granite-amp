@@ -116,9 +116,11 @@ void lua_to_nodes(const sol::table &data) {
             if (real_node) {
                 real_node->luaInit(node_state);
             }
+            ImNodes::SetNodeEditorSpacePos(node_i, ImVec2( 50 + (node_i % 10) * 50, 200 + (node_i / 10)));
             node_i += 5;
-        }
+        }  
     }
+    current_node = node_i;
 }
 
 void amp_load_preset(const std::string &file_name) {

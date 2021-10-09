@@ -99,12 +99,14 @@ void FlangerNode::showGui() {
         ImNodes::PopAttributeFlag();
 
         if (advancedMode) {
-            ImGui::DragFloat("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS, "%.3f ms");
+            ImGui::DragFloat("Minimum Delay", &min_delay_time, 1.0f, 0.0f, max_delay_time, "%.3f ms");
+            ImGui::DragFloat("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS - 1.0f, "%.3f ms");
             ImGui::DragFloat("LFO Frequency", &delay_frequency, 0.5f, 0.1f, 2.0f, "%.3f Hz");
             ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -144.0f, -1.0f, "%.3f dB");
         } else {
-            ImKnob::Knob("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImKnob::Knob("Minimum Delay", &min_delay_time, 1.0f, 1.0f, max_delay_time, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             ImGui::SameLine();
+            ImKnob::Knob("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS - 1.0f, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             ImKnob::Knob("LFO Frequency", &delay_frequency, 1.0f, 0.5f, 2.0f, "%.1f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             ImGui::SameLine();
             ImKnob::Knob("Feedback", &feedback_gain, 1.0f, -60.0f, -1.0f, "%.0f", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
@@ -120,10 +122,11 @@ void FlangerNode::showGui() {
 
 void FlangerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     
-    dsp::clamp(min_delay_time, 1.0f, 30.0f);
-    dsp::clamp(max_delay_time, 1.0f, MAX_POSSIBLE_DELAY_MS);
-
+    max_delay_time = dsp::clamp(max_delay_time, 1.0f, MAX_POSSIBLE_DELAY_MS);
+    min_delay_time = dsp::clamp(min_delay_time, 1.0f, max_delay_time-1.0f);
+    
     max_delay_samples = dsp::seconds_to_samples(max_delay_time/1000.0f, info.sample_rate);
+    min_delay_samples = dsp::seconds_to_samples(min_delay_time/1000.0f, info.sample_rate);
 
     if (static_cast<size_t>(static_cast<float>(info.sample_rate) * (max_delay_time / 1000.0f) + 0.5) != delay_buf_size) {
         delay_buf_size = static_cast<size_t>(static_cast<float>(info.sample_rate) * (max_delay_time / 1000.0f) + 0.5);
@@ -140,7 +143,7 @@ void FlangerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioIn
             delete[] delay_buf;
         }
 
-        delay_buf_size = static_cast<size_t>(static_cast<float>(info.sample_rate) * (MAX_DELAY_DURATION / 1000.0f) + 0.5);
+        delay_buf_size = static_cast<size_t>(static_cast<float>(info.sample_rate) * (MAX_POSSIBLE_DELAY_MS / 1000.0f) + 0.5);
         delay_buf = new float[delay_buf_size];
 
         internal_timer = 0.0f;
@@ -157,14 +160,25 @@ void FlangerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioIn
 
     for (size_t i = 0; i < numFrames; i++) {
 
-        float lfo_unscaled = std::cos(2.0f * 3.1415927f * delay_frequency * internal_timer / static_cast<float>(info.sample_rate)) + 1;
-        float lfo = lfo_unscaled * ((static_cast<float>(max_delay_samples) * 0.5f) - 1.0f);
+        float lfo_unscaled = std::cos(2.0f * 3.1415927f * delay_frequency * internal_timer / static_cast<float>(info.sample_rate));
+        float lfo = lfo_unscaled * ((static_cast<float>(max_delay_samples - min_delay_samples) * 0.5f));
+        lfo += static_cast<float>(max_delay_samples+min_delay_samples) * 0.5;
         float index = static_cast<float>(write_ptr) - lfo_unscaled;
         while (index < 0) {
             index += static_cast<float>(max_delay_samples);
         }
+        
+        if (!std::isfinite(delay_buf[static_cast<size_t>(index)])) {
+            delay_buf[static_cast<size_t>(index)] = 0;
+        }
+
+        if (!std::isfinite(delay_buf[(static_cast<size_t>(index) + 1) % max_delay_samples])) {
+            delay_buf[(static_cast<size_t>(index) + 1) % max_delay_samples] = 0;
+        }
+
         float y0 = delay_buf[static_cast<size_t>(index)];
         float y1 = delay_buf[(static_cast<size_t>(index) + 1) % max_delay_samples];
+        
         float fraction = index - std::floor(index);
         float interpolated = ((y1 - y0) * fraction) + y0;
 

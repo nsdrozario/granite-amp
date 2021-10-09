@@ -31,6 +31,7 @@ sol::table CompressorNode::serializeLua() {
     state["Ratio"] = ratio;
 
     out["state"] = state;
+    return out;
 }
 
 CompressorNode::~CompressorNode() { }
