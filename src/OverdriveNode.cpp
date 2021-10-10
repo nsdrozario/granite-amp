@@ -116,7 +116,7 @@ OverdriveNode::OverdriveNode(int id, const AudioInfo current_audio_info, const s
 }
 
 sol::table OverdriveNode::serializeLua() {
-    
+
     /*
 
         Exmaple config:
@@ -130,17 +130,17 @@ sol::table OverdriveNode::serializeLua() {
 
     */
 
-    sol::table out;
-    sol::table state;
+    sol::table out = sol::table();
+    sol::table state = sol::table();
 
-    out["type"] = "Overdrive";
+    out.set("type", "Overdrive");
 
-    state["HPF"] = hpf_cutoff;
-    state["LPF"] = lpf_cutoff;
-    state["Gain"] = gain;
-    state["Volume"] = output_volume;
+    state.set("HPF", hpf_cutoff);
+    state.set("LPF", lpf_cutoff);
+    state.set("Gain", gain);
+    state.set("Volume", output_volume);
 
-    out["state"] = state;
+    out.set("state", state);
 
     return out;
 
@@ -347,17 +347,21 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
 
     } else {
         */
+       /*
         switch(this->clipping_algorithm) {
             case 0:
                 dsp::hardclip_minmax(out, out, this->gain, this->output_volume, numFrames);
                 break;
             case 1:
+            */
                 dsp::clip_tanh(out, out, this->gain, this->output_volume, numFrames);
+            /*
                 break;
             case 2:
                 dsp::clip_sin(out, out, this->gain, this->output_volume, numFrames);
                 break;
         }
+        */
     /*
     }
     */

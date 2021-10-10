@@ -35,6 +35,9 @@ function serialize(t)
 end
 
 function table_to_str(t)
+    if t==nil or type(t) ~= "table" then
+        return "{}"
+    end
     local out = ""
     out = out .. "{"
     for k,v in pairs(t) do

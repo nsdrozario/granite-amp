@@ -2,8 +2,10 @@
 #include <sstream>
 #include <Nodes.hpp>
 #include <fstream>
+#include <iostream>
 
 std::string adjlist_to_lua() {
+    std::cout << "converting adjlist" << std::endl;
     sol::state l;
     l.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::table);
     l.script_file("scripts/io_module.lua");
@@ -24,6 +26,7 @@ std::string adjlist_to_lua() {
 }
 
 std::string nodes_to_lua() {
+    std::cout << "converting nodes" << std::endl;
     sol::state l;
     l.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::table);
     l.script_file("scripts/io_module.lua");
@@ -35,7 +38,9 @@ std::string nodes_to_lua() {
         int id = n.first;
         AudioProcessorNode *node = n.second;
         MiddleNode *real_node = dynamic_cast<MiddleNode *>(node);
+        std::cout << "node: " << node->getId() << std::endl;
         if (real_node) {
+            std::cout << (real_node->serializeLua()).get<std::string>("type") << std::endl;
             out << serialize_table.call<std::string>(real_node->serializeLua()) << ",\n";
         }
     }

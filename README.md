@@ -9,9 +9,6 @@ Real-time guitar amplifier simulation.
 ## Features
 
 - Distortion/Overdrive
-  - [x] Min/max clipping
-  - [x] tanh(x) clipping
-  - [x] sin(x) clipping 
 - Convolution Reverb
   - Note: Impulse responses not included.
 - Compressor
@@ -22,15 +19,10 @@ Real-time guitar amplifier simulation.
   - [x] Adjustable ratio
   - [x] Adjustable threshold (in dB)
 - Frequency analyzer (need to double click graph to see spectrum) 
-- EQ utilities
-  - [x] High/low shelf
-  - [ ] Peak filter
-  - [ ] Notch filter
-  - [ ] Standalone low pass
-  - [ ] Standalone high pass
- - Delay
- - Flanger
- - Cabinet Simulation
+- Delay
+- Flanger
+- Cabinet Simulation
+- Three-band EQ
 
 
 ## Dependencies
