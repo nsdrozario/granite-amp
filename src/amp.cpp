@@ -304,7 +304,7 @@ int main () {
     }
     // Initialize ImGui
     sf::Event e;
-    sf::RenderWindow w(sf::VideoMode(800,600), "Guitar Amp");
+    sf::RenderWindow w(sf::VideoMode(1024,768), "Guitar Amp");
     sf::Clock dt;
     
     // get images
