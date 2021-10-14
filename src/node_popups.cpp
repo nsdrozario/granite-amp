@@ -83,6 +83,11 @@ void ui::node_popups() {
             current_node += 5;
         }
 
+        if (ImGui::MenuItem("Chorus")) {
+            nodes[current_node] = new guitar_amp::ChorusNode(current_node, globalAudioInfo);
+            current_node += 5;
+        }
+
 
         #ifdef DEBUG_BUILD
 

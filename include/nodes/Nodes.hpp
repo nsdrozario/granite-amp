@@ -15,5 +15,6 @@
 #include <OverdriveNode.hpp>
 #include <ThreeBandEQ.hpp>
 #include <AnalyzerNode.hpp>
+#include <ChorusNode.hpp>
 
 #endif

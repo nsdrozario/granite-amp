@@ -54,7 +54,7 @@ std::map<int,int> adjlist_inward;
 
 int current_edge_id = INT_MIN;
 ma_uint32 lastFrameCount;
-bool audioEnabled = false;
+bool audioEnabled = true;
 
 std::string dfs_path = "";
 

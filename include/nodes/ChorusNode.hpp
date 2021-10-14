@@ -1,4 +1,4 @@
-/*
+
 #pragma once
 
 #include <mindsp/util/ring_buffer.hpp>
@@ -15,19 +15,23 @@ namespace guitar_amp {
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
-        void luaInit(const sol::table &init_table);
+
+        void luaInit(const sol::table &config);
+        sol::table serializeLua();
 
     private:
         mindsp::util::ring_buffer<float> delay_line;
         float min_delay = 15.0f; // in ms
-        float max_delay = 20.0f; // in ms
+        float max_delay = 30.0f; // in ms
+        float lfo_amplitude = 5.0f; // in ms
+        size_t lfo_amplitude_samples = 0;
+
+        float tap1_freq = 0.7;
+        float tap2_freq = 0.5;
+
+        float internal_timer = 0;
 
         size_t min_samples_delay = 0;
         size_t max_samples_delay = 0;
-        std::random_device rand_device;
-        std::default_random_engine rng;
-        std::uniform_real_distribution<double> rand_dist;
-
     };
 }
-*/
