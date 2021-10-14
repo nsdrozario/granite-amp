@@ -19,7 +19,9 @@ SOFTWARE.
 
 ========================================================
 
-This project uses Dear ImGui, which can be found at https://github.com/ocornut/imgui. The license in which this project uses Dear ImGui in is shown below:
+This project uses Adobe's fork of Dear ImGui, which can be found at https://github.com/adobe/imgui/.
+The original repository can be found at https://github.com/ocornut/imgui. 
+Both projects share the following license text (which this project uses Dear ImGui under), which is shown below:
 
 The MIT License (MIT)
 

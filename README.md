@@ -26,7 +26,8 @@ Real-time guitar amplifier simulation.
 
 
 ## Dependencies
-- [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
+- [Dear ImGui](https://github.com/adobe/imgui/) (contained within this repository already)
+    - This project uses the Adobe fork of Dear ImGui. The original repository can be found [here](https://github.com/ocornut/imgui).
 - [Imgui-SFML](https://github.com/eliasdaler/imgui-sfml) (contained within this repository already)
 - [imnodes](https://github.com/Nelarius/imnodes) (contained within this repository already)
 - [implot](https://github.com/epezent/implot) (contained within this repository already)

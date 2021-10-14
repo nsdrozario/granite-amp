@@ -304,7 +304,7 @@ int main () {
     }
     // Initialize ImGui
     sf::Event e;
-    sf::RenderWindow w(sf::VideoMode(1024,768), "Guitar Amp");
+    sf::RenderWindow w(sf::VideoMode(1920,1080), "Guitar Amp");
     sf::Clock dt;
     
     // get images
@@ -318,6 +318,7 @@ int main () {
     bgSprite.setTexture(bg);
 
     ImGui::SFML::Init(w);
+    ImGui::Spectrum::StyleColorsSpectrum();
     ImNodes::CreateContext();
     ImPlot::CreateContext();
     
@@ -436,13 +437,13 @@ int main () {
         ImGui::Begin("Metronome");
             ImGui::Checkbox("Enabled", &metronomeEnabled);
             
-            if (ImGui::InputInt("Metronome BPM", &metronomeBPM, 1, 10)) {
+            if (ImGui::InputInt("BPM", &metronomeBPM, 1, 10)) {
                 metronomeTickSamples = 0;
             }
             if (advancedMode) {
-                ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 6.0f, "%.3f dB");
+                ImGui::DragFloat("Gain", &metronomeGainDB, 1.0f, -144.0f, 6.0f, "%.3f dB");
             } else {
-                ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -60.0f, 6.0f, "%.0f dB");
+                ImKnob::Knob("Gain", &metronomeGainDB, 1.0f, -60.0f, 6.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             }
         ImGui::End();
 
