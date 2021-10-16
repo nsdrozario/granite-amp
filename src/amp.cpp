@@ -321,7 +321,8 @@ int main () {
     ImGui::Spectrum::StyleColorsSpectrum();
     ImNodes::CreateContext();
     ImPlot::CreateContext();
-    
+    ImGuiStyle &style = ImGui::GetStyle();
+    style.WindowRounding = 10.0f;
     // if vsync isn't enabled the app will use way too much GPU time
     w.setVerticalSyncEnabled(true);
     
