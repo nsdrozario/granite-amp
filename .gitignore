@@ -6,3 +6,4 @@ tools/
 tests/
 *.zip
 test.cpp
+dist/

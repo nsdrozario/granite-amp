@@ -369,9 +369,6 @@ int main () {
                 for (auto it = nodes.begin(); it != nodes.end(); it++) {
                     delete it->second;
                 }
-                ImPlot::DestroyContext();
-                ImNodes::DestroyContext();
-                ImGui::SFML::Shutdown();
                 w.close();
             }
         }
@@ -588,6 +585,10 @@ int main () {
         w.display();
 
     }
+
+    ImPlot::DestroyContext();
+    ImNodes::DestroyContext();
+    ImGui::SFML::Shutdown();
 
     return 0;
 }
