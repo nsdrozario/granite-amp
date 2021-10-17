@@ -47,9 +47,9 @@ void CompressorNode::showGui() {
             ImGui::TextUnformatted("Compressor");
         ImNodes::EndNodeTitleBar();
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
         /*
@@ -78,7 +78,7 @@ void CompressorNode::showGui() {
         ImGui::Text("Note: Sidechaining is unimplemented for the time being.\nNothing different will happen if you attach a node here!");
         ImGui::PopStyleColor();
 
-            ImNodes::BeginInputAttribute(this->id+2);
+            ImNodes::BeginInputAttribute(this->id+2, ImNodesPinShape_TriangleFilled);
                 ImGui::Text("Sidechain Signal");
             ImNodes::EndInputAttribute();
         }

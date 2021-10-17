@@ -1,3 +1,8 @@
+/*
+Use this regex to change everything to SliderFloats from DragFloats:
+ImGui::DragFloat\( *([_"a-zA-Z0-9 \.>+\-&%\(\)\/]+) *, *([_ "a-zA-Z0-9\.>+\-&%\(\)\/]+), *([_\/ "a-zA-Z0-9\.>+\-&%\(\)]+), *([_\/ "a-zA-Z0-9\.>+\-&%\(\)]+), *([_\/ "a-zA-Z0-9\.>+\-&%\(\)]+), *([_\/ "a-zA-Z0-9\.>+\-&%\(\)]+);
+ImGui::SliderFloat($1, $2, $4, $5, $6)
+*/
 #define MINIAUDIO_IMPLEMENTATION
 #include <headers.hpp>
 #include <climits>
@@ -322,7 +327,17 @@ int main () {
     ImNodes::CreateContext();
     ImPlot::CreateContext();
     ImGuiStyle &style = ImGui::GetStyle();
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->Clear();
+    ImFont *font = io.Fonts->AddFontFromFileTTF("fonts/SourceSansPro-Black.ttf", 20.0f);
+    ImGui::SFML::UpdateFontTexture();
+    ImNodes::GetStyle().GridSpacing = 120;
+    ImNodes::GetStyle().NodeCornerRounding = 10.0f;
+    ImNodes::GetStyle().PinCircleRadius = 7.0f;
+    ImNodes::GetStyle().PinTriangleSideLength = 14.0f;
     style.WindowRounding = 10.0f;
+    style.ChildRounding = 10.0f;
+    style.PopupRounding = 10.0f;
     // if vsync isn't enabled the app will use way too much GPU time
     w.setVerticalSyncEnabled(true);
     
@@ -363,10 +378,9 @@ int main () {
 
         w.clear();        
         ImGui::SFML::Update(w, dt.restart());
-
         // resize the background if necessary
-        if (w.getSize().x != bgSprite.getTextureRect().width || w.getSize().y != bgSprite.getTextureRect().height) {
-            bgSprite.setTextureRect(sf::IntRect(0,0,w.getSize().x,w.getSize().y));
+        if (w.getSize().x > bgSprite.getTextureRect().width || w.getSize().y > bgSprite.getTextureRect().height) {
+            bgSprite.setTextureRect(sf::IntRect(0, 0, w.getSize().x + bgSprite.getTextureRect().width, w.getSize().y + bgSprite.getTextureRect().height));
         }
 
         // draw the background
@@ -374,6 +388,7 @@ int main () {
 
         // imgui stuff
         // draw node 
+        ImGui::PushFont(font);
         ImGui::Begin("Signal Chain");
         ImNodes::BeginNodeEditor();
             // draw nodes
@@ -567,7 +582,9 @@ int main () {
             std::cout << "playback sample rate: " << device.playback.internalSampleRate << std::endl;
         }
 
+        ImGui::PopFont();
         ImGui::SFML::Render(w);
+
         w.display();
 
     }

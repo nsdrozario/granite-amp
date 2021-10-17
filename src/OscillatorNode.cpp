@@ -43,9 +43,9 @@ void OscillatorNode::showGui() {
             ImGui::TextColored(ImVec4(ImColor(18,18,18,255)), "Oscillator");
         ImNodes::EndNodeTitleBar();
 
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         
         ImGui::Combo(
@@ -54,8 +54,8 @@ void OscillatorNode::showGui() {
             "sine\0square\0triangle\0sawtooth\0"
         );
 
-        ImGui::DragFloat("Amplitude (dB)", &(this->amplitude), 2.0f, -144.0f, 0.0f, "%.3f dB");
-        ImGui::DragFloat("Frequency (Hz)", &(this->freq), 100.f, 0.0f, 20000.0f, "%.3f Hz");
+        ImGui::SliderFloat("Amplitude (dB)", &(this->amplitude), -144.0f, 0.0f, "%.3f dB");
+        ImGui::SliderFloat("Frequency (Hz)", &(this->freq), 0.0f, 20000.0f, "%.3f Hz");
 
     ImNodes::EndNode();
     

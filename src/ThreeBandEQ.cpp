@@ -148,9 +148,9 @@ void ThreeBandEQ::showGui() {
             ImGui::TextColored(ImVec4(ImColor(18,18,18,255)), "Simple EQ");
         ImNodes::EndNodeTitleBar();
 
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         
         if (advancedMode) {
