@@ -56,3 +56,21 @@ std::vector<float> guitar_amp::io::read_entire_file_wav(std::string file_name, s
     return data;
 
 }
+
+void guitar_amp::io::file_paths(std::vector<std::string> &path_vector, std::string directory_path) {
+    path_vector.clear();
+    for (auto f : std::filesystem::directory_iterator(directory_path)) {
+        if (f.is_regular_file()) {
+            path_vector.push_back(f.path().string());
+        }
+    }
+}
+
+void guitar_amp::io::file_names(std::vector<std::string> &name_vector, std::string directory_path) {
+    name_vector.clear();
+    for (auto f : std::filesystem::directory_iterator(directory_path)) {
+        if (f.is_regular_file()) {
+            name_vector.push_back(f.path().filename().string());
+        }
+    }
+}

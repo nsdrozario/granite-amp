@@ -11,7 +11,34 @@ using std::cout;
 DelayNode::DelayNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
 }
 
+DelayNode::DelayNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) {
+    /*
+        example config:
+        {
+            ["DelayTimeSeconds"]=0,
+            ["FeedbackGain"]=-6
+        }
+    */
+   time_delay = init_table.get_or("DelayTimeSeconds", 0.0);
+   feedback_gain = init_table.get_or("FeedbackGain", -6.0);
+}
+
 DelayNode::~DelayNode() { }
+
+void DelayNode::luaInit(const sol::table &init_table) {
+   time_delay = init_table.get_or("DelayTimeSeconds", 0.0);
+   feedback_gain = init_table.get_or("FeedbackGain", -6.0);   
+}
+
+sol::table DelayNode::serializeLua() {
+    sol::table out;
+    sol::table state;
+    out["type"] = "Delay";
+    state["DelayTimeSeconds"] = time_delay;
+    state["FeedbackGain"] = feedback_gain;
+    out["state"] = state;
+    return out;
+}
 
 void DelayNode::showGui() {
     ImGui::PushItemWidth(100);
@@ -26,10 +53,10 @@ void DelayNode::showGui() {
         ImNodes::EndNodeTitleBar();
 
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
 
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
 

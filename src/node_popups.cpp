@@ -63,11 +63,6 @@ void ui::node_popups() {
             current_node += 5;
         }
 
-        if (ImGui::MenuItem("Shelf EQ")) {
-            nodes[current_node] = new guitar_amp::ShelfNode(current_node, globalAudioInfo);
-            current_node += 5;
-        }
-
         if (ImGui::MenuItem("Delay")) {
             nodes[current_node] = new guitar_amp::DelayNode(current_node, globalAudioInfo);
             current_node += 5;
@@ -88,15 +83,20 @@ void ui::node_popups() {
             current_node += 5;
         }
 
-
-        #ifdef DEBUG_BUILD
-
         if (ImGui::MenuItem("Chorus")) {
             nodes[current_node] = new guitar_amp::ChorusNode(current_node, globalAudioInfo);
             current_node += 5;
         }
 
-        // this still isn't quite safe
+
+        #ifdef DEBUG_BUILD
+
+        /*
+        if (ImGui::MenuItem("Chorus")) {
+            nodes[current_node] = new guitar_amp::ChorusNode(current_node, globalAudioInfo);
+            current_node += 5;
+        }
+        */
 
         if (ImGui::MenuItem("Oscillator")) {
             nodes[current_node] = new guitar_amp::OscillatorNode(current_node, globalAudioInfo);

@@ -9,10 +9,13 @@ namespace guitar_amp {
     class OscillatorNode : public MiddleNode {
     public:
         OscillatorNode(int id, const AudioInfo current_audio_info);
+        OscillatorNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
         virtual ~OscillatorNode();
 
         virtual void showGui();
         virtual void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
+        virtual void luaInit(const sol::table &init_table);
+        virtual sol::table serializeLua();
 
     protected:
         float freq = 440.0f; // A4 = 440hz

@@ -4,6 +4,7 @@
 #include "MiddleNode.hpp"
 #include "internal_dsp.hpp"
 #include "state.hpp"
+#include <mindsp/filter.hpp>
 
 namespace guitar_amp {
     class OverdriveNode : public MiddleNode {
@@ -11,10 +12,13 @@ namespace guitar_amp {
     public:
         
         OverdriveNode(int id, const AudioInfo current_audio_info);
-        ~OverdriveNode();
+        OverdriveNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
+        virtual ~OverdriveNode();
         
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info); 
+        virtual sol::table serializeLua();
+        void luaInit(const sol::table &init_table);
 
         enum ClippingAlgorithm {
             minmax=0,
@@ -33,24 +37,10 @@ namespace guitar_amp {
         float gain = 0.0f;
         float output_volume = -35.0f;
 
-        int clipping_algorithm = 0;
+        int clipping_algorithm = 1;
 
-        
-        ma_lpf2 lpf;
-        ma_hpf2 hpf;
-
-
-        ma_lpf2 lpf_not_oversampled;
-        ma_hpf2 hpf_not_oversampled;
-
-        ma_lpf2 downsample_lpf;
-        ma_lpf2_config downsample_lpf_config;
-
-        ma_lpf2_config lpf_config;
-        ma_lpf2_config lpf_config_not_oversampled;
-        ma_hpf2_config hpf_config;
-        ma_hpf2_config hpf_config_not_oversampled;
-
+        mindsp::filter::biquad_filter low_pass;
+        mindsp::filter::biquad_filter high_pass;
         ma_resampler upscaler;
         ma_resampler downscaler;
 

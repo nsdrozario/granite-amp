@@ -26,7 +26,7 @@ void InputNode::showGui() {
             ImGui::TextUnformatted("Input");
         ImNodes::EndNodeTitleBar();
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
     ImNodes::EndNode();

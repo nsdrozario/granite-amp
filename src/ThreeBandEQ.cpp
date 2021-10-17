@@ -5,43 +5,135 @@
 using namespace guitar_amp;
 
 ThreeBandEQ::ThreeBandEQ(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
-        hishelf_config = ma_hishelf2_config_init(
-            ma_format_f32,
-            1,
-            current_audio_info.sample_rate,
-            treble_gain,
-            2.0,
-            4000.0
+
+        low_shelf.set_coefficients(
+            mindsp::filter::low_shelf(
+                250.0f, 
+                current_audio_info.sample_rate ? current_audio_info.sample_rate : 48000, 
+                2.0f, 
+                bass_gain
+            )
         );
 
-        loshelf_config = ma_loshelf2_config_init(
-            ma_format_f32,
-            1,
-            current_audio_info.sample_rate,
-            bass_gain,
-            2.0,
-            250.0
+        high_shelf.set_coefficients(
+            mindsp::filter::high_shelf(
+                4000,
+                current_audio_info.sample_rate ? current_audio_info.sample_rate : 48000,
+                2.0f,
+                treble_gain
+            )
         );
 
-        mid_config = ma_peak2_config_init(
-            ma_format_f32,
-            1,
-            current_audio_info.sample_rate,
-            mid_gain,
-            0.5,
-            900.0
+        mid_range.set_coefficients(
+            mindsp::filter::peak_filter(
+                900,
+                current_audio_info.sample_rate ? current_audio_info.sample_rate : 48000,
+                0.5,
+                mid_gain
+            )
         );
 
-        ma_result hishelf_result = ma_hishelf2_init(&hishelf_config, &high_shelf);
-        ma_result loshelf_result = ma_loshelf2_init(&loshelf_config, &low_shelf);
-        ma_result mid_result = ma_peak2_init(&mid_config, &midrange);
+}
 
-        if (hishelf_result != MA_SUCCESS || loshelf_result != MA_SUCCESS || mid_result != MA_SUCCESS) {
-            
-        }
-};
+ThreeBandEQ::ThreeBandEQ(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) {
+
+        /*
+            Example config:
+
+            {
+                ["BassGain"]=0,
+                ["TrebleGain"]=0,
+                ["MidGain"]=0
+            }
+
+        */
+
+        low_shelf.set_coefficients(
+            mindsp::filter::low_shelf(
+                250, 
+                current_audio_info.sample_rate ? current_audio_info.sample_rate : 48000, 
+                2.0f, 
+                init_table.get_or("BassGain", 0.0)
+            )
+        );
+
+        high_shelf.set_coefficients(
+            mindsp::filter::high_shelf(
+                4000,
+                current_audio_info.sample_rate ? current_audio_info.sample_rate : 48000,
+                2.0f,
+                init_table.get_or("TrebleGain", 0.0)
+            )
+        );
+
+        mid_range.set_coefficients(
+            mindsp::filter::peak_filter(
+                900,
+                current_audio_info.sample_rate ? current_audio_info.sample_rate : 48000,
+                0.5,
+                init_table.get_or("MidGain", 0.0)
+            )
+        );
+
+}
 
 ThreeBandEQ::~ThreeBandEQ() {
+
+}
+
+void ThreeBandEQ::luaInit(const sol::table &init_table) {
+            low_shelf.set_coefficients(
+            mindsp::filter::low_shelf(
+                250, 
+                internal_info.sample_rate ? internal_info.sample_rate : 48000, 
+                2.0f, 
+                init_table.get_or("BassGain", 0.0)
+            )
+        );
+
+        high_shelf.set_coefficients(
+            mindsp::filter::high_shelf(
+                4000,
+                internal_info.sample_rate ? internal_info.sample_rate : 48000,
+                2.0f,
+                init_table.get_or("TrebleGain", 0.0)
+            )
+        );
+
+        mid_range.set_coefficients(
+            mindsp::filter::peak_filter(
+                900,
+                internal_info.sample_rate ? internal_info.sample_rate : 48000,
+                0.5,
+                init_table.get_or("MidGain", 0.0)
+            )
+        );
+}
+
+sol::table ThreeBandEQ::serializeLua() {
+
+    /*
+        Example config:
+
+        {
+            ["BassGain"]=0,
+            ["TrebleGain"]=0,
+            ["MidGain"]=0
+        }
+
+    */
+
+    sol::table out;
+    sol::table state;
+    out["type"] = "ThreeBandEQ";
+
+    state["BassGain"] = bass_gain;
+    state["TrebleGain"] = treble_gain;
+    state["MidGain"] = mid_gain;
+    
+    out["state"] = state;
+
+    return out;
 
 }
 
@@ -56,19 +148,52 @@ void ThreeBandEQ::showGui() {
             ImGui::TextColored(ImVec4(ImColor(18,18,18,255)), "Simple EQ");
         ImNodes::EndNodeTitleBar();
 
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         
         if (advancedMode) {
 
         } else {
-            ImKnob::Knob("Bass", &bass_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            
+            if(ImKnob::Knob("Bass", &bass_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+                low_shelf.set_coefficients(
+                    mindsp::filter::low_shelf(
+                        250.0f, 
+                        device.sampleRate ? device.sampleRate : 48000, 
+                        2.0f, 
+                        bass_gain
+                    )
+                );
+            }
+            
             ImGui::SameLine();
-            ImKnob::Knob("Mid", &mid_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            
+            if(ImKnob::Knob("Mid", &mid_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+                mid_range.set_coefficients(
+                    mindsp::filter::peak_filter(
+                        900,
+                        device.sampleRate ? device.sampleRate : 48000,
+                        0.5,
+                        mid_gain
+                    )
+                );     
+            }
+
             ImGui::SameLine();
-            ImKnob::Knob("Treble", &treble_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            
+            if(ImKnob::Knob("Treble", &treble_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+                high_shelf.set_coefficients(
+                    mindsp::filter::high_shelf(
+                        4000,
+                        device.sampleRate ? device.sampleRate : 48000,
+                        2.0f,
+                        treble_gain
+                    )
+                );
+            }
+
         }
 
     ImNodes::EndNode();
@@ -77,54 +202,44 @@ void ThreeBandEQ::showGui() {
 void ThreeBandEQ::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     
     bool device_updated = internal_info != info;
-    bool loshelf_changed = bass_gain != loshelf_config.gainDB;
-    bool hishelf_changed = treble_gain != hishelf_config.gainDB;
-    bool mid_changed = mid_gain != mid_config.gainDB;
 
-    if (device_updated || loshelf_changed || hishelf_changed || mid_changed) {
+    if (device_updated) {
 
-        hishelf_config = ma_hishelf2_config_init(
-            ma_format_f32,
-            1,
-            info.sample_rate,
-            treble_gain,
-            2.0,
-            4000.0
+        low_shelf.set_coefficients(
+            mindsp::filter::low_shelf(
+                250.0f, 
+                info.sample_rate ? info.sample_rate : 48000, 
+                2.0f, 
+                bass_gain
+            )
         );
 
-        loshelf_config = ma_loshelf2_config_init(
-            ma_format_f32,
-            1,
-            info.sample_rate,
-            bass_gain,
-            2.0,
-            250.0
+        high_shelf.set_coefficients(
+            mindsp::filter::high_shelf(
+                4000,
+                info.sample_rate ? info.sample_rate : 48000,
+                2.0f,
+                treble_gain
+            )
         );
 
-        mid_config = ma_peak2_config_init(
-            ma_format_f32,
-            1,
-            info.sample_rate,
-            mid_gain,
-            0.5,
-            900.0
+        mid_range.set_coefficients(
+            mindsp::filter::peak_filter(
+                900,
+                info.sample_rate ? info.sample_rate : 48000,
+                0.5,
+                mid_gain
+            )
         );
-
-        ma_result hishelf_result = ma_hishelf2_init(&hishelf_config, &high_shelf);
-        ma_result loshelf_result = ma_loshelf2_init(&loshelf_config, &low_shelf);
-        ma_result mid_result = ma_peak2_init(&mid_config, &midrange);
-
-        if (hishelf_result != MA_SUCCESS || loshelf_result != MA_SUCCESS || mid_result != MA_SUCCESS) {
-            
-        }
 
         if (device_updated) {
             internal_info = info;
         }
+        
     }
 
-    ma_loshelf2_process_pcm_frames(&low_shelf, out, in, numFrames);
-    ma_hishelf2_process_pcm_frames(&high_shelf, out, out, numFrames);
-    ma_peak2_process_pcm_frames(&midrange, out, out, numFrames);
+    low_shelf.apply(out,in,numFrames);
+    high_shelf.apply(out,out,numFrames);
+    mid_range.apply(out,out,numFrames);
 
 }

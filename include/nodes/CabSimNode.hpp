@@ -5,22 +5,25 @@
 #include "internal_dsp.hpp"
 #include "state.hpp"
 #include "MiddleNode.hpp"
+#include <mindsp/filter.hpp>
 #include "../ConfigManager.hpp"
-#include <filesystem>
+#include <sol/sol.hpp>
 
 namespace guitar_amp {
-    /* 
-        This is NOT replacing the convolver! This is an algorithmic cabinet simulation so that you
-        don't necessarily need to obtain your own impulse responses to get a functional sound.
-    */
+
     class CabSimNode : public MiddleNode {
     public:
 
         CabSimNode(int id, const AudioInfo current_audio_info);
-        ~CabSimNode();
+        CabSimNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
+        virtual ~CabSimNode();
+
+        void reinit(CabSimSettings settings);
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
+        void luaInit(const sol::table &init_lua);
+        virtual sol::table serializeLua();
 
     private:
 
@@ -29,6 +32,7 @@ namespace guitar_amp {
         // for comb filtering
         dsp::ring_buffer<float> delay;
 
+        /*
         // cabs typically output around 6khz at most
         ma_lpf2 lpf;
 
@@ -42,6 +46,13 @@ namespace guitar_amp {
         ma_peak2 presence;
 
         ma_peak2 mid_scoop;
+        */
+
+        mindsp::filter::biquad_filter lpf;
+        mindsp::filter::biquad_filter hpf;
+        mindsp::filter::biquad_filter low_mid;
+        mindsp::filter::biquad_filter mid;
+        mindsp::filter::biquad_filter presence;
 
         // frequencies
         float lpf_freq = 4000.0f;
@@ -72,6 +83,7 @@ namespace guitar_amp {
         bool changed_delay = false;
 
     };
+
 }
 
 #endif

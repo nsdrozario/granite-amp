@@ -1,3 +1,8 @@
+/*
+Use this regex to change everything to SliderFloats from DragFloats:
+ImGui::DragFloat\( *([_"a-zA-Z0-9 \.>+\-&%\(\)\/]+) *, *([_ "a-zA-Z0-9\.>+\-&%\(\)\/]+), *([_\/ "a-zA-Z0-9\.>+\-&%\(\)]+), *([_\/ "a-zA-Z0-9\.>+\-&%\(\)]+), *([_\/ "a-zA-Z0-9\.>+\-&%\(\)]+), *([_\/ "a-zA-Z0-9\.>+\-&%\(\)]+);
+ImGui::SliderFloat($1, $2, $4, $5, $6)
+*/
 #define MINIAUDIO_IMPLEMENTATION
 #include <headers.hpp>
 #include <climits>
@@ -54,7 +59,7 @@ std::map<int,int> adjlist_inward;
 
 int current_edge_id = INT_MIN;
 ma_uint32 lastFrameCount;
-bool audioEnabled = false;
+bool audioEnabled = true;
 
 std::string dfs_path = "";
 
@@ -90,6 +95,12 @@ std::mutex recorderMutex;
 float processTime = 0.0f;
 bool advancedMode = false;
 int current_node = 10;
+
+std::vector<std::string> config_paths;
+std::vector<std::string> config_names;
+
+bool *config_selected = nullptr;
+int config_selected_id;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -260,6 +271,18 @@ void print_adjlist() {
     }
 }
 
+std::vector<const char *> config_paths_c_str;
+std::vector<const char *> config_names_c_str;
+
+void align_c_str_vector(std::vector<std::string> &in, std::vector<const char *> &out) {
+    if (in.size() != out.size()) {
+        out.resize(in.size());
+    }
+    for (std::size_t i = 0; i < in.size(); i++) {
+        out[i] = in[i].c_str();
+    }
+}
+
 int main () {
 
     // Initialize Miniaudio
@@ -270,6 +293,11 @@ int main () {
     }
 
     io::refresh_devices();
+    io::file_paths(config_paths, "assets/signalchain_presets/");
+    io::file_names(config_names, "assets/signalchain_presets");
+    config_selected = new bool[config_names.size()];
+    align_c_str_vector(config_paths, config_paths_c_str);
+    align_c_str_vector(config_names, config_names_c_str);
 
     deviceConfig = ma_device_config_init(ma_device_type_duplex);
     deviceConfig.periodSizeInFrames = 512;
@@ -281,7 +309,7 @@ int main () {
     }
     // Initialize ImGui
     sf::Event e;
-    sf::RenderWindow w(sf::VideoMode(800,600), "Guitar Amp");
+    sf::RenderWindow w(sf::VideoMode(1920,1080), "Guitar Amp");
     sf::Clock dt;
     
     // get images
@@ -295,9 +323,21 @@ int main () {
     bgSprite.setTexture(bg);
 
     ImGui::SFML::Init(w);
+    ImGui::Spectrum::StyleColorsSpectrum();
     ImNodes::CreateContext();
     ImPlot::CreateContext();
-    
+    ImGuiStyle &style = ImGui::GetStyle();
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->Clear();
+    ImFont *font = io.Fonts->AddFontFromFileTTF("fonts/SourceSansPro-Black.ttf", 20.0f);
+    ImGui::SFML::UpdateFontTexture();
+    ImNodes::GetStyle().GridSpacing = 120;
+    ImNodes::GetStyle().NodeCornerRounding = 10.0f;
+    ImNodes::GetStyle().PinCircleRadius = 7.0f;
+    ImNodes::GetStyle().PinTriangleSideLength = 14.0f;
+    style.WindowRounding = 10.0f;
+    style.ChildRounding = 10.0f;
+    style.PopupRounding = 10.0f;
     // if vsync isn't enabled the app will use way too much GPU time
     w.setVerticalSyncEnabled(true);
     
@@ -338,10 +378,9 @@ int main () {
 
         w.clear();        
         ImGui::SFML::Update(w, dt.restart());
-
         // resize the background if necessary
-        if (w.getSize().x != bgSprite.getTextureRect().width || w.getSize().y != bgSprite.getTextureRect().height) {
-            bgSprite.setTextureRect(sf::IntRect(0,0,w.getSize().x,w.getSize().y));
+        if (w.getSize().x > bgSprite.getTextureRect().width || w.getSize().y > bgSprite.getTextureRect().height) {
+            bgSprite.setTextureRect(sf::IntRect(0, 0, w.getSize().x + bgSprite.getTextureRect().width, w.getSize().y + bgSprite.getTextureRect().height));
         }
 
         // draw the background
@@ -349,6 +388,7 @@ int main () {
 
         // imgui stuff
         // draw node 
+        ImGui::PushFont(font);
         ImGui::Begin("Signal Chain");
         ImNodes::BeginNodeEditor();
             // draw nodes
@@ -410,20 +450,56 @@ int main () {
             }
         ImGui::End();
 
+        ImGui::Begin("Metronome");
+            ImGui::Checkbox("Enabled", &metronomeEnabled);
+            
+            if (ImGui::InputInt("BPM", &metronomeBPM, 1, 10)) {
+                metronomeTickSamples = 0;
+            }
+            if (advancedMode) {
+                ImGui::DragFloat("Gain", &metronomeGainDB, 1.0f, -144.0f, 6.0f, "%.3f dB");
+            } else {
+                ImKnob::Knob("Gain", &metronomeGainDB, 1.0f, -60.0f, 6.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            }
+        ImGui::End();
+
+        ImGui::Begin("Preset Manager");
+            // preset loader
+            if (ImGui::ListBox("Presets", &config_selected_id, config_names_c_str.data(), config_names.size())) {
+                // load preset
+                amp_load_preset(config_paths[config_selected_id]);
+            }
+
+            /*
+            if (ImGui::Button("Save as Preset")) {
+                amp_save_preset("NewPreset.lua");
+                io::file_paths(config_paths, "assets/signalchain_presets/");
+                io::file_names(config_names, "assets/signalchain_presets");
+                if (config_selected != nullptr) {
+                    delete[] config_selected;
+                }
+                config_selected = new bool[config_names.size()];
+                align_c_str_vector(config_paths, config_paths_c_str);
+                align_c_str_vector(config_names, config_names_c_str);
+            }
+            */
+           
+            if (ImGui::Button("Refresh Preset List")) {
+                io::file_paths(config_paths, "assets/signalchain_presets/");
+                io::file_names(config_names, "assets/signalchain_presets");
+                if (config_selected != nullptr) {
+                    delete[] config_selected;
+                }
+                config_selected = new bool[config_names.size()];
+                align_c_str_vector(config_paths, config_paths_c_str);
+                align_c_str_vector(config_names, config_names_c_str);
+            }
+        ImGui::End();
+
         // control panel
         ImGui::Begin("Control Panel");
 
             // ImGui::Text("Time to process: %.1f ms", processTime);
-            ImGui::Checkbox("Metronome", &metronomeEnabled);
-            
-            if (ImGui::InputInt("Metronome BPM", &metronomeBPM, 1, 10)) {
-                metronomeTickSamples = 0;
-            }
-            if (advancedMode) {
-                ImGui::DragFloat("Metronome Gain", &metronomeGainDB, 1.0f, -144.0f, 0.0f, "%.3f dB");
-            } else {
-                ImKnob::Knob("Metronome Gain", &metronomeGainDB, 1.0f, -60.0f, 0.0f, "%.0f dB");
-            }
 
             if (audioEnabled) {
             
@@ -472,7 +548,7 @@ int main () {
             }
             // todo: levels meter
             if (advancedMode) {
-                ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
+            //    ImGui::Checkbox("Oversampled Overdrive (4x)", &oversamplingEnabled);
             }
 
             ImGui::Checkbox("Advanced Mode", &advancedMode);
@@ -506,7 +582,9 @@ int main () {
             std::cout << "playback sample rate: " << device.playback.internalSampleRate << std::endl;
         }
 
+        ImGui::PopFont();
         ImGui::SFML::Render(w);
+
         w.display();
 
     }

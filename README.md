@@ -9,9 +9,6 @@ Real-time guitar amplifier simulation.
 ## Features
 
 - Distortion/Overdrive
-  - [x] Min/max clipping
-  - [x] tanh(x) clipping
-  - [x] sin(x) clipping 
 - Convolution Reverb
   - Note: Impulse responses not included.
 - Compressor
@@ -22,19 +19,15 @@ Real-time guitar amplifier simulation.
   - [x] Adjustable ratio
   - [x] Adjustable threshold (in dB)
 - Frequency analyzer (need to double click graph to see spectrum) 
-- EQ utilities
-  - [x] High/low shelf
-  - [ ] Peak filter
-  - [ ] Notch filter
-  - [ ] Standalone low pass
-  - [ ] Standalone high pass
- - Delay
- - Flanger
- - Cabinet Simulation
+- Delay
+- Flanger
+- Cabinet Simulation
+- Three-band EQ
 
 
 ## Dependencies
-- [Dear ImGui](https://github.com/ocornut/imgui) (contained within this repository already)
+- [Dear ImGui](https://github.com/adobe/imgui/) (contained within this repository already)
+    - This project uses the Adobe fork of Dear ImGui. The original repository can be found [here](https://github.com/ocornut/imgui).
 - [Imgui-SFML](https://github.com/eliasdaler/imgui-sfml) (contained within this repository already)
 - [imnodes](https://github.com/Nelarius/imnodes) (contained within this repository already)
 - [implot](https://github.com/epezent/implot) (contained within this repository already)

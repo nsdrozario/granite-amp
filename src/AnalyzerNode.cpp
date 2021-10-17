@@ -8,6 +8,19 @@ AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info) : MiddleN
     this->fft_size = 0;
 }
 
+AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) {
+    this->internal_fft.init(fftconvolver::NextPowerOf2(device.capture.internalPeriodSizeInFrames));
+    this->fft_size = 0;
+}
+
+void AnalyzerNode::luaInit(const sol::table &init_table) { }
+sol::table AnalyzerNode::serializeLua() { 
+    sol::table out;
+    out["type"] = "Analyzer";
+    out["state"] = sol::table();
+    return out;
+}
+
 AnalyzerNode::~AnalyzerNode() { }
 
 void AnalyzerNode::showGui() {
@@ -23,9 +36,9 @@ void AnalyzerNode::showGui() {
         ImNodes::EndNodeTitleBar();
 
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
 

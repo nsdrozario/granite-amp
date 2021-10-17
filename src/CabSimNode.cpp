@@ -3,63 +3,353 @@
 #include <imknob.hpp>
 using namespace guitar_amp;
 
-CabSimNode::CabSimNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
+CabSimNode::CabSimNode(int id, const AudioInfo info) : MiddleNode(id, info) {
 
-    ma_lpf2_config lpf_cfg = ma_lpf2_config_init(ma_format_f32, 1, current_audio_info.sample_rate, lpf_freq, lpf_q);
-    ma_hpf2_config hpf_cfg = ma_hpf2_config_init(ma_format_f32, 1, current_audio_info.sample_rate, hpf_freq, hpf_q);
-    ma_peak2_config presence_config = ma_peak2_config_init(ma_format_f32, 1, current_audio_info.sample_rate, presence_magnitude, presence_q, presence_freq);
+    lpf.set_coefficients(
+        mindsp::filter::low_pass_filter(
+            lpf_freq,
+            info.sample_rate,
+            2.0f
+        )
+    );
 
-    if (ma_lpf2_init(&lpf_cfg, &lpf) != MA_SUCCESS) {
-        std::cerr << "error in CabSimNode constructor, lpf" << std::endl;
-    }
+    hpf.set_coefficients(
+        mindsp::filter::high_pass_filter(
+            hpf_freq,
+            info.sample_rate,
+            2.0f
+        )
+    );
+
+    low_mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            low_mids_boost_freq,
+            info.sample_rate,
+            low_mids_boost_q,
+            low_mids_boost_magnitude
+        )
+    );
+
+    mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            mid_scoop_freq,
+            info.sample_rate,
+            mid_scoop_q,
+            mid_scoop_magnitude
+        )
+    );
+
+    presence.set_coefficients(
+        mindsp::filter::peak_filter(
+            presence_freq,
+            info.sample_rate,
+            presence_q,
+            presence_magnitude
+        )
+    );
+
+   
+    delay.reinit(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f), 0, 0);
+
+}
+
+CabSimNode::CabSimNode(int id, const AudioInfo info, const sol::table &init_table) : MiddleNode(id, info) {
     
-    if (ma_hpf2_init(&hpf_cfg, &hpf) != MA_SUCCESS) {
-        std::cerr << "error in CabSimNode constructor, hpf" << std::endl;
+    /*
+        Example:
+        {
+            ["HPF"] = 60,
+            ["LPF"] = 12000,
+            ["LowMid"] = {
+                ["freq"] = 250,
+                ["q"] = 4,
+                ["gain"] = 6
+            },
+            ["Mid"] = {
+                ["freq"] = 500,
+                ["q"] = 4,
+                ["gain"] = -12
+            },
+            ["Presence"] = {
+                ["freq"] = 1250,
+                ["q"] = 12,
+                ["gain"] = -6
+            }
+        }
+    */
+
+    lpf_freq = init_table.get_or("LPF", 12000.0);
+    hpf_freq = init_table.get_or("HPF", 60.0);
+
+    if (init_table.get<sol::table>("LowMid")) {
+        low_mids_boost_freq = init_table.get<sol::table>("LowMid").get_or("freq", 250.0);
+        low_mids_boost_magnitude = init_table.get<sol::table>("LowMid").get_or("gain", 6.0);
+        low_mids_boost_q = init_table.get<sol::table>("LowMid").get_or("q", 4.0);
     }
 
-    if (ma_peak2_init(&presence_config, &presence) != MA_SUCCESS) {
-        std::cerr << "error in CabSimNode constructor, presence filter" << std::endl;
-
+    if (init_table["Mid"]) {
+        mid_scoop_freq = init_table.get<sol::table>("Mid").get_or("freq", 500.0);
+        mid_scoop_magnitude = init_table.get<sol::table>("Mid").get_or("gain", -12.0);
+        mid_scoop_q = init_table.get<sol::table>("Mid").get_or("q", 4.0);
     }
 
-    ma_peak2_config mid_config = ma_peak2_config_init(ma_format_f32, 1, current_audio_info.sample_rate, mid_scoop_magnitude, mid_scoop_q, mid_scoop_freq);
-
-    if (ma_peak2_init(&mid_config, &mid_scoop) != MA_SUCCESS) {
-        std::cerr << "error in CabSimNode constructor, mid filter" << std::endl;
-
-    }
-    
-    ma_peak2_config low_mid_config = ma_peak2_config_init(ma_format_f32, 1, current_audio_info.sample_rate, low_mids_boost_magnitude, low_mids_boost_q, low_mids_boost_freq);
-
-    if (ma_peak2_init(&low_mid_config, &low_mids_boost) != MA_SUCCESS) {
-        std::cerr << "error in CabSimNode constructor, low mid filter" << std::endl;
+    if (init_table["Presence"]) {
+        presence_freq = init_table.get<sol::table>("Presence").get_or("freq", 1250.0);
+        presence_magnitude = init_table.get<sol::table>("Presence").get_or("gain", -6.0);
+        presence_q = init_table.get<sol::table>("Presence").get_or("q", 12.0);
     }
 
-    delay.reinit(static_cast<size_t>(static_cast<float>(current_audio_info.sample_rate) * delay_time / 1000.0f), 0, 0);
+    lpf.set_coefficients(
+        mindsp::filter::low_pass_filter(
+            lpf_freq,
+            info.sample_rate,
+            2.0f
+        )
+    );
+
+    hpf.set_coefficients(
+        mindsp::filter::high_pass_filter(
+            hpf_freq,
+            info.sample_rate,
+            2.0f
+        )
+    );
+
+    low_mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            low_mids_boost_freq,
+            info.sample_rate,
+            low_mids_boost_q,
+            low_mids_boost_magnitude
+        )
+    );
+
+    mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            mid_scoop_freq,
+            info.sample_rate,
+            mid_scoop_q,
+            mid_scoop_magnitude
+        )
+    );
+
+    presence.set_coefficients(
+        mindsp::filter::peak_filter(
+            presence_freq,
+            info.sample_rate,
+            presence_q,
+            presence_magnitude
+        )
+    );
+
+}
+
+void CabSimNode::luaInit(const sol::table &init_table) {
+    lpf_freq = init_table.get_or("LPF", 12000.0);
+    hpf_freq = init_table.get_or("HPF", 60.0);
+
+    if (init_table.get<sol::table>("LowMid")) {
+        low_mids_boost_freq = init_table.get<sol::table>("LowMid").get_or("freq", 250.0);
+        low_mids_boost_magnitude = init_table.get<sol::table>("LowMid").get_or("gain", 6.0);
+        low_mids_boost_q = init_table.get<sol::table>("LowMid").get_or("q", 4.0);
+    }
+
+    if (init_table["Mid"]) {
+        mid_scoop_freq = init_table.get<sol::table>("Mid").get_or("freq", 500.0);
+        mid_scoop_magnitude = init_table.get<sol::table>("Mid").get_or("gain", -12.0);
+        mid_scoop_q = init_table.get<sol::table>("Mid").get_or("q", 4.0);
+    }
+
+    if (init_table["Presence"]) {
+        presence_freq = init_table.get<sol::table>("Presence").get_or("freq", 1250.0);
+        presence_magnitude = init_table.get<sol::table>("Presence").get_or("gain", -6.0);
+        presence_q = init_table.get<sol::table>("Presence").get_or("q", 12.0);
+    }
+
+    lpf.set_coefficients(
+        mindsp::filter::low_pass_filter(
+            lpf_freq,
+            internal_info.sample_rate,
+            2.0f
+        )
+    );
+
+    hpf.set_coefficients(
+        mindsp::filter::high_pass_filter(
+            hpf_freq,
+            internal_info.sample_rate,
+            2.0f
+        )
+    );
+
+    low_mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            low_mids_boost_freq,
+            internal_info.sample_rate,
+            low_mids_boost_q,
+            low_mids_boost_magnitude
+        )
+    );
+
+    mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            mid_scoop_freq,
+            internal_info.sample_rate,
+            mid_scoop_q,
+            mid_scoop_magnitude
+        )
+    );
+
+    presence.set_coefficients(
+        mindsp::filter::peak_filter(
+            presence_freq,
+            internal_info.sample_rate,
+            presence_q,
+            presence_magnitude
+        )
+    );
+}
+
+sol::table CabSimNode::serializeLua() {
+    /*
+        Example:
+        {
+            ["HPF"] = 60,
+            ["LPF"] = 12000,
+            ["LowMid"] = {
+                ["freq"] = 250,
+                ["q"] = 4,
+                ["gain"] = 6
+            },
+            ["Mid"] = {
+                ["freq"] = 500,
+                ["q"] = 4,
+                ["gain"] = -12
+            },
+            ["Presence"] = {
+                ["freq"] = 1250,
+                ["q"] = 12,
+                ["gain"] = -6
+            }
+        }
+    */
+
+    sol::table out;
+    sol::table state;
+    sol::table low_mid_config;
+    sol::table mid_config;
+    sol::table presence_config;
+
+    out["type"] = "CabSim";
+    state["HPF"] = hpf_freq;
+    state["LPF"] = lpf_freq;
+
+    low_mid_config["freq"] = low_mids_boost_freq;
+    low_mid_config["q"] = low_mids_boost_q;
+    low_mid_config["gain"] = low_mids_boost_magnitude;
+
+    mid_config["freq"] = mid_scoop_freq;
+    mid_config["q"] = mid_scoop_q;
+    mid_config["gain"] = mid_scoop_magnitude;
+
+    presence_config["freq"] = presence_freq;
+    presence_config["q"] = mid_scoop_q;
+    presence_config["gain"] = mid_scoop_magnitude;
+
+    state["LowMid"] = low_mid_config;
+    state["Mid"] = mid_config;
+    state["Presence"] = presence_config;
+
+    out["state"] = state;
+
+    return out;
 
 }
 
 CabSimNode::~CabSimNode() { }
+
+void CabSimNode::reinit(CabSimSettings settings) {
+    
+    lpf_freq = settings.lpf.freq;
+    lpf_q = settings.lpf.q;
+    
+    hpf_freq = settings.hpf.freq;
+    hpf_q = settings.hpf.q;
+    
+    low_mids_boost_freq = settings.lowmid.freq;
+    low_mids_boost_q = settings.lowmid.q;
+    low_mids_boost_magnitude = settings.lowmid.gain_db;
+
+    mid_scoop_freq = settings.mid.freq;
+    mid_scoop_q = settings.mid.q;
+    mid_scoop_magnitude = settings.mid.gain_db;
+
+    presence_freq = settings.presence.freq;
+    presence_q = settings.presence.q;
+    presence_magnitude = settings.presence.gain_db;
+
+    lpf.set_coefficients(
+        mindsp::filter::low_pass_filter(
+            lpf_freq,
+            device.sampleRate,
+            2.0f
+        )
+    );
+
+    hpf.set_coefficients(
+        mindsp::filter::high_pass_filter(
+            hpf_freq,
+            device.sampleRate,
+            2.0f
+        )
+    );
+
+    low_mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            low_mids_boost_freq,
+            device.sampleRate,
+            low_mids_boost_q,
+            low_mids_boost_magnitude
+        )
+    );
+
+    mid.set_coefficients(
+        mindsp::filter::peak_filter(
+            mid_scoop_freq,
+            device.sampleRate,
+            mid_scoop_q,
+            mid_scoop_magnitude
+        )
+    );
+
+    presence.set_coefficients(
+        mindsp::filter::peak_filter(
+            presence_freq,
+            device.sampleRate,
+            presence_q,
+            presence_magnitude
+        )
+    );
+
+}
 
 void CabSimNode::showGui() {
     ImGui::PushItemWidth(100);
     ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(170,110,220, 100));
     ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(170,110,220, 255));
     ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(170,110,220, 255));
-    
     ImNodes::BeginNode(id);
         
         ImNodes::BeginNodeTitleBar();
             ImGui::TextUnformatted("Cabinet Simulation");
         ImNodes::EndNodeTitleBar();
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
 
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
-        
         if (advancedMode) {
             if(ImGui::DragFloat("Delay Time", &delay_time, 1.0f, 1.0f, 10.0f, "%.3f ms")) {
                 changed_delay = true;
@@ -125,35 +415,50 @@ void CabSimNode::showGui() {
 void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
 
     if (internal_info != info) {
-        // if the sample rate changes everything has to be reinitalized
-        ma_lpf2_config lpf_cfg = ma_lpf2_config_init(ma_format_f32, 1, info.sample_rate, lpf_freq, lpf_q);
-        ma_hpf2_config hpf_cfg = ma_hpf2_config_init(ma_format_f32, 1, info.sample_rate, hpf_freq, hpf_q);
-        ma_peak2_config presence_config = ma_peak2_config_init(ma_format_f32, 1, info.sample_rate, presence_magnitude, presence_q, presence_freq);
 
-        if (ma_lpf2_init(&lpf_cfg, &lpf) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, lpf" << std::endl;
-        }
-        
-        if (ma_hpf2_init(&hpf_cfg, &hpf) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, hpf" << std::endl;
-        }
+        lpf.set_coefficients(
+            mindsp::filter::low_pass_filter(
+                lpf_freq,
+                info.sample_rate,
+                2.0f
+            )
+        );
 
-        if (ma_peak2_init(&presence_config, &presence) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, presence filter" << std::endl;
-        }
+        hpf.set_coefficients(
+            mindsp::filter::high_pass_filter(
+                hpf_freq,
+                info.sample_rate,
+                2.0f
+            )
+        );
 
-        ma_peak2_config mid_config = ma_peak2_config_init(ma_format_f32, 1, info.sample_rate, mid_scoop_magnitude, mid_scoop_q, mid_scoop_freq);
+        low_mid.set_coefficients(
+            mindsp::filter::peak_filter(
+                low_mids_boost_freq,
+                info.sample_rate,
+                low_mids_boost_q,
+                low_mids_boost_magnitude
+            )
+        );
 
-        if (ma_peak2_init(&mid_config, &mid_scoop) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, mid filter" << std::endl;
+        mid.set_coefficients(
+            mindsp::filter::peak_filter(
+                mid_scoop_freq,
+                info.sample_rate,
+                mid_scoop_q,
+                mid_scoop_magnitude
+            )
+        );
 
-        }
-        
-        ma_peak2_config low_mid_config = ma_peak2_config_init(ma_format_f32, 1, info.sample_rate, low_mids_boost_magnitude, low_mids_boost_q, low_mids_boost_freq);
+        presence.set_coefficients(
+            mindsp::filter::peak_filter(
+                presence_freq,
+                info.sample_rate,
+                presence_q,
+                presence_magnitude
+            )
+        );
 
-        if (ma_peak2_init(&low_mid_config, &low_mids_boost) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, low mid filter" << std::endl;
-        }
 
         delay.reinit(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f), 0, 0);
     }    
@@ -164,42 +469,60 @@ void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInf
     }
 
     if (changed_lpf) {
-        ma_lpf2_config lpf_cfg = ma_lpf2_config_init(ma_format_f32, 1, info.sample_rate, lpf_freq, lpf_q);
-        if (ma_lpf2_init(&lpf_cfg, &lpf) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, lpf" << std::endl;
-        }
+        lpf.set_coefficients(
+            mindsp::filter::low_pass_filter(
+                lpf_freq,
+                info.sample_rate,
+                2.0f
+            )
+        );
         changed_lpf = false;
     }
 
     if (changed_hpf) {
-        ma_hpf2_config hpf_cfg = ma_hpf2_config_init(ma_format_f32, 1, info.sample_rate, hpf_freq, hpf_q);
-        if (ma_hpf2_init(&hpf_cfg, &hpf) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, hpf" << std::endl;
-        }
+        hpf.set_coefficients(
+            mindsp::filter::high_pass_filter(
+                hpf_freq,
+                info.sample_rate,
+                2.0f
+            )
+        );
         changed_hpf = false;
     }
 
     if (changed_presence) {
-        ma_peak2_config presence_config = ma_peak2_config_init(ma_format_f32, 1, info.sample_rate, presence_magnitude, presence_q, presence_freq);
-        if (ma_peak2_init(&presence_config, &presence) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, presence filter" << std::endl;
-        }
+        presence.set_coefficients(
+            mindsp::filter::peak_filter(
+                presence_freq,
+                info.sample_rate,
+                presence_q,
+                presence_magnitude
+            )
+        );
         changed_presence = false;
     }
 
     if (changed_mid_scoop) {
-        ma_peak2_config mid_config = ma_peak2_config_init(ma_format_f32, 1, info.sample_rate, mid_scoop_magnitude, mid_scoop_q, mid_scoop_freq);
-        if (ma_peak2_init(&mid_config, &mid_scoop) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, mid filter" << std::endl;
-        }
+        mid.set_coefficients(
+            mindsp::filter::peak_filter(
+                mid_scoop_freq,
+                info.sample_rate,
+                mid_scoop_q,
+                mid_scoop_magnitude
+            )
+        );
         changed_mid_scoop = false;
     }
 
     if (changed_low_mids_boost) {
-        ma_peak2_config low_mid_config = ma_peak2_config_init(ma_format_f32, 1, info.sample_rate, low_mids_boost_magnitude, low_mids_boost_q, low_mids_boost_freq);
-        if (ma_peak2_init(&low_mid_config, &low_mids_boost) != MA_SUCCESS) {
-            std::cerr << "error in CabSimNode reinitialization, low mid filter" << std::endl;
-        }
+        low_mid.set_coefficients(
+            mindsp::filter::peak_filter(
+                low_mids_boost_freq,
+                info.sample_rate,
+                low_mids_boost_q,
+                low_mids_boost_magnitude
+            )
+        );
         changed_low_mids_boost = false;
     }
 
@@ -216,10 +539,9 @@ void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInf
     */
 
     // then apply all the biquad filters
-    ma_lpf2_process_pcm_frames(&lpf, out, in, numFrames);
-    ma_hpf2_process_pcm_frames(&hpf, out, out, numFrames);
-    ma_peak2_process_pcm_frames(&low_mids_boost, out, out, numFrames);
-    ma_peak2_process_pcm_frames(&mid_scoop, out, out, numFrames);
-    ma_peak2_process_pcm_frames(&presence, out, out, numFrames);
-    
+    lpf.apply(out,in,numFrames);
+    hpf.apply(out,out,numFrames);
+    low_mid.apply(out,out,numFrames);
+    mid.apply(out,out,numFrames);
+    presence.apply(out,out,numFrames);
 }

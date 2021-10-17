@@ -23,10 +23,10 @@ void OutputNode::showGui() {
     
     ImNodes::BeginNode(id);
         ImNodes::BeginNodeTitleBar();
-            ImGui::TextUnformatted("Ouput");
+            ImGui::TextUnformatted("Output");
         ImNodes::EndNodeTitleBar();
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
         ImNodes::PopAttributeFlag();
     ImNodes::EndNode();

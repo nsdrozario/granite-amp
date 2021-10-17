@@ -9,10 +9,13 @@ namespace guitar_amp {
     class DelayNode : public MiddleNode {
     public:
         DelayNode(int id, const AudioInfo current_audio_info);
-        ~DelayNode();
+        DelayNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
+        virtual ~DelayNode();
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
+        void luaInit(const sol::table &init_table);
+        virtual sol::table serializeLua();
 
     private:
 

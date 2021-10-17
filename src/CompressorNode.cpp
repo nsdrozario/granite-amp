@@ -5,6 +5,34 @@
 using namespace guitar_amp;
 
 CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) { }
+CompressorNode::CompressorNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : MiddleNode(id, current_audio_info) { 
+    /*
+        Example config:
+        {
+            ["Threshold"]=0,
+            ["Ratio"]=1
+        }
+    */
+    threshold = init_table.get_or("Threshold", 0.0);
+    ratio = init_table.get_or("Ratio", 1.0);
+}
+
+void CompressorNode::luaInit(const sol::table &init_table) {
+    threshold = init_table.get_or("Threshold", 0.0);
+    ratio = init_table.get_or("Ratio", 1.0);  
+}
+
+sol::table CompressorNode::serializeLua() {
+    sol::table out;
+    sol::table state;
+    out["type"] = "Compressor";
+
+    state["Threshold"] = threshold;
+    state["Ratio"] = ratio;
+
+    out["state"] = state;
+    return out;
+}
 
 CompressorNode::~CompressorNode() { }
 
@@ -19,9 +47,9 @@ void CompressorNode::showGui() {
             ImGui::TextUnformatted("Compressor");
         ImNodes::EndNodeTitleBar();
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
         /*
@@ -50,7 +78,7 @@ void CompressorNode::showGui() {
         ImGui::Text("Note: Sidechaining is unimplemented for the time being.\nNothing different will happen if you attach a node here!");
         ImGui::PopStyleColor();
 
-            ImNodes::BeginInputAttribute(this->id+2);
+            ImNodes::BeginInputAttribute(this->id+2, ImNodesPinShape_TriangleFilled);
                 ImGui::Text("Sidechain Signal");
             ImNodes::EndInputAttribute();
         }

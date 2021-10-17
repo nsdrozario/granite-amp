@@ -37,6 +37,21 @@ ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info) : M
 
 }
 
+ConvolutionNode::ConvolutionNode(int id, const AudioInfo current_audio_info, const sol::table &init_table) : ConvolutionNode(id, current_audio_info) { 
+    // presets involving ConvolutionNode are kind of useless unless you want to bundle the files somehow
+}
+
+void ConvolutionNode::luaInit(const sol::table &init_table) {
+
+}
+
+sol::table ConvolutionNode::serializeLua() {
+    sol::table out;
+    out["type"] = "Convolution";
+    out["state"] = sol::table();
+    return out;
+}
+
 ConvolutionNode::~ConvolutionNode() {
     // decoder should already be released at this point
     this->convolver.reset();    
@@ -55,9 +70,9 @@ void ConvolutionNode::showGui() {
         ImNodes::EndNodeTitleBar();
 
         ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
-        ImNodes::BeginInputAttribute(this->id+1);
+        ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
-        ImNodes::BeginOutputAttribute(this->id+3);
+        ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
 

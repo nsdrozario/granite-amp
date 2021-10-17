@@ -4,15 +4,19 @@
 #include <MiddleNode.hpp>
 #include <internal_dsp.hpp>
 #include <miniaudio.h>
+#include <mindsp/filter.hpp>
 
 namespace guitar_amp {
     class ThreeBandEQ : public MiddleNode {
     public:
         ThreeBandEQ(int id, const AudioInfo current_audio_info);
+        ThreeBandEQ(int id, const AudioInfo current_audio_info, const sol::table &init_table);
         virtual ~ThreeBandEQ();
 
         void showGui();
         void ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info);
+        void luaInit(const sol::table &init_table);
+        virtual sol::table serializeLua();
 
     private:
 
@@ -20,13 +24,10 @@ namespace guitar_amp {
         float treble_gain = 0.0f;
         float mid_gain = 0.0f;
 
-        ma_hishelf2 high_shelf;
-        ma_loshelf2 low_shelf;
-        ma_peak2 midrange;
-
-        ma_hishelf2_config hishelf_config;
-        ma_loshelf2_config loshelf_config;
-        ma_peak2_config mid_config;
+        mindsp::filter::biquad_filter low_shelf;
+        mindsp::filter::biquad_filter high_shelf;
+        mindsp::filter::biquad_filter mid_range;
+        
     };
 }
 
