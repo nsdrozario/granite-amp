@@ -1,19 +1,34 @@
 #include <imknob.hpp>
 
 bool ImKnob::Knob(const char *label, float *value, float speed, float min, float max, const char *format, float radius, ImVec4 color, ImVec4 color_active) {
+    
     float text_padding = 20.0f;
     float drag_deadzone = 0.3f;
- 
+    float big_radius = 1.25f * radius;
+    
     ImGuiStyle &style = ImGui::GetStyle();
     ImDrawList *draw_list = ImGui::GetWindowDrawList();
     ImGuiIO &io_handle = ImGui::GetIO();
     ImVec2 draw_position = ImGui::GetCursorScreenPos();
     ImVec2 label_size = ImGui::CalcTextSize(label);
-    ImVec2 center_position = ImVec2(draw_position.x+std::max((label_size.x*0.5f)+text_padding,radius), draw_position.y+radius+text_padding);
+
+    ImVec2 text_position (draw_position.x + text_padding, draw_position.y);
+    ImVec2 center_position = ImVec2(draw_position.x+std::max((label_size.x*0.5f)+text_padding,radius), draw_position.y+big_radius+text_padding);
+    
+    if (label_size.x > big_radius) {
+        // move the knob towards the center
+        center_position.x = draw_position.x + text_padding + (label_size.x / 2);
+        center_position.y = draw_position.y + big_radius + text_padding;
+    } else {
+        // move the text towards the center
+        text_position.x = draw_position.x + text_padding + big_radius - (label_size.x/2);
+        text_position.y = draw_position.y;
+    }
+
     bool interacted = false;
-    ImVec4 color_to_use = color;
-    
-    
+    ImVec4 color_to_use = color_active;
+    ImVec4 shadow_color = color;
+
     /* 
         the "min angle" and "max angle" are actually opposites; positive direction for angles is counterclockwise
         but positive direction for knob adjustments is clockwise
@@ -26,7 +41,7 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
     float angle = (1.0f-norm_position) * (min_angle - max_angle) + max_angle;
 
     ImGui::PushID(value); // the variable being pointed to shouldn't be using other imgui elements
-    ImGui::InvisibleButton("Knob", ImVec2(std::max(radius*2, label_size.x)+(text_padding*2), (radius+text_padding)*2));
+    ImGui::InvisibleButton("Knob", ImVec2(std::max(radius*2, label_size.x)+((text_padding)*2), (big_radius+text_padding)*2));
 
     // click action
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
@@ -66,6 +81,12 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
 
     if (interacted || ImGui::IsItemHovered()) {
         color_to_use = color_active;
+        color_to_use.x *= 1.1;
+        color_to_use.y *= 1.35;
+        color_to_use.z *= 1.7;
+        shadow_color = color_active;
+        shadow_color.y *= 1.1;
+        shadow_color.z *= 1.3;
     }
     
     ImGui::PopID();
@@ -75,7 +96,8 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
     ImVec2 point1 = ImVec2((radius * std::cos(angle)) + center_position.x, -(radius * std::sin(angle)) + center_position.y);
     ImVec2 point2 = ImVec2((radius * 0.5f * std::cos(angle)) + center_position.x, -(radius * 0.5f * std::sin(angle)) + center_position.y);
 
-    draw_list->AddText(ImVec2(text_padding + draw_position.x+radius*0.25,draw_position.y), IM_COL32(255,255,255,255),label);
+    draw_list->AddText(text_position, IM_COL32(255,255,255,255) ,label);
+    draw_list->AddCircleFilled(ImVec2(center_position.x, center_position.y + (big_radius-radius)), big_radius, ImColor(shadow_color));
     draw_list->AddCircleFilled(center_position, radius, ImColor(color_to_use));
     draw_list->AddLine(point2, point1, IM_COL32(255,255,255,255), 2.0f);
     
@@ -83,6 +105,14 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
     char formatted[256];
     snprintf(formatted, 256, format, *value);
 
-    draw_list->AddText(ImVec2(text_padding + draw_position.x+radius*0.25,draw_position.y + text_padding + (2.0f * radius)),IM_COL32(255,255,255,255), formatted);
+    ImVec2 value_text_position = text_position;
+    value_text_position.y = draw_position.y + (2*big_radius) + text_padding + 5;
+    ImVec2 value_text_size = ImGui::CalcTextSize(formatted);
+    
+    if (value_text_size.x < label_size.x) {
+        value_text_position.x += (label_size.x/2) - (value_text_size.x/2);
+    }
+
+    draw_list->AddText(value_text_position,IM_COL32(255,255,255,255), formatted);
     return interacted;
 }

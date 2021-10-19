@@ -102,6 +102,9 @@ std::vector<std::string> config_names;
 bool *config_selected = nullptr;
 int config_selected_id;
 
+sf::Texture amp_grill;
+sf::Sprite amp_grill_sprite;
+
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
@@ -318,6 +321,14 @@ int main () {
     if (!bg.loadFromFile("assets/board.png")) {
         std::cout << "error loading board.png\n";
     }
+
+    if(!amp_grill.loadFromFile("assets/amp_grill.png")) {
+        std::cout << "error loading amp_grill.png\n";
+    }
+
+    amp_grill.setRepeated(true);
+    amp_grill_sprite.setTexture(amp_grill);
+
     bg.setRepeated(true);
     sf::Sprite bgSprite;
     bgSprite.setTexture(bg);
@@ -357,7 +368,7 @@ int main () {
 
     nodes[0] = new guitar_amp::InputNode(0);
     nodes[5] = new guitar_amp::OutputNode(5);
-
+    
     ImGui::SetNextWindowSize(ImVec2(300,200));
     ImNodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
     ImNodes::SetNodeEditorSpacePos(5, ImVec2(150, 100));

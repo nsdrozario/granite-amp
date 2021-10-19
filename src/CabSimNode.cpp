@@ -333,6 +333,10 @@ void CabSimNode::reinit(CabSimSettings settings) {
 
 }
 
+void speakerGrill(float size_x, float size_y) {
+    ImGui::Image(amp_grill_sprite);
+}
+
 void CabSimNode::showGui() {
     ImGui::PushItemWidth(100);
     ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(170,110,220, 100));
@@ -402,7 +406,15 @@ void CabSimNode::showGui() {
                 changed_presence = true;
             }
         } else {
-            // use presets; there will be too many knobs
+            ImKnob::Knob("BASS", &hpf_freq, 10.0f, 10.0f, 120.0f, "%.0f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);    
+            ImGui::SameLine();
+            ImKnob::Knob("TREB", &lpf_freq, 500.0f, 1000.0f, 6000.0f, "%.0f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImGui::SameLine();
+            ImKnob::Knob("LO MID", &low_mids_boost_magnitude, 1.0f, -3.0f, 3.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImGui::SameLine();
+            ImKnob::Knob("MID", &mid_scoop_magnitude, 1.0f, -6.0f, 2.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImGui::SameLine();
+            ImKnob::Knob("PRES", &presence_magnitude, 1.0f, -6.0f, 3.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
         }
 
     ImNodes::EndNode();
