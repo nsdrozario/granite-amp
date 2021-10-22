@@ -193,9 +193,9 @@ void OverdriveNode::luaInit(const sol::table &init_table) {
 
 void OverdriveNode::showGui() {
 
-    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(201, 4, 126, 100));
-    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(201, 4, 126, 255));
-    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(201, 4, 126, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(245, 39, 7, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(245, 39, 7, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(245, 39, 7, 255));
     if (advancedMode) {
         ImGui::PushItemWidth(150);
     }

@@ -57,7 +57,9 @@ void AnalyzerNode::showGui() {
         }
 
         if (this->showing_spectrum && this->accept_warning) {
+            #ifdef DEBUG_BUILD
             ImGui::Checkbox("Frequency Domain", &freqDomain);
+            #endif
             ImGui::BeginChildFrame(this->id, ImVec2(400,300));
             #ifdef DEBUG_BUILD
             if (!freqDomain) {
@@ -71,9 +73,10 @@ void AnalyzerNode::showGui() {
                 ImPlot::SetNextPlotLimitsX(0.0f, static_cast<double>(device.sampleRate/2));
                 const double ticks[] = {0.0,0.05,0.2,0.5,1,4,8,20};
                 ImPlot::SetNextPlotTicksX(ticks, 10);
-                ImPlot::BeginPlot("FFT", "Frequency (kHz)", "Power (dBFS)", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
-                ImPlot::PlotLine("Power", this->freqs.data(), this->output.data()+1, (this->fft_size/2)-1);
-                ImPlot::EndPlot();
+                if (ImPlot::BeginPlot("FFT", "Frequency (kHz)", "Power (dBFS)", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale)) {
+                    ImPlot::PlotLine("Power", this->freqs.data(), this->output.data()+1, (this->fft_size/2)-1);
+                    ImPlot::EndPlot();
+                }
             #ifdef DEBUG_BUILD
             }
             #endif

@@ -64,7 +64,11 @@ namespace mindsp {
             T read_tap(std::size_t tap_index) {
                 std::size_t tap_index2 = tap_index % buffer.size();
                 std::size_t index = wrap_index(write_ptr - tap_index2, buffer.size());
-                return buffer[index];
+                if (std::isfinite(buffer[index])) {
+                    return buffer[index];
+                } else {
+                    return 0;
+                }
             }
             
             /**
@@ -79,7 +83,11 @@ namespace mindsp {
                 float index = std::fmod(static_cast<float>(write_ptr) - tap_index2, size);
                 std::size_t x0 = static_cast<std::size_t> (index);
                 float out = (buffer[(x0 + 1) % buffer.size()] - buffer[x0]) * (index - std::floor(index)) + buffer[x0];
-                return out;
+                if (std::isfinite(out)) {
+                    return out;
+                } else {
+                    return 0;
+                }
             }
 
             /**

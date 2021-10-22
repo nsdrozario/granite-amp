@@ -49,11 +49,8 @@ std::string nodes_to_lua() {
 }
 
 void amp_save_preset(const std::string &file_path) {
-    std::ofstream output_file (file_path);
-    if (output_file.good() && output_file.is_open()) {
-        output_file << nodes_to_lua() << "\n" << adjlist_to_lua() << "\n";
-    }
-    output_file.close();
+    std::cout << "call" << std::endl;
+    
 }
 
 
@@ -129,9 +126,13 @@ void lua_to_nodes(const sol::table &data) {
 }
 
 void amp_load_preset(const std::string &file_name) {
+    audioEnabled = false;
+    nodes_mutex.lock();
     sol::state l;
     l.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::table);
     l.script_file(file_name);
     lua_to_nodes(l.get_or("nodes", sol::table()));
     lua_to_adjlist(l.get_or("adjlist", sol::table()), l.get_or("adjlist_inward", sol::table()));
+    audioEnabled = true;
+    nodes_mutex.unlock();
 }

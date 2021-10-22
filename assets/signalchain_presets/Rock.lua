@@ -2,18 +2,18 @@ nodes = {
     {
         ["type"] = "Overdrive",
         ["state"] = {
-            ["Gain"]=3,
+            ["Gain"]=40,
             ["Volume"]=-20,
-            ["LPF"]=16000,
-            ["HPF"]=100,
+            ["LPF"]=12000,
+            ["HPF"]=300,
         }
     },
     {
         ["type"] = "CabSim",
         ["state"] = {
-            ["Delay"]=0.7,
+            ["Delay"] = 0.7,
             ["HPF"] = 60,
-            ["LPF"] = 8000,
+            ["LPF"] = 4000,
             ["LowMid"] = {
                 ["freq"] = 250,
                 ["q"] = 4,

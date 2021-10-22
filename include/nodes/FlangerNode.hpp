@@ -27,13 +27,17 @@ namespace guitar_amp {
         float delay_frequency = 1.0f; // measured in Hz
         
         float min_delay_time = 1.0f; // 1 millisecond
-        float max_delay_time = 5.0f;
+        float max_delay_time = 25.0f;
         float feedback_gain = -6.0f;
 
         float internal_timer = 0;
 
         size_t max_delay_samples = 0;
         size_t min_delay_samples = 0;
+
+        float depth = 50;
+
+        bool changed_delay = false;
 
         // honestly using an inbuilt ring buffer may be easier here
         float *delay_buf = nullptr;

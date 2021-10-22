@@ -15,15 +15,34 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
     ImVec2 text_position (draw_position.x + text_padding, draw_position.y);
     ImVec2 center_position = ImVec2(draw_position.x+std::max((label_size.x*0.5f)+text_padding,radius), draw_position.y+big_radius+text_padding);
     
-    if (label_size.x > big_radius) {
+    // there is no reason for the number to be that long but it's just for safety
+    char formatted[256];
+    snprintf(formatted, 256, format, *value);
+    ImVec2 value_text_position = text_position;
+    value_text_position.y = draw_position.y + (2*big_radius) + text_padding + 5;
+    ImVec2 value_text_size = ImGui::CalcTextSize(formatted);
+    
+    /*
+    if (value_text_size.x < label_size.x) {
+        value_text_position.x += (label_size.x/2) - (value_text_size.x/2);
+    }
+    */
+    // consider this for the bottom one as well
+
+    float bigger_label_size_x = std::max(label_size.x, value_text_size.x);
+    if (bigger_label_size_x > big_radius) {
         // move the knob towards the center
-        center_position.x = draw_position.x + text_padding + (label_size.x / 2);
+        center_position.x = draw_position.x + text_padding + (bigger_label_size_x / 2);
         center_position.y = draw_position.y + big_radius + text_padding;
     } else {
         // move the text towards the center
         text_position.x = draw_position.x + text_padding + big_radius - (label_size.x/2);
         text_position.y = draw_position.y;
     }
+
+    
+    value_text_position.x = center_position.x - (value_text_size.x/2);
+    text_position.x = center_position.x - (label_size.x/2);
 
     bool interacted = false;
     ImVec4 color_to_use = color_active;
@@ -41,7 +60,7 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
     float angle = (1.0f-norm_position) * (min_angle - max_angle) + max_angle;
 
     ImGui::PushID(value); // the variable being pointed to shouldn't be using other imgui elements
-    ImGui::InvisibleButton("Knob", ImVec2(std::max(radius*2, label_size.x)+((text_padding)*2), (big_radius+text_padding)*2));
+    ImGui::InvisibleButton("Knob", ImVec2(std::max(radius*2, bigger_label_size_x)+((text_padding*2)), (big_radius*2)+(label_size.y)+(value_text_size.y)+text_padding));
 
     // click action
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
@@ -101,17 +120,7 @@ bool ImKnob::Knob(const char *label, float *value, float speed, float min, float
     draw_list->AddCircleFilled(center_position, radius, ImColor(color_to_use));
     draw_list->AddLine(point2, point1, IM_COL32(255,255,255,255), 2.0f);
     
-    // there is no reason for the number to be that long but it's just for safety
-    char formatted[256];
-    snprintf(formatted, 256, format, *value);
-
-    ImVec2 value_text_position = text_position;
-    value_text_position.y = draw_position.y + (2*big_radius) + text_padding + 5;
-    ImVec2 value_text_size = ImGui::CalcTextSize(formatted);
-    
-    if (value_text_size.x < label_size.x) {
-        value_text_position.x += (label_size.x/2) - (value_text_size.x/2);
-    }
+ 
 
     draw_list->AddText(value_text_position,IM_COL32(255,255,255,255), formatted);
     return interacted;

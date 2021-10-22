@@ -1,18 +1,26 @@
 nodes = {
     {
+        ["type"]="Delay",
+        ["state"]={
+            ["DelayTimeSeconds"]=0.2,
+            ["FeedbackGain"]=-6 
+        }
+    },
+    {
         ["type"] = "Overdrive",
         ["state"] = {
-            ["Gain"]=40,
+            ["Gain"]=3,
             ["Volume"]=-20,
-            ["LPF"]=12000,
-            ["HPF"]=300,
+            ["LPF"]=16000,
+            ["HPF"]=100,
         }
     },
     {
         ["type"] = "CabSim",
         ["state"] = {
+            ["Delay"]=0.7,
             ["HPF"] = 60,
-            ["LPF"] = 4000,
+            ["LPF"] = 8000,
             ["LowMid"] = {
                 ["freq"] = 250,
                 ["q"] = 4,
@@ -35,11 +43,13 @@ nodes = {
 adjlist = {
     [3] = 11,
     [13] = 16,
-    [18] = 6
+    [18] = 21,
+    [23] = 6
 }
 
 adjlist_inward = {
     [3] = 11,
     [13] = 16,
-    [18] = 6
+    [18] = 21,
+    [23] = 6
 }

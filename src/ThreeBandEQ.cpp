@@ -239,7 +239,6 @@ void ThreeBandEQ::ApplyFX(const float *in, float *out, size_t numFrames, AudioIn
     }
 
     low_shelf.apply(out,in,numFrames);
-    high_shelf.apply(out,out,numFrames);
-    mid_range.apply(out,out,numFrames);
+
 
 }

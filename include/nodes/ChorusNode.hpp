@@ -20,7 +20,7 @@ namespace guitar_amp {
         sol::table serializeLua();
 
     private:
-        mindsp::util::ring_buffer<float> delay_line;
+        mindsp::util::ring_buffer<float> delay_line; 
         float min_delay = 15.0f; // in ms
         float max_delay = 30.0f; // in ms
         float lfo_amplitude = 5.0f; // in ms

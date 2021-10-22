@@ -30,6 +30,7 @@ FlangerNode::FlangerNode(int id, const AudioInfo current_audio_info, const sol::
     max_delay_time = init_table.get_or("DelayTimeMilliseconds", 1.0);
     delay_frequency = init_table.get_or("DelayFrequency", 1.0);
     feedback_gain = init_table.get_or("FeeedbackGain", -6.0);
+    depth = init_table.get_or("Depth", 50);
 
     if (current_audio_info.sample_rate == 0) {
         // don't allocate
@@ -47,6 +48,7 @@ sol::table FlangerNode::serializeLua() {
         {
             ["DelayTimeMilliseconds"]=1,
             ["DelayFrequency"]=1,
+            ["Depth"]=50,
             ["FeedbackGain"]=-6
         }
     */
@@ -57,6 +59,7 @@ sol::table FlangerNode::serializeLua() {
     state["DelayTimeMilliseconds"] = max_delay_time;
     state["DelayFrequency"] = delay_frequency;
     state["FeedbackGain"] = feedback_gain;
+    state["Depth"] = depth;
     
     out["state"] = state;
     
@@ -68,6 +71,7 @@ void FlangerNode::luaInit(const sol::table &init_table) {
     max_delay_time = init_table.get_or("DelayTimeMilliseconds", 1.0);
     delay_frequency = init_table.get_or("DelayFrequency", 1.0);
     feedback_gain = init_table.get_or("FeeedbackGain", -6.0);
+    depth = init_table.get_or("Depth", 50.0);
     // applyfx should take care of the reallocation
 }
 
@@ -99,17 +103,29 @@ void FlangerNode::showGui() {
         ImNodes::PopAttributeFlag();
 
         if (advancedMode) {
-            ImGui::DragFloat("Minimum Delay", &min_delay_time, 1.0f, 0.0f, max_delay_time, "%.3f ms");
-            ImGui::DragFloat("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS - 1.0f, "%.3f ms");
+            if(ImGui::DragFloat("Minimum Delay", &min_delay_time, 1.0f, 0.0f, max_delay_time, "%.3f ms")) {
+                changed_delay = true;
+            } else {
+                changed_delay = false;
+            }
+            if (ImGui::DragFloat("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS - 1.0f, "%.3f ms")) {
+                changed_delay = true;
+            } else {
+                changed_delay = false;
+            }
             ImGui::DragFloat("LFO Frequency", &delay_frequency, 0.5f, 0.1f, 2.0f, "%.3f Hz");
             ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -144.0f, -1.0f, "%.3f dB");
+            ImGui::DragFloat("Wet/Dry Ratio", &depth, 1.0f, 0.0f, 100.0f, "%.0f%%");
         } else {
-            ImKnob::Knob("Minimum Delay", &min_delay_time, 1.0f, 1.0f, max_delay_time, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            if(ImKnob::Knob("Minimum Delay", &min_delay_time, 1.0f, 1.0f, max_delay_time, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+                internal_timer = 0;
+            }
             ImGui::SameLine();
             ImKnob::Knob("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS - 1.0f, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             ImKnob::Knob("LFO Frequency", &delay_frequency, 1.0f, 0.5f, 2.0f, "%.1f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             ImGui::SameLine();
-            ImKnob::Knob("Feedback Gain", &feedback_gain, 1.0f, -60.0f, -1.0f, "%.0f", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImKnob::Knob("Feedback Gain", &feedback_gain, 1.0f, -60.0f, -1.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImKnob::Knob("Wet/Dry Ratio", &depth, 1.0f, 0.0f, 100.0f, "%.0f%%", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
         }
         // ImGui::Text("%.2f", ((static_cast<float>(max_delay_samples) * 0.5) - 1.0f) * (std::cos(2.0f * 3.1415927f * delay_frequency * internal_timer) + 1));
 
@@ -176,15 +192,28 @@ void FlangerNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioIn
             delay_buf[(static_cast<size_t>(index) + 1) % max_delay_samples] = 0;
         }
 
+        if (std::abs(delay_buf[static_cast<size_t>(index)]) >= 1 ) {
+            delay_buf[static_cast<size_t>(index)] = 0;
+        }
+
+        if (std::abs(delay_buf[(static_cast<size_t>(index) + 1) % max_delay_samples]) >= 1) {
+            delay_buf[(static_cast<size_t>(index) + 1) % max_delay_samples] = 0;
+        }
+
         float y0 = delay_buf[static_cast<size_t>(index)];
         float y1 = delay_buf[(static_cast<size_t>(index) + 1) % max_delay_samples];
         
         float fraction = index - std::floor(index);
         float interpolated = ((y1 - y0) * fraction) + y0;
 
-        out[i] = in[i] + interpolated;
+        if (!changed_delay) {
+            delay_buf[write_ptr] = in[i] + (dsp::dbfs_to_f32(feedback_gain) * interpolated);
+            out[i] = ((1-(depth/100)) * in[i]) + (interpolated * (depth/100));
+        } else {
+            out[i] = 0;
+            delay_buf[write_ptr] = 0;
+        }
 
-        delay_buf[write_ptr] = in[i] + (dsp::dbfs_to_f32(feedback_gain) * interpolated);
         write_ptr = (write_ptr + 1) % max_delay_samples;
 
         internal_timer += 1;

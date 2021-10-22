@@ -33,7 +33,7 @@ void ui::node_popups() {
         if (node_creation_popup && !is_node_hovered) {
             ImGui::OpenPopup("Node Creator");
         } else if (is_node_hovered) {
-            if (node_hovered != 0 && node_hovered != 5) {
+            if (node_hovered != 0 && node_hovered != 5 && node_hovered != -1) {
                 ImGui::OpenPopup("Delete Node");
             }
         }
@@ -82,12 +82,6 @@ void ui::node_popups() {
             nodes[current_node] = new guitar_amp::FlangerNode(current_node, globalAudioInfo);
             current_node += 5;
         }
-
-        if (ImGui::MenuItem("Chorus")) {
-            nodes[current_node] = new guitar_amp::ChorusNode(current_node, globalAudioInfo);
-            current_node += 5;
-        }
-
 
         #ifdef DEBUG_BUILD
 

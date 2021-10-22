@@ -105,6 +105,8 @@ int config_selected_id;
 sf::Texture amp_grill;
 sf::Sprite amp_grill_sprite;
 
+std::mutex nodes_mutex;
+
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
@@ -372,6 +374,10 @@ int main () {
     ImGui::SetNextWindowSize(ImVec2(300,200));
     ImNodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
     ImNodes::SetNodeEditorSpacePos(5, ImVec2(150, 100));
+    
+    ImNodesIO &imnodes_io = ImNodes::GetIO();
+    imnodes_io.EmulateThreeButtonMouse.Modifier = &io.KeyAlt;
+    imnodes_io.LinkDetachWithModifierClick.Modifier = &io.KeyCtrl;
 
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
@@ -400,6 +406,28 @@ int main () {
         ImGui::Begin("Signal Chain");
         ImNodes::BeginNodeEditor();
             // draw nodes
+            static bool help_open = true;
+            ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(117, 161, 150, 255));
+            ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(117, 161, 150, 255));
+            ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(117, 161, 150, 255));
+            ImGui::PushItemWidth(100);
+            ImNodes::BeginNode(-1);
+                ImNodes::BeginNodeTitleBar();
+                    ImGui::Text("Help");
+                ImNodes::EndNodeTitleBar();
+                if (help_open) {
+                    ImGui::Text("- Drag the triangle pins to each other to connect nodes.");
+                    ImGui::Text("- Nodes can be disconnected by dragging a connection out of a triangle pin.");
+                    ImGui::Text("- Nodes can also be disconnected by holding Ctrl while clicking on a connection.");
+                    ImGui::Text("- Right click the grid to add a node.");
+                    ImGui::Text("- Right click a node and click \"Delete Node\" to delete it.");
+                    ImGui::Text("- Scroll around the grid by holding Alt while dragging the mouse with left click,\nor drag with the mouse wheel button held down.");
+                }
+                ImGui::Checkbox("Show", &help_open);
+            ImNodes::EndNode();
+            ImNodes::PopColorStyle();
+            ImGui::PopItemWidth();
+
             for (auto it = nodes.begin(); it != nodes.end(); it++) {
                 int node_id = it->first;
                 AudioProcessorNode *node = it->second;
@@ -478,23 +506,13 @@ int main () {
                 amp_load_preset(config_paths[config_selected_id]);
             }
 
-            /*
-            if (ImGui::Button("Save as Preset")) {
-                amp_save_preset("NewPreset.lua");
-                io::file_paths(config_paths, "assets/signalchain_presets/");
-                io::file_names(config_names, "assets/signalchain_presets");
-                if (config_selected != nullptr) {
-                    delete[] config_selected;
-                }
-                config_selected = new bool[config_names.size()];
-                align_c_str_vector(config_paths, config_paths_c_str);
-                align_c_str_vector(config_names, config_names_c_str);
+            if(ImGui::Button("Save Preset")) {
+                std::cout << "save" << std::endl;
             }
-            */
-           
+            
             if (ImGui::Button("Refresh Preset List")) {
                 io::file_paths(config_paths, "assets/signalchain_presets/");
-                io::file_names(config_names, "assets/signalchain_presets");
+                io::file_names(config_names, "assets/signalchain_presets/");
                 if (config_selected != nullptr) {
                     delete[] config_selected;
                 }
@@ -508,6 +526,8 @@ int main () {
         ImGui::Begin("Control Panel");
 
             // ImGui::Text("Time to process: %.1f ms", processTime);
+
+          
 
             if (audioEnabled) {
             
