@@ -118,10 +118,11 @@ void lua_to_nodes(const sol::table &data) {
             if (real_node) {
                 real_node->luaInit(node_state);
             }
-            ImNodes::SetNodeEditorSpacePos(node_i, ImVec2( 50 + (node_i % 10) * 50, 200 + (node_i / 10)));
+            ImNodes::SetNodeEditorSpacePos(node_i, ImVec2( 50 + (((node_i / 5)-2) % 3) * 350, 200 + ((((node_i / 5)-2) / 3) * 400)));
             node_i += 5;
         }  
     }
+    ImNodes::SetNodeEditorSpacePos(5, ImVec2( 50 + ((((node_i / 5)-2) % 3) + 1) * 350, 200 + (((((node_i / 5)-2) / 3) + 1) * 200)));
     current_node = node_i;
 }
 

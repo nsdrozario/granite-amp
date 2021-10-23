@@ -16,6 +16,15 @@ nodes = {
         }
     },
     {
+        ["type"]="Flanger",
+        ["state"]={
+            ["DelayTimeMilliseconds"]=10,
+            ["DelayFrequency"]=0.7,
+            ["Depth"]=75,
+            ["FeedbackGain"]=-5
+        }
+    },
+    {
         ["type"] = "CabSim",
         ["state"] = {
             ["Delay"]=0.7,
@@ -44,12 +53,14 @@ adjlist = {
     [3] = 11,
     [13] = 16,
     [18] = 21,
-    [23] = 6
+    [23] = 26,
+    [28] = 6
 }
 
 adjlist_inward = {
     [3] = 11,
     [13] = 16,
     [18] = 21,
-    [23] = 6
+    [23] = 26,
+    [28] = 6
 }

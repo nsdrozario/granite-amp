@@ -3,16 +3,16 @@ nodes = {
         ["type"] = "Overdrive",
         ["state"] = {
             ["Gain"]=40,
-            ["Volume"]=-20,
+            ["Volume"]=-35,
             ["LPF"]=12000,
-            ["HPF"]=300,
+            ["HPF"]=400,
         }
     },
     {
         ["type"] = "CabSim",
         ["state"] = {
             ["Delay"] = 0.7,
-            ["Gain"] = -6,
+            ["Gain"] = 6,
             ["HPF"] = 60,
             ["LPF"] = 4000,
             ["LowMid"] = {
