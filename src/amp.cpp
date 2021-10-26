@@ -35,6 +35,7 @@ ImGui::SliderFloat($1, $2, $4, $5, $6)
 #include <implot.h>
 
 #include <imknob.hpp>
+#include <immeter.hpp>
 
 #include <AudioInfo.hpp>
 #include <MainUI.hpp>
@@ -106,6 +107,8 @@ sf::Texture amp_grill;
 sf::Sprite amp_grill_sprite;
 
 std::mutex nodes_mutex;
+
+float rms_value = 0;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -265,6 +268,15 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
 
         }
 
+        rms_value = 0;
+    
+        for (std::size_t i = 0; i < numFrames; i++) {
+            rms_value += f32_output[i] * f32_output[i];
+        }
+
+        rms_value /= numFrames;
+        rms_value = dsp::f32_to_dbfs(std::sqrt(rms_value));
+
     }
 
 }
@@ -287,6 +299,7 @@ void align_c_str_vector(std::vector<std::string> &in, std::vector<const char *> 
         out[i] = in[i].c_str();
     }
 }
+
 
 int main () {
 
@@ -506,10 +519,12 @@ int main () {
                 amp_load_preset(config_paths[config_selected_id]);
             }
 
+            /*
             if(ImGui::Button("Save Preset")) {
                 std::cout << "save" << std::endl;
             }
-            
+            */
+
             if (ImGui::Button("Refresh Preset List")) {
                 io::file_paths(config_paths, "assets/signalchain_presets/");
                 io::file_names(config_names, "assets/signalchain_presets/");
@@ -527,7 +542,8 @@ int main () {
 
             // ImGui::Text("Time to process: %.1f ms", processTime);
 
-          
+            
+            ImMeter::Meter("Volume (dBFS)", &rms_value, -60.0, 0.0);
 
             if (audioEnabled) {
             
