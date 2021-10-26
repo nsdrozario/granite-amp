@@ -109,6 +109,7 @@ sf::Sprite amp_grill_sprite;
 std::mutex nodes_mutex;
 
 float rms_value = 0;
+int rms_count = 0;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -268,15 +269,18 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
 
         }
 
-        rms_value = 0;
-    
-        for (std::size_t i = 0; i < numFrames; i++) {
-            rms_value += f32_output[i] * f32_output[i];
+        if (rms_count == 0) {
+            rms_value = 0;
+        
+            for (std::size_t i = 0; i < numFrames; i++) {
+                rms_value += f32_output[i] * f32_output[i];
+            }
+
+            rms_value /= numFrames;
+            rms_value = dsp::f32_to_dbfs(std::sqrt(rms_value));
         }
-
-        rms_value /= numFrames;
-        rms_value = dsp::f32_to_dbfs(std::sqrt(rms_value));
-
+        rms_count++;
+        rms_count %= 3;
     }
 
 }
@@ -387,6 +391,7 @@ int main () {
     ImGui::SetNextWindowSize(ImVec2(300,200));
     ImNodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
     ImNodes::SetNodeEditorSpacePos(5, ImVec2(150, 100));
+    ImNodes::SetNodeEditorSpacePos(-1, ImVec2(200,400));
     
     ImNodesIO &imnodes_io = ImNodes::GetIO();
     imnodes_io.EmulateThreeButtonMouse.Modifier = &io.KeyAlt;

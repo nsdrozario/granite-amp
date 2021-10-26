@@ -20,7 +20,11 @@ void ImMeter::Meter(const char *label, float *val, float min, float max) {
     draw_list->AddText(ImVec2(draw_pos.x + (width/2) - (text_size.x / 2), draw_pos.y - 30), IM_COL32(255,255,255,255), label);
     draw_list->AddRectFilled(draw_pos, ImVec2(draw_pos.x + width, draw_pos.y + 20), IM_COL32(39, 116, 161, 255));
     if ((*val - min) / (max-min) >= 0.0f) {
-        draw_list->AddRectFilled(draw_pos, ImVec2(draw_pos.x + ( width * ( (*val - min) / (max-min) ) ), draw_pos.y + 20), IM_COL32(0, 200, 255, 255), 5);
+        if ((*val - min) / (max-min) > 1.0f) {
+            draw_list->AddRectFilled(draw_pos, ImVec2(draw_pos.x + width, draw_pos.y + 20), IM_COL32(0, 200, 255, 255));
+        } else {
+            draw_list->AddRectFilled(draw_pos, ImVec2(draw_pos.x + ( width * (*val - min) / (max-min)), draw_pos.y + 20), IM_COL32(0, 200, 255, 255), 5);
+        }
     }
     for (int i = 0; i <= 4; i++) {
         char buf[256];
