@@ -42,14 +42,6 @@ void AnalyzerNode::showGui() {
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
 
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
-        ImGui::Text("WARNING: The frequency analyzer fluctuates rapidly\nand may cause seizures in some people.\nIf you or any of your relatives have had\na history of epileptic conditions or seizures,\nplease consult a medical professional before using this software\nand DO NOT press the checkbox below.");
-        ImGui::PopStyleColor();
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 153, 153)));
-        ImGui::Text("This is not medical advice;\nplease consult a medical professional for medical advice.");
-        ImGui::PopStyleColor();
-        ImGui::Checkbox("I accept the warning and understand the risks.", &(this->accept_warning));
-        
         if (this->accept_warning) {
             ImGui::Checkbox("Show Spectrum", &(this->showing_spectrum));
         } else {

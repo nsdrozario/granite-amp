@@ -7,7 +7,7 @@
 
 CXX := clang++
 LDFLAGS := -lsfml-graphics -lsfml-window -lsfml-system -lopengl32 
-CXXFLAGS := -g -std=c++17 -Iinclude/ -Iexternal_headers/ -O3 -mwindows -Iinclude/nodes/ $(shell pkg-config --cflags --libs sol2) $(shell pkg-config --cflags --libs lua5.3)
+CXXFLAGS := -g -std=c++17 -Iinclude/ -Iexternal_headers/ -mwindows -O3 -Iinclude/nodes/ $(shell pkg-config --cflags --libs sol2) $(shell pkg-config --cflags --libs lua5.3)
 SRCS := $(wildcard src/*.cpp) $(wildcard src/external/*.cpp)
 OBJS := $(patsubst src/%.cpp, obj/%.o, $(SRCS))
 

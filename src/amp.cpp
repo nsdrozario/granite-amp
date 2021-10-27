@@ -111,6 +111,8 @@ std::mutex nodes_mutex;
 float rms_value = 0;
 int rms_count = 0;
 
+bool warning_open = true;
+
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
     ma_uint32 buffer_size_in_bytes = numFrames * ma_get_bytes_per_frame(d->capture.format, d->capture.channels);
@@ -391,7 +393,7 @@ int main () {
     ImGui::SetNextWindowSize(ImVec2(300,200));
     ImNodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
     ImNodes::SetNodeEditorSpacePos(5, ImVec2(150, 100));
-    ImNodes::SetNodeEditorSpacePos(-1, ImVec2(200,400));
+    ImNodes::SetNodeEditorSpacePos(-1, ImVec2(200,450));
     
     ImNodesIO &imnodes_io = ImNodes::GetIO();
     imnodes_io.EmulateThreeButtonMouse.Modifier = &io.KeyAlt;
@@ -418,6 +420,22 @@ int main () {
         // draw the background
         w.draw(bgSprite);
 
+        if (warning_open) {
+            ImGui::OpenPopup("Warning Popup");    
+        }
+        if (ImGui::BeginPopupModal("Warning Popup", &warning_open)) {
+            ImGui::TextColored(ImColor(IM_COL32(179, 50, 41, 255)), "WARNING: This app contains rapidly changing colors,\nwhich may cause seizures in some people.\nUsers should exercise caution.\nThis is not medical advice; please consult a medical\nprofessional for medical advice.");
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(179.f/255, 50.f/255, 41.f/255, 1));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(235.f/255, 64.f/255, 52.f/255, 1));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(235.f/255, 64.f/255, 52.f/255, 1));
+            if (ImGui::Button("I acknowledge this warning.")) {
+                warning_open = false;
+            }
+            ImGui::PopStyleColor();
+            ImGui::PopStyleColor();
+            ImGui::PopStyleColor();
+            ImGui::EndPopup();
+        }
         // imgui stuff
         // draw node 
         ImGui::PushFont(font);
@@ -546,9 +564,12 @@ int main () {
         ImGui::Begin("Control Panel");
 
             // ImGui::Text("Time to process: %.1f ms", processTime);
-
-            
-            ImMeter::Meter("Volume (dBFS)", &rms_value, -60.0, 0.0);
+            static float fake_volume = -60;
+            if (!warning_open) {
+                ImMeter::Meter("Volume (dBFS)", &rms_value, -60.0, 0.0);
+            } else {
+                ImMeter::Meter("Volume (dBFS)", &fake_volume, -60.0, 0.0);
+            }
 
             if (audioEnabled) {
             
