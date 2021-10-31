@@ -66,7 +66,7 @@ void CompressorNode::showGui() {
 
             ImKnob::Knob("Ratio", &this->ratio, 0.01, 1.0f, 50.0f, "%.1f", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
             ImGui::SameLine();
-            ImKnob::Knob("Threshold", &this->threshold, 1.0f, -144.0f, 0.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+            ImKnob::Knob("Threshold", &this->threshold, 1.0f, -60.0f, 0.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
 
         }
 

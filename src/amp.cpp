@@ -101,7 +101,7 @@ std::vector<std::string> config_paths;
 std::vector<std::string> config_names;
 
 bool *config_selected = nullptr;
-int config_selected_id;
+int config_selected_id = 1;
 
 sf::Texture amp_grill;
 sf::Sprite amp_grill_sprite;
@@ -112,6 +112,7 @@ float rms_value = 0;
 int rms_count = 0;
 
 bool warning_open = true;
+float global_gain = 100.0f;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -271,6 +272,10 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
 
         }
 
+        for (std::size_t i = 0; i < numFrames; i++) {
+            f32_output[i] *= global_gain/100.0f;
+        }
+
         if (rms_count == 0) {
             rms_value = 0;
         
@@ -333,7 +338,7 @@ int main () {
     }
     // Initialize ImGui
     sf::Event e;
-    sf::RenderWindow w(sf::VideoMode(1920,1080), "Guitar Amp");
+    sf::RenderWindow w(sf::VideoMode(1920,1080), "GraniteAmp");
     sf::Clock dt;
     
     // get images
@@ -393,11 +398,13 @@ int main () {
     ImGui::SetNextWindowSize(ImVec2(300,200));
     ImNodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
     ImNodes::SetNodeEditorSpacePos(5, ImVec2(150, 100));
-    ImNodes::SetNodeEditorSpacePos(-1, ImVec2(200,450));
+    ImNodes::SetNodeEditorSpacePos(-1, ImVec2(720,670));
     
     ImNodesIO &imnodes_io = ImNodes::GetIO();
     imnodes_io.EmulateThreeButtonMouse.Modifier = &io.KeyAlt;
     imnodes_io.LinkDetachWithModifierClick.Modifier = &io.KeyCtrl;
+
+    amp_load_preset("assets/signalchain_presets/Clean.lua");
 
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
@@ -529,7 +536,7 @@ int main () {
                 metronomeTickSamples = 0;
             }
             if (advancedMode) {
-                ImGui::DragFloat("Gain", &metronomeGainDB, 1.0f, -144.0f, 6.0f, "%.3f dB");
+                ImGui::DragFloat("Gain", &metronomeGainDB, 1.0f, -60.0f, 6.0f, "%.3f dB");
             } else {
                 ImKnob::Knob("Gain", &metronomeGainDB, 1.0f, -60.0f, 12.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             }
@@ -571,6 +578,8 @@ int main () {
                 ImMeter::Meter("Volume (dBFS)", &fake_volume, -60.0, 0.0);
             }
 
+            ImGui::SliderFloat("Volume", &global_gain, 0.0f, 100.0f, "%.0f%%");
+
             if (audioEnabled) {
             
                 if (recordingAudio) {
@@ -599,7 +608,7 @@ int main () {
                         "Recorder File Explorer", 
                         imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, 
                         ImVec2(300,200), 
-                        "*.wav"
+                        ".wav"
                     )
                 ) 
                 {
@@ -622,6 +631,11 @@ int main () {
             }
 
             ImGui::Checkbox("Advanced Mode", &advancedMode);
+
+            if (ImGui::Button("Restore Default Layout")) {
+                ImGui::LoadIniSettingsFromDisk("default_imgui.ini");
+                ImGui::SaveIniSettingsToDisk("imgui.ini");
+            }
 
         ImGui::End();
 

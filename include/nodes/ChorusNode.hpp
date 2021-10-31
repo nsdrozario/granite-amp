@@ -3,12 +3,20 @@
 
 #include <mindsp/util/ring_buffer.hpp>
 #include <MiddleNode.hpp>
-#include <random>
+#define CHORUS_VOICES 2
+
 
 namespace guitar_amp {
     class ChorusNode : public MiddleNode {
     public:
         
+        struct ChorusVoiceSettings {
+            float avg_delay = 20; // ms
+            float width = 5; // ms
+            float depth = 50; // percent
+            float frequency = 0.7;
+        };
+
         ChorusNode(int id, const AudioInfo info);
         ChorusNode(int id, const AudioInfo current_audio_info, const sol::table &init_table);
         virtual ~ChorusNode();
@@ -20,18 +28,11 @@ namespace guitar_amp {
         sol::table serializeLua();
 
     private:
-        mindsp::util::ring_buffer<float> delay_line; 
-        float min_delay = 15.0f; // in ms
-        float max_delay = 30.0f; // in ms
-        float lfo_amplitude = 5.0f; // in ms
-        size_t lfo_amplitude_samples = 0;
 
-        float tap1_freq = 0.7;
-        float tap2_freq = 0.5;
-
+        bool need_reinit = false;
         float internal_timer = 0;
+        mindsp::util::ring_buffer<float> delay_lines[2];
+        ChorusVoiceSettings delay_line_settings[2];
 
-        size_t min_samples_delay = 0;
-        size_t max_samples_delay = 0;
     };
 }

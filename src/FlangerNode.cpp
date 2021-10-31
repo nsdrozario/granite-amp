@@ -114,7 +114,7 @@ void FlangerNode::showGui() {
                 changed_delay = false;
             }
             ImGui::DragFloat("LFO Frequency", &delay_frequency, 0.5f, 0.1f, 2.0f, "%.3f Hz");
-            ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -144.0f, -1.0f, "%.3f dB");
+            ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -60.0f, -1.0f, "%.3f dB");
             ImGui::DragFloat("Wet/Dry Ratio", &depth, 1.0f, 0.0f, 100.0f, "%.0f%%");
         } else {
             if(ImKnob::Knob("Minimum Delay", &min_delay_time, 1.0f, 1.0f, max_delay_time, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
@@ -122,10 +122,10 @@ void FlangerNode::showGui() {
             }
             ImGui::SameLine();
             ImKnob::Knob("Maximum Delay", &max_delay_time, 1.0f, 1.0f, MAX_POSSIBLE_DELAY_MS - 1.0f, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
-            ImKnob::Knob("LFO Frequency", &delay_frequency, 1.0f, 0.5f, 2.0f, "%.1f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImKnob::Knob("LFO Frequency ", &delay_frequency, 1.0f, 0.5f, 2.0f, "%.1f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             ImGui::SameLine();
             ImKnob::Knob("Feedback Gain", &feedback_gain, 1.0f, -60.0f, -1.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
-            ImKnob::Knob("Wet/Dry Ratio", &depth, 1.0f, 0.0f, 100.0f, "%.0f%%", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImKnob::Knob("Wet/Dry Ratio  ", &depth, 1.0f, 0.0f, 100.0f, "%.0f%%", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
         }
         // ImGui::Text("%.2f", ((static_cast<float>(max_delay_samples) * 0.5) - 1.0f) * (std::cos(2.0f * 3.1415927f * delay_frequency * internal_timer) + 1));
 

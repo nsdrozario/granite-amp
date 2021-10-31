@@ -5,20 +5,29 @@
 #include <internal_dsp.hpp>
 #include <cmath>
 #include <imknob.hpp>
-#include <random>
+#include <state.hpp>
 
 using namespace guitar_amp;
 using std::cout;
 
 ChorusNode::ChorusNode(int id, const AudioInfo info) : MiddleNode(id, info) {
 
-    if (info.sample_rate == 0) {
+    if (globalAudioInfo.sample_rate == 0) {
+        
+        for (int i = 0; i < CHORUS_VOICES; i++) {
+            std::size_t buf_size = dsp::seconds_to_samples(80.0f/1000.0f, 48000);
+            delay_lines[i].resize(buf_size);
+            delay_lines[i].reset_data();
+        }
 
     } else {
-        max_samples_delay = dsp::seconds_to_samples(max_delay / 1000.0f, info.sample_rate);
-        min_samples_delay = dsp::seconds_to_samples(min_delay / 1000.0f, info.sample_rate);
-        lfo_amplitude_samples = dsp::seconds_to_samples(lfo_amplitude/1000.0f, info.sample_rate);
-        delay_line.resize(max_samples_delay + lfo_amplitude_samples + 1);
+
+        for (int i = 0; i < CHORUS_VOICES; i++) {
+            std::size_t buf_size = dsp::seconds_to_samples(80.0f/1000.0f, globalAudioInfo.sample_rate);
+            delay_lines[i].resize(buf_size);
+            delay_lines[i].reset_data();
+        }
+
     }
 
 }
@@ -41,6 +50,43 @@ void ChorusNode::showGui() {
         ImNodes::BeginInputAttribute(this->id+1, ImNodesPinShape_TriangleFilled);
         ImNodes::EndInputAttribute();
 
+        for (int i = 0; i < CHORUS_VOICES; i++) {
+            if (advancedMode) {
+                ImGui::Text("Voice %d", i);
+                if (ImGui::DragFloat("Avg. Delay", &(delay_line_settings[i].avg_delay), 1.0f, 1.0f, 50.0f, "%.1f ms")) {
+                    need_reinit = true;
+                }
+                if (ImGui::DragFloat("Width", &(delay_line_settings[i].width), 1.0f, 0.0f, delay_line_settings[i].avg_delay-1, "%.1f ms")) {
+                    need_reinit = true;
+                }
+                if (ImGui::DragFloat("Frequency", &(delay_line_settings[i].frequency), 1.0f, 0.1f, 2.0f, "%.1f Hz")) {
+                    need_reinit = true;
+                }
+                if (ImGui::DragFloat("Depth", &(delay_line_settings[i].depth), 1.0f, 0.0f, 100.0f, "%.0f%%")) {
+                    need_reinit = true;
+                }
+                ImGui::NewLine();
+            } else {
+                ImGui::Text("Voice %d", i);
+                if (ImKnob::Knob("Avg. Delay", &(delay_line_settings[i].avg_delay), 1.0f, 1.0f, 50.0f, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+                    need_reinit = true;
+                }
+                ImGui::SameLine();
+                if(ImKnob::Knob("Width", &(delay_line_settings[i].width), 1.0f, 0.0f, delay_line_settings[i].avg_delay-1, "%.1f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+                    need_reinit = true;
+                }
+                ImGui::SameLine();
+                if (ImKnob::Knob("Frequency", &(delay_line_settings[i].frequency), 1.0f, 0.1f, 2.0f, "%.1f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+                    need_reinit = true;
+                }
+                ImGui::SameLine();
+                if (ImKnob::Knob("Depth", &(delay_line_settings[i].depth), 1.0f, 0.0f, 100.0f, "%.0f%%", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+                    need_reinit = true;
+                }
+                ImGui::NewLine();
+            }
+        }
+
         ImNodes::BeginOutputAttribute(this->id+3, ImNodesPinShape_TriangleFilled);
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
@@ -56,30 +102,75 @@ void ChorusNode::showGui() {
 
 void ChorusNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
     
-    if (internal_info != info) {
-        size_t samples_delay = dsp::seconds_to_samples(max_delay / 1000.0f, static_cast<float>(info.sample_rate));
-        delay_line.resize(samples_delay);
-        internal_info = info;
-        max_samples_delay = dsp::seconds_to_samples(max_delay / 1000.0f, info.sample_rate);
-        min_samples_delay = dsp::seconds_to_samples(min_delay / 1000.0f, info.sample_rate);
-        lfo_amplitude_samples = dsp::seconds_to_samples(lfo_amplitude/1000.0f, info.sample_rate);
+    if (internal_info != globalAudioInfo) {
+            for (int i = 0; i < CHORUS_VOICES; i++) {
+                std::size_t buf_size = dsp::seconds_to_samples(100.0f/1000.0f, globalAudioInfo.sample_rate);
+                delay_lines[i].resize(buf_size);
+            }
+        } else {
+            for (int i = 0; i < CHORUS_VOICES; i++) {
+                std::size_t buf_size = dsp::seconds_to_samples(100.0f/1000.0f, 48000);
+                delay_lines[i].resize(buf_size);
+            }
+        internal_info = globalAudioInfo;
+    }
+    
+    if (need_reinit) {
+        internal_timer = 0;
+        for (int i = 0; i < CHORUS_VOICES; i++) {
+            delay_lines[i].reset_data();
+        }
+        need_reinit = false;
     }
 
 
     for (size_t i = 0; i < numFrames; i++) {
-
-        float lfo_tap1 = std::sin(2 * 3.141592654f * tap1_freq * internal_timer / static_cast<float>(info.sample_rate)) * lfo_amplitude_samples;
-        float lfo_tap2 = std::sin(2 * 3.141592654f * tap2_freq * internal_timer / static_cast<float>(info.sample_rate)) * lfo_amplitude_samples;
-        out[i] = in[i] + delay_line.read_tap_lerp(max_samples_delay + lfo_tap1) + delay_line.read_tap_lerp(min_samples_delay + lfo_tap2);
-        delay_line.push(in[i]);
-
-        internal_timer = std::fmod(internal_timer + 1, info.sample_rate);
-
+        float lfo = (dsp::seconds_to_samples(delay_line_settings[0].width/1000.0f, globalAudioInfo.sample_rate) * std::sin(2.0f * 3.141592654f * delay_line_settings[0].frequency * internal_timer / globalAudioInfo.sample_rate));
+        lfo += dsp::seconds_to_samples(delay_line_settings[0].avg_delay, globalAudioInfo.sample_rate);
+        out[i] = ((1-delay_line_settings[0].depth) * in[i]) + ((delay_line_settings[0].depth) * delay_lines[0].read_tap_lerp(lfo));
     }
 
 }
 
 void ChorusNode::luaInit(const sol::table &settings) {
+    /* 
+        {
+            ["voices"]={
+                {
+                    ["avg_delay"]=20,
+                    ["width"]=5,
+                    ["depth"]=50,
+                    ["freq"]=0.7
+                },
+                {
+                    ["avg_delay"]=20,
+                    ["width"]=5,
+                    ["depth"]=50,
+                    ["freq"]=0.7
+                }
+            }
+        }
+    */
+
+    int voices_counted = 0;
+    for (auto &o : settings) {
+        
+        if (voices_counted > CHORUS_VOICES) {
+            break;
+        }
+        
+        sol::object &key = o.first;
+        sol::object &val = o.second;
+
+        sol::table voice = val.as<sol::table>();
+
+        delay_line_settings[voices_counted].avg_delay = voice.get_or("avg_delay", 20.0f);
+        delay_line_settings[voices_counted].depth = voice.get_or("depth",50.0f);
+        delay_line_settings[voices_counted].width = voice.get_or("width", 5.0f);
+        delay_line_settings[voices_counted].frequency = voice.get_or("freq", 0.7);
+
+        voices_counted++;
+    }
 
 }
 

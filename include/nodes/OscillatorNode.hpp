@@ -19,7 +19,7 @@ namespace guitar_amp {
 
     protected:
         float freq = 440.0f; // A4 = 440hz
-        float amplitude = -144.0f; // in dBFS
+        float amplitude = -60.0f; // in dBFS
         /*
         0: sine
         1: square

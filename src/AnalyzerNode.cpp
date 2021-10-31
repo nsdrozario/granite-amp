@@ -1,6 +1,8 @@
 #include <AnalyzerNode.hpp>
 #include <implot.h>
 #include <iostream>
+#include <state.hpp>
+
 using namespace guitar_amp;
 
 AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
@@ -42,13 +44,13 @@ void AnalyzerNode::showGui() {
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
 
-        if (this->accept_warning) {
+        if (!warning_open) {
             ImGui::Checkbox("Show Spectrum", &(this->showing_spectrum));
         } else {
             this->showing_spectrum = false;
         }
 
-        if (this->showing_spectrum && this->accept_warning) {
+        if (this->showing_spectrum && !warning_open) {
             #ifdef DEBUG_BUILD
             ImGui::Checkbox("Frequency Domain", &freqDomain);
             #endif

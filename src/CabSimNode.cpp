@@ -428,11 +428,11 @@ void CabSimNode::showGui() {
                 changed_presence = true;
             }
         } else {
-            if(ImKnob::Knob("Delay", &delay_time, 1.0f, 0.0f, 10.0f, "%.0f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+            if(ImKnob::Knob("DELAY", &delay_time, 1.0f, 0.0f, 10.0f, "%.0f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
                 changed_delay = true;
             }
             ImGui::SameLine();
-            ImKnob::Knob("Gain", &gain, 1.0f, -14.0f, 6.0, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImKnob::Knob("GAIN", &gain, 1.0f, -14.0f, 6.0, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             ImGui::SameLine();
             ImKnob::Knob("BASS", &hpf_freq, 10.0f, 10.0f, 300.0f, "%.0f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);    
             ImGui::SameLine();
@@ -453,6 +453,8 @@ void CabSimNode::showGui() {
 }
 
 void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
+
+    delay_time = std::clamp(delay_time, 0.0f, 10.0f);
 
     if (internal_info != info) {
 

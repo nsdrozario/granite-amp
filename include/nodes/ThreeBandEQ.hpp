@@ -24,6 +24,8 @@ namespace guitar_amp {
         float treble_gain = 0.0f;
         float mid_gain = 0.0f;
 
+        bool settings_changed = false;
+
         mindsp::filter::biquad_filter low_shelf;
         mindsp::filter::biquad_filter high_shelf;
         mindsp::filter::biquad_filter mid_range;
