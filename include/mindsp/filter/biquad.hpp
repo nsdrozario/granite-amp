@@ -167,12 +167,15 @@ namespace mindsp {
             float a = std::pow(10, gain_db / 40);
             float sin_arg = 2 * 3.141592654f * frequency / sample_rate;
             float alpha = std::sin(sin_arg) / (2 * q);
-            out.b0 = a * ( (a+1) - ((a-1) * std::cos(sin_arg)) + (2 * alpha * std::sqrt(a)) );
-            out.b1 = (2 * a) * ( (a-1) - ((a+1) * std::cos(sin_arg)) );
-            out.b2 = a * ((a+1) - ((a-1) * std::cos(sin_arg)) - (2.0f * alpha * std::sqrt(a)));
-            out.a0 = (a+1) + ((a-1) * std::cos(sin_arg)) - (2 * alpha * std::sqrt(a));
-            out.a1 = -2 * ((a-1) + ((a+1) * std::cos(sin_arg)));
-            out.a2 = (a+1) + ((a-1) * std::cos(sin_arg)) - (2 * alpha * std::sqrt(a));
+            
+            out.a0 = (a+1) + ( (a-1) * std::cos(sin_arg) ) + (2 * std::sqrt(a) * alpha);
+            out.a1 = -2 * ( (a-1) + ( (a+1) * std::cos(sin_arg)) );
+            out.a2 = (a+1) + ( (a-1) * std::cos(sin_arg) ) - (2 * std::sqrt(a) * alpha);
+
+            out.b0 = a * ( (a+1) - ( (a-1) * std::cos(sin_arg) ) + (2 * std::sqrt(a) * alpha) );
+            out.b1 = 2 * a * ( (a-1) - ((a+1) * std::cos(sin_arg)) );
+            out.b2 = a * ( (a+1) - ((a-1)*std::cos(sin_arg)) - (2 * std::sqrt(a) * alpha));
+
             if (normalize) {
                 out.normalize();
             }

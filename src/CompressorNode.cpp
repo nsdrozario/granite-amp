@@ -40,7 +40,7 @@ void CompressorNode::showGui() {
     ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(184,73,0,255));
     ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(255, 111, 0, 255));
     ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(255, 111, 0, 255));
-
+    ImGui::PushItemWidth(100);
     ImNodes::BeginNode(this->id);
 
         ImNodes::BeginNodeTitleBar();
@@ -60,13 +60,13 @@ void CompressorNode::showGui() {
         if (advancedMode) {
 
             ImGui::DragFloat("Ratio", &this->ratio, 0.01, 1.0f, 50.0f, "%.3f");
-            ImGui::DragFloat("Threshold", &this->threshold, 1.0f, -1440.0f, 0.0f, "%.3f dB");
+            ImGui::DragFloat("Threshold", &this->threshold, 1.0f, -60.0f, 0.0f, "%.3f dB");
 
         } else {
 
             ImKnob::Knob("Ratio", &this->ratio, 0.01, 1.0f, 50.0f, "%.1f", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
             ImGui::SameLine();
-            ImKnob::Knob("Threshold", &this->threshold, 1.0f, -1440.0f, 0.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+            ImKnob::Knob("Threshold", &this->threshold, 1.0f, -60.0f, 0.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
 
         }
 
@@ -88,6 +88,7 @@ void CompressorNode::showGui() {
     ImNodes::EndNode();
     ImNodes::PopColorStyle();
     ImNodes::PopColorStyle();
+    ImGui::PopItemWidth();
 }
 
 void CompressorNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {

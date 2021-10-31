@@ -54,7 +54,7 @@ void OscillatorNode::showGui() {
             "sine\0square\0triangle\0sawtooth\0"
         );
 
-        ImGui::SliderFloat("Amplitude (dB)", &(this->amplitude), -144.0f, 0.0f, "%.3f dB");
+        ImGui::SliderFloat("Amplitude (dB)", &(this->amplitude), -60.0f, 0.0f, "%.3f dB");
         ImGui::SliderFloat("Frequency (Hz)", &(this->freq), 0.0f, 20000.0f, "%.3f Hz");
 
     ImNodes::EndNode();

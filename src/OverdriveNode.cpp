@@ -193,9 +193,9 @@ void OverdriveNode::luaInit(const sol::table &init_table) {
 
 void OverdriveNode::showGui() {
 
-    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(201, 4, 126, 100));
-    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(201, 4, 126, 255));
-    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(201, 4, 126, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(245, 39, 7, 100));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(245, 39, 7, 255));
+    ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(245, 39, 7, 255));
     if (advancedMode) {
         ImGui::PushItemWidth(150);
     }
@@ -212,10 +212,10 @@ void OverdriveNode::showGui() {
         ImNodes::PopAttributeFlag();
 
         if (advancedMode) {
-            ImGui::DragFloat("Gain", &(this->gain), 1.0, -144, 40.0f, "%.3f dB");
+            ImGui::DragFloat("Gain", &(this->gain), 1.0, -60, 40.0f, "%.3f dB");
             
             // with how high the gain can go the -8dB limit is for the safety of the user
-            ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -144, -8.0f, "%.3f dB");
+            ImGui::DragFloat("Output Volume", &(this->output_volume), 0.01, -60, -8.0f, "%.3f dB");
             
             if(ImGui::DragFloat("Low pass frequency", &(this->lpf_cutoff), 1, 0, 21000, "%.3f")) {
                 low_pass.set_coefficients(mindsp::filter::low_pass_filter(lpf_cutoff, device.sampleRate ? device.sampleRate : 48000, 1.0f));
@@ -226,7 +226,7 @@ void OverdriveNode::showGui() {
             }
 
         } else {
-            ImKnob::Knob("Gain", &gain, 1.0, -14, 40, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImKnob::Knob("Gain", &gain, 1.0, -14, 40, "%.2f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
 
             ImGui::SameLine();
 

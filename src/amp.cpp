@@ -35,6 +35,7 @@ ImGui::SliderFloat($1, $2, $4, $5, $6)
 #include <implot.h>
 
 #include <imknob.hpp>
+#include <immeter.hpp>
 
 #include <AudioInfo.hpp>
 #include <MainUI.hpp>
@@ -100,7 +101,18 @@ std::vector<std::string> config_paths;
 std::vector<std::string> config_names;
 
 bool *config_selected = nullptr;
-int config_selected_id;
+int config_selected_id = 1;
+
+sf::Texture amp_grill;
+sf::Sprite amp_grill_sprite;
+
+std::mutex nodes_mutex;
+
+float rms_value = 0;
+int rms_count = 0;
+
+bool warning_open = true;
+float global_gain = 100.0f;
 
 void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames) {
 
@@ -260,6 +272,22 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
 
         }
 
+        for (std::size_t i = 0; i < numFrames; i++) {
+            f32_output[i] *= global_gain/100.0f;
+        }
+
+        if (rms_count == 0) {
+            rms_value = 0;
+        
+            for (std::size_t i = 0; i < numFrames; i++) {
+                rms_value += f32_output[i] * f32_output[i];
+            }
+
+            rms_value /= numFrames;
+            rms_value = dsp::f32_to_dbfs(std::sqrt(rms_value));
+        }
+        rms_count++;
+        rms_count %= 3;
     }
 
 }
@@ -282,6 +310,7 @@ void align_c_str_vector(std::vector<std::string> &in, std::vector<const char *> 
         out[i] = in[i].c_str();
     }
 }
+
 
 int main () {
 
@@ -309,7 +338,7 @@ int main () {
     }
     // Initialize ImGui
     sf::Event e;
-    sf::RenderWindow w(sf::VideoMode(1920,1080), "Guitar Amp");
+    sf::RenderWindow w(sf::VideoMode(1920,1080), "GraniteAmp");
     sf::Clock dt;
     
     // get images
@@ -318,6 +347,14 @@ int main () {
     if (!bg.loadFromFile("assets/board.png")) {
         std::cout << "error loading board.png\n";
     }
+
+    if(!amp_grill.loadFromFile("assets/amp_grill.png")) {
+        std::cout << "error loading amp_grill.png\n";
+    }
+
+    amp_grill.setRepeated(true);
+    amp_grill_sprite.setTexture(amp_grill);
+
     bg.setRepeated(true);
     sf::Sprite bgSprite;
     bgSprite.setTexture(bg);
@@ -357,10 +394,17 @@ int main () {
 
     nodes[0] = new guitar_amp::InputNode(0);
     nodes[5] = new guitar_amp::OutputNode(5);
-
+    
     ImGui::SetNextWindowSize(ImVec2(300,200));
     ImNodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
     ImNodes::SetNodeEditorSpacePos(5, ImVec2(150, 100));
+    ImNodes::SetNodeEditorSpacePos(-1, ImVec2(720,670));
+    
+    ImNodesIO &imnodes_io = ImNodes::GetIO();
+    imnodes_io.EmulateThreeButtonMouse.Modifier = &io.KeyAlt;
+    imnodes_io.LinkDetachWithModifierClick.Modifier = &io.KeyCtrl;
+
+    amp_load_preset("assets/signalchain_presets/Clean.lua");
 
     while (w.isOpen()) {
         while (w.pollEvent(e)) {
@@ -383,12 +427,50 @@ int main () {
         // draw the background
         w.draw(bgSprite);
 
+        if (warning_open) {
+            ImGui::OpenPopup("Warning Popup");    
+        }
+        if (ImGui::BeginPopupModal("Warning Popup", &warning_open)) {
+            ImGui::TextColored(ImColor(IM_COL32(179, 50, 41, 255)), "WARNING: This app contains rapidly changing colors,\nwhich may cause seizures in some people.\nUsers should exercise caution.\nThis is not medical advice; please consult a medical\nprofessional for medical advice.");
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(179.f/255, 50.f/255, 41.f/255, 1));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(235.f/255, 64.f/255, 52.f/255, 1));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(235.f/255, 64.f/255, 52.f/255, 1));
+            if (ImGui::Button("I acknowledge this warning.")) {
+                warning_open = false;
+            }
+            ImGui::PopStyleColor();
+            ImGui::PopStyleColor();
+            ImGui::PopStyleColor();
+            ImGui::EndPopup();
+        }
         // imgui stuff
         // draw node 
         ImGui::PushFont(font);
         ImGui::Begin("Signal Chain");
         ImNodes::BeginNodeEditor();
             // draw nodes
+            static bool help_open = true;
+            ImNodes::PushColorStyle(ImNodesCol_TitleBar, IM_COL32(117, 161, 150, 255));
+            ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, IM_COL32(117, 161, 150, 255));
+            ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, IM_COL32(117, 161, 150, 255));
+            ImGui::PushItemWidth(100);
+            ImNodes::BeginNode(-1);
+                ImNodes::BeginNodeTitleBar();
+                    ImGui::Text("Help");
+                ImNodes::EndNodeTitleBar();
+                if (help_open) {
+                    ImGui::Text("- Drag the triangle pins to each other to connect nodes.");
+                    ImGui::Text("- Nodes can be disconnected by dragging a connection out of a triangle pin.");
+                    ImGui::Text("- Nodes can also be disconnected by holding Ctrl while clicking on a connection.");
+                    ImGui::Text("- Right click the grid to add a node.");
+                    ImGui::Text("- Right click a node and click \"Delete Node\" to delete it.");
+                    ImGui::Text("- Scroll around the grid by holding Alt while dragging the mouse with left click,\nor drag with the mouse wheel button held down.");
+                }
+                ImGui::Checkbox("Show", &help_open);
+            ImNodes::EndNode();
+            ImNodes::PopColorStyle();
+            ImGui::PopItemWidth();
+
             for (auto it = nodes.begin(); it != nodes.end(); it++) {
                 int node_id = it->first;
                 AudioProcessorNode *node = it->second;
@@ -454,9 +536,9 @@ int main () {
                 metronomeTickSamples = 0;
             }
             if (advancedMode) {
-                ImGui::DragFloat("Gain", &metronomeGainDB, 1.0f, -144.0f, 6.0f, "%.3f dB");
+                ImGui::DragFloat("Gain", &metronomeGainDB, 1.0f, -60.0f, 6.0f, "%.3f dB");
             } else {
-                ImKnob::Knob("Gain", &metronomeGainDB, 1.0f, -60.0f, 6.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+                ImKnob::Knob("Gain", &metronomeGainDB, 1.0f, -60.0f, 12.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             }
         ImGui::End();
 
@@ -468,22 +550,14 @@ int main () {
             }
 
             /*
-            if (ImGui::Button("Save as Preset")) {
-                amp_save_preset("NewPreset.lua");
-                io::file_paths(config_paths, "assets/signalchain_presets/");
-                io::file_names(config_names, "assets/signalchain_presets");
-                if (config_selected != nullptr) {
-                    delete[] config_selected;
-                }
-                config_selected = new bool[config_names.size()];
-                align_c_str_vector(config_paths, config_paths_c_str);
-                align_c_str_vector(config_names, config_names_c_str);
+            if(ImGui::Button("Save Preset")) {
+                std::cout << "save" << std::endl;
             }
             */
-           
+
             if (ImGui::Button("Refresh Preset List")) {
                 io::file_paths(config_paths, "assets/signalchain_presets/");
-                io::file_names(config_names, "assets/signalchain_presets");
+                io::file_names(config_names, "assets/signalchain_presets/");
                 if (config_selected != nullptr) {
                     delete[] config_selected;
                 }
@@ -497,6 +571,14 @@ int main () {
         ImGui::Begin("Control Panel");
 
             // ImGui::Text("Time to process: %.1f ms", processTime);
+            static float fake_volume = -60;
+            if (!warning_open) {
+                ImMeter::Meter("Volume (dBFS)", &rms_value, -60.0, 0.0);
+            } else {
+                ImMeter::Meter("Volume (dBFS)", &fake_volume, -60.0, 0.0);
+            }
+
+            ImGui::SliderFloat("Volume", &global_gain, 0.0f, 100.0f, "%.0f%%");
 
             if (audioEnabled) {
             
@@ -526,7 +608,7 @@ int main () {
                         "Recorder File Explorer", 
                         imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, 
                         ImVec2(300,200), 
-                        "*.wav"
+                        ".wav"
                     )
                 ) 
                 {
@@ -549,6 +631,11 @@ int main () {
             }
 
             ImGui::Checkbox("Advanced Mode", &advancedMode);
+
+            if (ImGui::Button("Restore Default Layout")) {
+                ImGui::LoadIniSettingsFromDisk("default_imgui.ini");
+                ImGui::SaveIniSettingsToDisk("imgui.ini");
+            }
 
         ImGui::End();
 

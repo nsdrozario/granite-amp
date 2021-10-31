@@ -55,6 +55,10 @@ namespace mindsp {
                 buffer.resize(size);
             }
 
+            std::size_t size() {
+                return buffer.size();
+            }
+
             /**
              * 
              * Reads a delayed value relative to the write pointer as if a tap were placed tap_index samples behind the write pointer. 
@@ -64,7 +68,11 @@ namespace mindsp {
             T read_tap(std::size_t tap_index) {
                 std::size_t tap_index2 = tap_index % buffer.size();
                 std::size_t index = wrap_index(write_ptr - tap_index2, buffer.size());
-                return buffer[index];
+                if (std::isfinite(buffer[index])) {
+                    return buffer[index];
+                } else {
+                    return 0;
+                }
             }
             
             /**
@@ -79,7 +87,11 @@ namespace mindsp {
                 float index = std::fmod(static_cast<float>(write_ptr) - tap_index2, size);
                 std::size_t x0 = static_cast<std::size_t> (index);
                 float out = (buffer[(x0 + 1) % buffer.size()] - buffer[x0]) * (index - std::floor(index)) + buffer[x0];
-                return out;
+                if (std::isfinite(out)) {
+                    return out;
+                } else {
+                    return 0;
+                }
             }
 
             /**
@@ -101,6 +113,20 @@ namespace mindsp {
             void push(T val) {
                 buffer[write_ptr] = val;
                 write_ptr = (write_ptr + 1) % buffer.size();
+            }
+
+            /**
+             * 
+             * 
+             * Sets write pointer position to 0 and clears all data to default values
+             * 
+             * 
+             */
+            void reset_data() {
+                write_ptr = 0;
+                for (std::size_t i = 0; i < buffer.size(); i++) {
+                    buffer[i] = T();
+                }
             }
         private:
             std::vector<T> buffer;

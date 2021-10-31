@@ -158,40 +158,19 @@ void ThreeBandEQ::showGui() {
         } else {
             
             if(ImKnob::Knob("Bass", &bass_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
-                low_shelf.set_coefficients(
-                    mindsp::filter::low_shelf(
-                        250.0f, 
-                        device.sampleRate ? device.sampleRate : 48000, 
-                        2.0f, 
-                        bass_gain
-                    )
-                );
+                settings_changed = true;
             }
             
             ImGui::SameLine();
             
             if(ImKnob::Knob("Mid", &mid_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
-                mid_range.set_coefficients(
-                    mindsp::filter::peak_filter(
-                        900,
-                        device.sampleRate ? device.sampleRate : 48000,
-                        0.5,
-                        mid_gain
-                    )
-                );     
+                settings_changed = true;
             }
 
             ImGui::SameLine();
             
             if(ImKnob::Knob("Treble", &treble_gain, 1.0f, -40.0f, 20.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
-                high_shelf.set_coefficients(
-                    mindsp::filter::high_shelf(
-                        4000,
-                        device.sampleRate ? device.sampleRate : 48000,
-                        2.0f,
-                        treble_gain
-                    )
-                );
+                settings_changed = true;
             }
 
         }
@@ -203,7 +182,7 @@ void ThreeBandEQ::ApplyFX(const float *in, float *out, size_t numFrames, AudioIn
     
     bool device_updated = internal_info != info;
 
-    if (device_updated) {
+    if (device_updated || settings_changed) {
 
         low_shelf.set_coefficients(
             mindsp::filter::low_shelf(
@@ -236,6 +215,8 @@ void ThreeBandEQ::ApplyFX(const float *in, float *out, size_t numFrames, AudioIn
             internal_info = info;
         }
         
+        settings_changed = false;
+
     }
 
     low_shelf.apply(out,in,numFrames);

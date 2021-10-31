@@ -59,4 +59,10 @@ void lua_to_nodes(const sol::table &data);
 void amp_load_preset(const std::string &name);
 void amp_save_preset(const std::string &name);
 
+extern std::mutex nodes_mutex;
+
+extern sf::Texture amp_grill;
+extern sf::Sprite amp_grill_sprite;
+extern bool warning_open;
+
 #endif

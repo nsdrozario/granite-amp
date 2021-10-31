@@ -1,4 +1,4 @@
-# Guitar Amp
+# GraniteAmp
 
 Real-time guitar amplifier simulation.
 

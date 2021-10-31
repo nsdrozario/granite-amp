@@ -11,6 +11,8 @@ nodes = {
     {
         ["type"] = "CabSim",
         ["state"] = {
+            ["Delay"] = 0.7,
+            ["Gain"] = -6,
             ["HPF"] = 60,
             ["LPF"] = 4000,
             ["LowMid"] = {

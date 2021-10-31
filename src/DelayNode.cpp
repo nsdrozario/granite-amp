@@ -65,12 +65,12 @@ void DelayNode::showGui() {
         if (advancedMode) {
             ImGui::DragFloat("Delay (seconds)", &(this->time_delay), 0.1, 0, 10, "%.3f s");
             // for now this is disabled because it makes controlling the feedback weird
-            // ImGui::DragFloat("Delay Gain", &delay_gain, 1.0f, -144.0f, 0.0f, "%.3f dB");
-            ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -144.0f, -1.0f, "%.3f dB");
+            // ImGui::DragFloat("Delay Gain", &delay_gain, 1.0f, -60.0f, 0.0f, "%.3f dB");
+            ImGui::DragFloat("Feedback Gain", &feedback_gain, 1.0f, -60.0f, -1.0f, "%.3f dB");
         } else {
             ImKnob::Knob("Delay (seconds)", &time_delay, 0.1, 0, 10, "%.1f s", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
             ImGui::SameLine();
-            ImKnob::Knob("Feedback Gain",  &feedback_gain, 1.0f, -144.0f, -1.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+            ImKnob::Knob("Feedback Gain",  &feedback_gain, 1.0f, -60.0f, -1.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
         }
     ImNodes::EndNode();
     ImGui::PopItemWidth();

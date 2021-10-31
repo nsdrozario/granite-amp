@@ -77,13 +77,13 @@ void ConvolutionNode::showGui() {
         ImNodes::PopAttributeFlag();
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
-        ImGui::Text("Keep the gain low and slowly raise the gain\nwhen loading in new impulse responses,\nthey could be louder than expected.");
+        // ImGui::Text("Keep the gain low and slowly raise the gain\nwhen loading in new impulse responses,\nthey could be louder than expected.");
         ImGui::PopStyleColor();
 
         if (advancedMode) {
-            ImGui::DragFloat("Gain", &(this->gain), 1.0f, -144.0f, 0.0f, "%.3f dB");
+            ImGui::DragFloat("Gain", &(this->gain), 1.0f, -60.0f, 0.0f, "%.3f dB");
         } else {
-            ImKnob::Knob("Gain", &gain, 1.0f, -144.0f, 0.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
+            ImKnob::Knob("Gain", &gain, 1.0f, -60.0f, 0.0f, "%.0f dB", 24.0f, ImVec4(0.1f,0.1f,0.1f,1.0f), ImVec4(0.15f,0.15f,0.15f,1.0f));
         }
 
         ImGui::Checkbox("Bypass", &this->bypass);

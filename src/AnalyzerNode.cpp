@@ -1,6 +1,8 @@
 #include <AnalyzerNode.hpp>
 #include <implot.h>
 #include <iostream>
+#include <state.hpp>
+
 using namespace guitar_amp;
 
 AnalyzerNode::AnalyzerNode(int id, const AudioInfo current_audio_info) : MiddleNode(id, current_audio_info) {
@@ -42,22 +44,16 @@ void AnalyzerNode::showGui() {
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
 
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 102)));
-        ImGui::Text("WARNING: The frequency analyzer fluctuates rapidly\nand may cause seizures in some people.\nIf you or any of your relatives have had\na history of epileptic conditions or seizures,\nplease consult a medical professional before using this software\nand DO NOT press the checkbox below.");
-        ImGui::PopStyleColor();
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 153, 153)));
-        ImGui::Text("This is not medical advice;\nplease consult a medical professional for medical advice.");
-        ImGui::PopStyleColor();
-        ImGui::Checkbox("I accept the warning and understand the risks.", &(this->accept_warning));
-        
-        if (this->accept_warning) {
+        if (!warning_open) {
             ImGui::Checkbox("Show Spectrum", &(this->showing_spectrum));
         } else {
             this->showing_spectrum = false;
         }
 
-        if (this->showing_spectrum && this->accept_warning) {
+        if (this->showing_spectrum && !warning_open) {
+            #ifdef DEBUG_BUILD
             ImGui::Checkbox("Frequency Domain", &freqDomain);
+            #endif
             ImGui::BeginChildFrame(this->id, ImVec2(400,300));
             #ifdef DEBUG_BUILD
             if (!freqDomain) {
@@ -71,9 +67,10 @@ void AnalyzerNode::showGui() {
                 ImPlot::SetNextPlotLimitsX(0.0f, static_cast<double>(device.sampleRate/2));
                 const double ticks[] = {0.0,0.05,0.2,0.5,1,4,8,20};
                 ImPlot::SetNextPlotTicksX(ticks, 10);
-                ImPlot::BeginPlot("FFT", "Frequency (kHz)", "Power (dBFS)", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale);
-                ImPlot::PlotLine("Power", this->freqs.data(), this->output.data()+1, (this->fft_size/2)-1);
-                ImPlot::EndPlot();
+                if (ImPlot::BeginPlot("FFT", "Frequency (kHz)", "Power (dBFS)", ImVec2(-1, 0), ImPlotFlags_None, ImPlotAxisFlags_LogScale)) {
+                    ImPlot::PlotLine("Power", this->freqs.data(), this->output.data()+1, (this->fft_size/2)-1);
+                    ImPlot::EndPlot();
+                }
             #ifdef DEBUG_BUILD
             }
             #endif

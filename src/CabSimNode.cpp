@@ -48,9 +48,9 @@ CabSimNode::CabSimNode(int id, const AudioInfo info) : MiddleNode(id, info) {
         )
     );
 
-   
-    delay.reinit(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f), 0, 0);
-
+    if (dsp::seconds_to_samples(delay_time/1000, info.sample_rate) > 0) {
+        delay.resize(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f));
+    }
 }
 
 CabSimNode::CabSimNode(int id, const AudioInfo info, const sol::table &init_table) : MiddleNode(id, info) {
@@ -74,13 +74,16 @@ CabSimNode::CabSimNode(int id, const AudioInfo info, const sol::table &init_tabl
                 ["freq"] = 1250,
                 ["q"] = 12,
                 ["gain"] = -6
-            }
+            },
+            ["Delay"]=1
         }
     */
 
     lpf_freq = init_table.get_or("LPF", 12000.0);
     hpf_freq = init_table.get_or("HPF", 60.0);
-
+    delay_time = init_table.get_or("Delay", 0.0);
+    gain = init_table.get_or("Gain", 0.0f);
+    
     if (init_table.get<sol::table>("LowMid")) {
         low_mids_boost_freq = init_table.get<sol::table>("LowMid").get_or("freq", 250.0);
         low_mids_boost_magnitude = init_table.get<sol::table>("LowMid").get_or("gain", 6.0);
@@ -141,13 +144,18 @@ CabSimNode::CabSimNode(int id, const AudioInfo info, const sol::table &init_tabl
             presence_magnitude
         )
     );
+
+    if (dsp::seconds_to_samples(delay_time/1000, info.sample_rate) > 0) {
+        delay.resize(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f));
+    }
 
 }
 
 void CabSimNode::luaInit(const sol::table &init_table) {
     lpf_freq = init_table.get_or("LPF", 12000.0);
     hpf_freq = init_table.get_or("HPF", 60.0);
-
+    delay_time = init_table.get_or("Delay", 0.0);
+    gain = init_table.get_or("Gain", 0.0f);
     if (init_table.get<sol::table>("LowMid")) {
         low_mids_boost_freq = init_table.get<sol::table>("LowMid").get_or("freq", 250.0);
         low_mids_boost_magnitude = init_table.get<sol::table>("LowMid").get_or("gain", 6.0);
@@ -208,6 +216,11 @@ void CabSimNode::luaInit(const sol::table &init_table) {
             presence_magnitude
         )
     );
+
+    if (dsp::seconds_to_samples(delay_time/1000, internal_info.sample_rate) > 0) {
+        delay.resize(static_cast<size_t>(static_cast<float>(internal_info.sample_rate) * delay_time / 1000.0f));
+    }
+
 }
 
 sol::table CabSimNode::serializeLua() {
@@ -243,6 +256,8 @@ sol::table CabSimNode::serializeLua() {
     out["type"] = "CabSim";
     state["HPF"] = hpf_freq;
     state["LPF"] = lpf_freq;
+    state["Delay"] = delay_time;
+    state["Gain"] = gain;
 
     low_mid_config["freq"] = low_mids_boost_freq;
     low_mid_config["q"] = low_mids_boost_q;
@@ -331,6 +346,14 @@ void CabSimNode::reinit(CabSimSettings settings) {
         )
     );
 
+    if (dsp::seconds_to_samples(delay_time/1000, internal_info.sample_rate) > 0) {
+        delay.resize(static_cast<size_t>(static_cast<float>(internal_info.sample_rate) * delay_time / 1000.0f));
+    }
+
+}
+
+void speakerGrill(float size_x, float size_y) {
+    ImGui::Image(amp_grill_sprite);
 }
 
 void CabSimNode::showGui() {
@@ -351,6 +374,9 @@ void CabSimNode::showGui() {
         ImNodes::EndOutputAttribute();
         ImNodes::PopAttributeFlag();
         if (advancedMode) {
+
+            ImGui::DragFloat("Gain", &gain, 1.0f, -14.0f, 6.0, "%.0f dB");
+
             if(ImGui::DragFloat("Delay Time", &delay_time, 1.0f, 1.0f, 10.0f, "%.3f ms")) {
                 changed_delay = true;
             }
@@ -402,7 +428,21 @@ void CabSimNode::showGui() {
                 changed_presence = true;
             }
         } else {
-            // use presets; there will be too many knobs
+            if(ImKnob::Knob("DELAY", &delay_time, 1.0f, 0.0f, 10.0f, "%.0f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
+                changed_delay = true;
+            }
+            ImGui::SameLine();
+            ImKnob::Knob("GAIN", &gain, 1.0f, -14.0f, 6.0, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImGui::SameLine();
+            ImKnob::Knob("BASS", &hpf_freq, 10.0f, 10.0f, 300.0f, "%.0f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);    
+            ImGui::SameLine();
+            ImKnob::Knob("TREBLE", &lpf_freq, 500.0f, 1000.0f, 6000.0f, "%.0f Hz", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImGui::SameLine();
+            ImKnob::Knob("LO MID", &low_mids_boost_magnitude, 1.0f, -8.0f, 6.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImGui::SameLine();
+            ImKnob::Knob("MID", &mid_scoop_magnitude, 1.0f, -8.0f, 6.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+            ImGui::SameLine();
+            ImKnob::Knob("PRES", &presence_magnitude, 1.0f, -12.0f, 6.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
         }
 
     ImNodes::EndNode();
@@ -413,6 +453,8 @@ void CabSimNode::showGui() {
 }
 
 void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInfo info) {
+
+    delay_time = std::clamp(delay_time, 0.0f, 10.0f);
 
     if (internal_info != info) {
 
@@ -459,12 +501,13 @@ void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInf
             )
         );
 
-
-        delay.reinit(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f), 0, 0);
+        if (dsp::seconds_to_samples(delay_time/1000, info.sample_rate) > 0) {
+            delay.resize(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f));
+        }
     }    
 
-    if (changed_delay) {
-        delay.reinit(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f), 0, 0);
+    if (changed_delay && dsp::seconds_to_samples(delay_time/1000, info.sample_rate) > 0) {
+        delay.resize(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f));
         changed_delay = false;
     }
 
@@ -527,21 +570,27 @@ void CabSimNode::ApplyFX(const float *in, float *out, size_t numFrames, AudioInf
     }
 
 
-    /*
+    
     // first apply the delay
     for (size_t i = 0; i < numFrames; i++) {
-        float val = delay.get_read_ptr_value();
-        out[i] = in[i] + val;
-        delay.set_write_ptr_value(in[i]);
-        delay.inc_read_ptr();
-        delay.inc_write_ptr();
+        if (dsp::seconds_to_samples(delay_time/1000, info.sample_rate) > 0) {
+            out[i] = in[i] + delay.read_tap(dsp::seconds_to_samples(delay_time/1000, info.sample_rate));
+            delay.push(in[i]);
+        } else {
+            out[i] = in[i];
+            delay.push(in[i]);
+        }
     }
-    */
-
+    
     // then apply all the biquad filters
-    lpf.apply(out,in,numFrames);
+    lpf.apply(out,out,numFrames);
     hpf.apply(out,out,numFrames);
     low_mid.apply(out,out,numFrames);
     mid.apply(out,out,numFrames);
     presence.apply(out,out,numFrames);
+
+    for (size_t i = 0; i < numFrames; i++) {
+        out[i] *= dsp::dbfs_to_f32(gain);
+    }
+
 }

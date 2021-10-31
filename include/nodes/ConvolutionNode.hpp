@@ -31,9 +31,9 @@ namespace guitar_amp {
         std::vector<float> impulse;
         ma_decoder file_reader;
         fftconvolver::FFTConvolver convolver;
-        bool bypass = true;
+        bool bypass = false;
         imgui_addons::ImGuiFileBrowser file_browser;
-        float gain = -144.0f;
+        float gain = -20.0f;
 
         void loadIRFile(const std::string &path);
 

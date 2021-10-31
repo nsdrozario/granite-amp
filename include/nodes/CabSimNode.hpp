@@ -30,7 +30,7 @@ namespace guitar_amp {
         std::vector<std::string> preset_files;
 
         // for comb filtering
-        dsp::ring_buffer<float> delay;
+        mindsp::util::ring_buffer<float> delay;
 
         /*
         // cabs typically output around 6khz at most
@@ -53,6 +53,8 @@ namespace guitar_amp {
         mindsp::filter::biquad_filter low_mid;
         mindsp::filter::biquad_filter mid;
         mindsp::filter::biquad_filter presence;
+
+        float gain = 0.0f;
 
         // frequencies
         float lpf_freq = 4000.0f;
