@@ -18,7 +18,6 @@ Real-time guitar amplifier simulation.
 - Cabinet Simulation
 - Three-band EQ
 
-
 ## Dependencies
 - [Dear ImGui](https://github.com/adobe/imgui/) (contained within this repository already)
     - This project uses the Adobe fork of Dear ImGui. The original repository can be found [here](https://github.com/ocornut/imgui).
@@ -61,4 +60,8 @@ make -f Makefile_MAC clean
 make -f Makefile_MAC -j
 ```
 
+## Troubleshooting
+
+- Parts of the user interface are disabled.
+    - Solution: Delete `default_imgui.ini`.
 
