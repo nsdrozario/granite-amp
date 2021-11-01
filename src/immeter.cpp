@@ -10,7 +10,7 @@ void ImMeter::Meter(const char *label, float *val, float min, float max) {
     draw_pos.x += 20;
     draw_pos.y += 30;
 
-    float width = 270;
+    float width = ImGui::GetWindowWidth() - 60;
     
     auto green_col = IM_COL32(3, 252, 73, 100);
 
