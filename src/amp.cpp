@@ -287,10 +287,12 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
             rms_value = dsp::f32_to_dbfs(std::sqrt(rms_value));
         }
         rms_count++;
-        rms_count %= 3;
+        rms_count %= 1;
     }
 
 }
+
+bool default_settings_exist = false;
 
 void print_adjlist() {
     std::cout <<"adjlist: \n";
@@ -302,17 +304,13 @@ void print_adjlist() {
 std::vector<const char *> config_paths_c_str;
 std::vector<const char *> config_names_c_str;
 
-void align_c_str_vector(std::vector<std::string> &in, std::vector<const char *> &out) {
-    if (in.size() != out.size()) {
-        out.resize(in.size());
-    }
-    for (std::size_t i = 0; i < in.size(); i++) {
-        out[i] = in[i].c_str();
-    }
-}
-
 
 int main () {
+
+    std::ifstream check_default ("default_imgui.ini");
+    if (check_default) {
+        default_settings_exist = true;
+    }
 
     // Initialize Miniaudio
     {
@@ -325,8 +323,8 @@ int main () {
     io::file_paths(config_paths, "assets/signalchain_presets/");
     io::file_names(config_names, "assets/signalchain_presets");
     config_selected = new bool[config_names.size()];
-    align_c_str_vector(config_paths, config_paths_c_str);
-    align_c_str_vector(config_names, config_names_c_str);
+    io::align_c_str_vector(config_paths, config_paths_c_str);
+    io::align_c_str_vector(config_names, config_names_c_str);
 
     deviceConfig = ma_device_config_init(ma_device_type_duplex);
     deviceConfig.periodSizeInFrames = 512;
@@ -338,7 +336,7 @@ int main () {
     }
     // Initialize ImGui
     sf::Event e;
-    sf::RenderWindow w(sf::VideoMode(1920,1080), "GraniteAmp");
+    sf::RenderWindow w(sf::VideoMode::getDesktopMode(), "GraniteAmp");
     sf::Clock dt;
     
     // get images
@@ -395,11 +393,10 @@ int main () {
     nodes[0] = new guitar_amp::InputNode(0);
     nodes[5] = new guitar_amp::OutputNode(5);
     
-    ImGui::SetNextWindowSize(ImVec2(300,200));
+
     ImNodes::SetNodeEditorSpacePos(0, ImVec2(50,100));
     ImNodes::SetNodeEditorSpacePos(5, ImVec2(150, 100));
     ImNodes::SetNodeEditorSpacePos(-1, ImVec2(720,670));
-    
     ImNodesIO &imnodes_io = ImNodes::GetIO();
     imnodes_io.EmulateThreeButtonMouse.Modifier = &io.KeyAlt;
     imnodes_io.LinkDetachWithModifierClick.Modifier = &io.KeyCtrl;
@@ -446,6 +443,10 @@ int main () {
         // imgui stuff
         // draw node 
         ImGui::PushFont(font);
+        if (!default_settings_exist) {
+            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.7, sf::VideoMode::getDesktopMode().height * 0.9));
+            ImGui::SetNextWindowPos(ImVec2(0,0));
+        }
         ImGui::Begin("Signal Chain");
         ImNodes::BeginNodeEditor();
             // draw nodes
@@ -518,7 +519,10 @@ int main () {
             adjlist_inward.erase(forward);
             print_adjlist();
         }
-
+        if (!default_settings_exist) {
+            ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.7 + 10, 0));
+            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.3 - 15, sf::VideoMode::getDesktopMode().height * 0.3 - 10));
+        }
         // consider using ListBoxHeader
         ImGui::Begin("I/O Devices");
             ImGui::ListBox("Inputs", &listBoxSelectedInput, inputNames.data(), static_cast<int>(numInputDevices));
@@ -528,7 +532,10 @@ int main () {
                 io::refresh_devices(); // consider adding a mutex and putting this off to another thread
             }
         ImGui::End();
-
+        if (!default_settings_exist) {
+            ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.7 + 10, sf::VideoMode::getDesktopMode().height * 0.3 ));
+            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.3 - 10, sf::VideoMode::getDesktopMode().height * 0.3 - 10));
+        }
         ImGui::Begin("Metronome");
             ImGui::Checkbox("Enabled", &metronomeEnabled);
             
@@ -541,7 +548,10 @@ int main () {
                 ImKnob::Knob("Gain", &metronomeGainDB, 1.0f, -60.0f, 12.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             }
         ImGui::End();
-
+        if (!default_settings_exist) {
+            ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.85 + 15, sf::VideoMode::getDesktopMode().height * 0.6 ));
+            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.15 - 20, sf::VideoMode::getDesktopMode().height * 0.3 - 5));
+        }
         ImGui::Begin("Preset Manager");
             // preset loader
             if (ImGui::ListBox("Presets", &config_selected_id, config_names_c_str.data(), config_names.size())) {
@@ -562,11 +572,14 @@ int main () {
                     delete[] config_selected;
                 }
                 config_selected = new bool[config_names.size()];
-                align_c_str_vector(config_paths, config_paths_c_str);
-                align_c_str_vector(config_names, config_names_c_str);
+                io::align_c_str_vector(config_paths, config_paths_c_str);
+                io::align_c_str_vector(config_names, config_names_c_str);
             }
         ImGui::End();
-
+        if (!default_settings_exist) {
+            ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.7 + 10, sf::VideoMode::getDesktopMode().height * 0.6 ));
+            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.15, sf::VideoMode::getDesktopMode().height * 0.3 - 5));
+        }
         // control panel
         ImGui::Begin("Control Panel");
 
@@ -631,7 +644,7 @@ int main () {
             }
 
             ImGui::Checkbox("Advanced Mode", &advancedMode);
-
+            
             if (ImGui::Button("Restore Default Layout")) {
                 ImGui::LoadIniSettingsFromDisk("default_imgui.ini");
                 ImGui::SaveIniSettingsToDisk("imgui.ini");
@@ -664,6 +677,11 @@ int main () {
             std::cout << "sample rate: " << device.sampleRate << std::endl;
             std::cout << "capture sample rate: " << device.capture.internalSampleRate << std::endl;
             std::cout << "playback sample rate: " << device.playback.internalSampleRate << std::endl;
+        }
+ 
+        if (!default_settings_exist) {
+            ImGui::SaveIniSettingsToDisk("default_imgui.ini");
+            default_settings_exist = true;
         }
 
         ImGui::PopFont();

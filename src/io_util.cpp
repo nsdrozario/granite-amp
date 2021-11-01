@@ -71,8 +71,19 @@ void guitar_amp::io::file_names(std::vector<std::string> &name_vector, std::stri
     for (auto f : std::filesystem::directory_iterator(directory_path)) {
         if (f.is_regular_file()) {
             std::string str = f.path().filename().string();
-            str = str.substr(0, str.length() - 4); // remove .lua
+            if (str.at(str.length()-4) == '.') {
+                str = str.substr(0, str.length() - 4); // remove .lua
+            }
             name_vector.push_back(str);
         }
+    }
+}
+
+void guitar_amp::io::align_c_str_vector(std::vector<std::string> &in, std::vector<const char *> &out) {
+    if (in.size() != out.size()) {
+        out.resize(in.size());
+    }
+    for (std::size_t i = 0; i < in.size(); i++) {
+        out[i] = in[i].c_str();
     }
 }

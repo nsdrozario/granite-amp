@@ -16,7 +16,7 @@ end
 function read_config_file(file_contents)
     local obj = {};
     for i, l in ipairs(split(file_contents, "\n")) do
-        local key, value = string.match(l, "(%w+): ([%-%w]+)");
+        local key, value = string.match(l, "(%w+): ([%-.%w]+)");
         if key and value then
             value = tonumber(value);
             obj[key] = value;

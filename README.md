@@ -12,18 +12,11 @@ Real-time guitar amplifier simulation.
 - Convolution Reverb
   - Note: Impulse responses not included.
 - Compressor
-  - [x] Peak activation
-  - [ ] RMS activation
-  - [ ] Adjustable attack
-  - [ ] Adjustable release
-  - [x] Adjustable ratio
-  - [x] Adjustable threshold (in dB)
 - Frequency analyzer (need to double click graph to see spectrum) 
 - Delay
 - Flanger
 - Cabinet Simulation
 - Three-band EQ
-
 
 ## Dependencies
 - [Dear ImGui](https://github.com/adobe/imgui/) (contained within this repository already)
@@ -67,4 +60,8 @@ make -f Makefile_MAC clean
 make -f Makefile_MAC -j
 ```
 
+## Troubleshooting
+
+- Parts of the user interface are disabled.
+    - Solution: Delete `default_imgui.ini`.
 

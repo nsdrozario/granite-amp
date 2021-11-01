@@ -17,9 +17,9 @@ namespace guitar_amp {
         };
         
         FilterType type;
-        double q;
-        double gain_db;
-        double freq; 
+        float q;
+        float gain_db;
+        float freq; 
     
     };
 
@@ -29,7 +29,7 @@ namespace guitar_amp {
         FilterDescriptor mid;
         FilterDescriptor lowmid;
         FilterDescriptor presence;
-        double delay_ms;
+        float delay_ms;
     };
 
     struct OverdriveSettings {

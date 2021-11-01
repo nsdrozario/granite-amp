@@ -51,6 +51,14 @@ CabSimNode::CabSimNode(int id, const AudioInfo info) : MiddleNode(id, info) {
     if (dsp::seconds_to_samples(delay_time/1000, info.sample_rate) > 0) {
         delay.resize(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f));
     }
+
+    // load the presets
+    io::file_names(this->preset_file_names, "assets/cabsim_presets");
+    io::file_paths(this->preset_files, "assets/cabsim_presets");
+    // preset_file_names.push_back("");
+    // preset_files.push_back("");
+    file_selected = preset_files.size()-1;
+    io::align_c_str_vector(preset_file_names, preset_file_names_c_str);
 }
 
 CabSimNode::CabSimNode(int id, const AudioInfo info, const sol::table &init_table) : MiddleNode(id, info) {
@@ -148,7 +156,13 @@ CabSimNode::CabSimNode(int id, const AudioInfo info, const sol::table &init_tabl
     if (dsp::seconds_to_samples(delay_time/1000, info.sample_rate) > 0) {
         delay.resize(static_cast<size_t>(static_cast<float>(info.sample_rate) * delay_time / 1000.0f));
     }
-
+    // load the presets
+    io::file_names(this->preset_file_names, "assets/cabsim_presets");
+    io::file_paths(this->preset_files, "assets/cabsim_presets");
+    // preset_file_names.push_back("");
+    // preset_files.push_back("");
+    file_selected = preset_files.size()-1;
+    io::align_c_str_vector(preset_file_names, preset_file_names_c_str);
 }
 
 void CabSimNode::luaInit(const sol::table &init_table) {
@@ -346,6 +360,8 @@ void CabSimNode::reinit(CabSimSettings settings) {
         )
     );
 
+    delay_time = settings.delay_ms;
+
     if (dsp::seconds_to_samples(delay_time/1000, internal_info.sample_rate) > 0) {
         delay.resize(static_cast<size_t>(static_cast<float>(internal_info.sample_rate) * delay_time / 1000.0f));
     }
@@ -427,6 +443,49 @@ void CabSimNode::showGui() {
             if (presence_freq_changed || presence_magnitude_changed || presence_q_changed) {
                 changed_presence = true;
             }
+
+            ImGui::NewLine();
+    
+            if (ImGui::ListBox("Preset", &(this->file_selected), preset_file_names_c_str.data(), preset_file_names.size())) {
+                CabSimSettings s = read_cabsim_config(preset_files[file_selected]);
+                reinit(s);
+            }
+            static char name_buf[256];
+            ImGui::InputText("Preset Name", name_buf, 256);
+            if (ImGui::Button("Save Current Settings as Preset")) {
+                if (std::string(name_buf, 256).length() > 0) {
+                CabSimSettings s;
+                s.delay_ms = delay_time;
+                s.lpf.freq = lpf_freq;
+                s.lpf.q = lpf_q;
+                s.hpf.freq = hpf_freq;
+                s.hpf.q = hpf_q;
+                s.lowmid.freq = low_mids_boost_freq;
+                s.lowmid.gain_db = low_mids_boost_magnitude;
+                s.lowmid.q = low_mids_boost_q;
+                s.mid.freq = mid_scoop_freq;
+                s.mid.gain_db= mid_scoop_magnitude;
+                s.mid.q = mid_scoop_q;
+                s.presence.freq = presence_freq;
+                s.presence.gain_db = presence_magnitude;
+                s.presence.q = presence_q;
+                save_cabsim_config(s, std::string(name_buf, 256));
+                io::file_names(this->preset_file_names, "assets/cabsim_presets");
+                io::file_paths(this->preset_files, "assets/cabsim_presets");
+                file_selected = preset_files.size()-1;
+                io::align_c_str_vector(preset_file_names, preset_file_names_c_str);
+                } else {
+                    
+                }
+            }
+
+            if (ImGui::Button("Refresh Preset List")) {
+                // load the presets
+                io::file_names(this->preset_file_names, "assets/cabsim_presets");
+                io::file_paths(this->preset_files, "assets/cabsim_presets");
+                file_selected = preset_files.size()-1;
+                io::align_c_str_vector(preset_file_names, preset_file_names_c_str);
+            }
         } else {
             if(ImKnob::Knob("DELAY", &delay_time, 1.0f, 0.0f, 10.0f, "%.0f ms", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED)) {
                 changed_delay = true;
@@ -443,6 +502,47 @@ void CabSimNode::showGui() {
             ImKnob::Knob("MID", &mid_scoop_magnitude, 1.0f, -8.0f, 6.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
             ImGui::SameLine();
             ImKnob::Knob("PRES", &presence_magnitude, 1.0f, -12.0f, 6.0f, "%.0f dB", 18.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
+        
+            if (ImGui::ListBox("Preset", &(this->file_selected), preset_file_names_c_str.data(), preset_file_names.size())) {
+                CabSimSettings s = read_cabsim_config(preset_files[file_selected]);
+                reinit(s);
+            }
+            static char name_buf[256];
+            ImGui::InputText("Preset Name", name_buf, 256);
+            if (ImGui::Button("Save Current Settings as Preset")) {
+                if (std::string(name_buf, 256).length() > 0) {
+                CabSimSettings s;
+                s.delay_ms = delay_time;
+                s.lpf.freq = lpf_freq;
+                s.lpf.q = lpf_q;
+                s.hpf.freq = hpf_freq;
+                s.hpf.q = hpf_q;
+                s.lowmid.freq = low_mids_boost_freq;
+                s.lowmid.gain_db = low_mids_boost_magnitude;
+                s.lowmid.q = low_mids_boost_q;
+                s.mid.freq = mid_scoop_freq;
+                s.mid.gain_db= mid_scoop_magnitude;
+                s.mid.q = mid_scoop_q;
+                s.presence.freq = presence_freq;
+                s.presence.gain_db = presence_magnitude;
+                s.presence.q = presence_q;
+                save_cabsim_config(s, std::string(name_buf, 256));
+                io::file_names(this->preset_file_names, "assets/cabsim_presets");
+                io::file_paths(this->preset_files, "assets/cabsim_presets");
+                file_selected = preset_files.size()-1;
+                io::align_c_str_vector(preset_file_names, preset_file_names_c_str);
+                } else {
+                    
+                }
+            }
+
+            if (ImGui::Button("Refresh Preset List")) {
+                // load the presets
+                io::file_names(this->preset_file_names, "assets/cabsim_presets");
+                io::file_paths(this->preset_files, "assets/cabsim_presets");
+                file_selected = preset_files.size()-1;
+                io::align_c_str_vector(preset_file_names, preset_file_names_c_str);
+            }
         }
 
     ImNodes::EndNode();
