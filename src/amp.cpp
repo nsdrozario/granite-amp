@@ -521,7 +521,7 @@ int main () {
         }
         if (!default_settings_exist) {
             ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.7 + 10, 0));
-            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.3 - 20, sf::VideoMode::getDesktopMode().height * 0.3 - 10));
+            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.3 - 15, sf::VideoMode::getDesktopMode().height * 0.3 - 10));
         }
         // consider using ListBoxHeader
         ImGui::Begin("I/O Devices");
@@ -534,7 +534,7 @@ int main () {
         ImGui::End();
         if (!default_settings_exist) {
             ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.7 + 10, sf::VideoMode::getDesktopMode().height * 0.3 ));
-            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.3 - 20, sf::VideoMode::getDesktopMode().height * 0.3 - 10));
+            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.3 - 10, sf::VideoMode::getDesktopMode().height * 0.3 - 10));
         }
         ImGui::Begin("Metronome");
             ImGui::Checkbox("Enabled", &metronomeEnabled);
@@ -549,8 +549,8 @@ int main () {
             }
         ImGui::End();
         if (!default_settings_exist) {
-            ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.85 + 20, sf::VideoMode::getDesktopMode().height * 0.6 ));
-            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.15 - 20, sf::VideoMode::getDesktopMode().height * 0.3 - 10));
+            ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.85 + 15, sf::VideoMode::getDesktopMode().height * 0.6 ));
+            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.15 - 20, sf::VideoMode::getDesktopMode().height * 0.3 - 5));
         }
         ImGui::Begin("Preset Manager");
             // preset loader
@@ -578,7 +578,7 @@ int main () {
         ImGui::End();
         if (!default_settings_exist) {
             ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.7 + 10, sf::VideoMode::getDesktopMode().height * 0.6 ));
-            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.15 - 10, sf::VideoMode::getDesktopMode().height * 0.3 - 10));
+            ImGui::SetNextWindowSize(ImVec2(sf::VideoMode::getDesktopMode().width * 0.15, sf::VideoMode::getDesktopMode().height * 0.3 - 5));
         }
         // control panel
         ImGui::Begin("Control Panel");
