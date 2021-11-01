@@ -546,7 +546,7 @@ int main () {
                 ImGui::DragFloat("Gain", &metronomeGainDB, 1.0f, -60.0f, 6.0f, "%.3f dB");
             } else {
                 ImKnob::Knob("Gain", &metronomeGainDB, 1.0f, -60.0f, 12.0f, "%.0f dB", 24.0f, COLOR_KNOB_DARK, COLOR_KNOB_DARK_SELECTED);
-            }
+            } 
         ImGui::End();
         if (!default_settings_exist) {
             ImGui::SetNextWindowPos(ImVec2(sf::VideoMode::getDesktopMode().width*0.85 + 15, sf::VideoMode::getDesktopMode().height * 0.6 ));

@@ -3,7 +3,7 @@
 #include <Nodes.hpp>
 #include <fstream>
 #include <iostream>
-
+ 
 std::string adjlist_to_lua() {
     std::cout << "converting adjlist" << std::endl;
     sol::state l;
