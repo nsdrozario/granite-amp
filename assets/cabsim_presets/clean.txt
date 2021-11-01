@@ -15,3 +15,5 @@ LowMidQ = 4
 PresenceFreq: 1250
 PresenceGain: -6
 PresenceQ: 12
+
+Delay: 0.4

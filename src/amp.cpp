@@ -302,15 +302,6 @@ void print_adjlist() {
 std::vector<const char *> config_paths_c_str;
 std::vector<const char *> config_names_c_str;
 
-void align_c_str_vector(std::vector<std::string> &in, std::vector<const char *> &out) {
-    if (in.size() != out.size()) {
-        out.resize(in.size());
-    }
-    for (std::size_t i = 0; i < in.size(); i++) {
-        out[i] = in[i].c_str();
-    }
-}
-
 
 int main () {
 
@@ -325,8 +316,8 @@ int main () {
     io::file_paths(config_paths, "assets/signalchain_presets/");
     io::file_names(config_names, "assets/signalchain_presets");
     config_selected = new bool[config_names.size()];
-    align_c_str_vector(config_paths, config_paths_c_str);
-    align_c_str_vector(config_names, config_names_c_str);
+    io::align_c_str_vector(config_paths, config_paths_c_str);
+    io::align_c_str_vector(config_names, config_names_c_str);
 
     deviceConfig = ma_device_config_init(ma_device_type_duplex);
     deviceConfig.periodSizeInFrames = 512;
@@ -562,8 +553,8 @@ int main () {
                     delete[] config_selected;
                 }
                 config_selected = new bool[config_names.size()];
-                align_c_str_vector(config_paths, config_paths_c_str);
-                align_c_str_vector(config_names, config_names_c_str);
+                io::align_c_str_vector(config_paths, config_paths_c_str);
+                io::align_c_str_vector(config_names, config_names_c_str);
             }
         ImGui::End();
 
@@ -665,7 +656,7 @@ int main () {
             std::cout << "capture sample rate: " << device.capture.internalSampleRate << std::endl;
             std::cout << "playback sample rate: " << device.playback.internalSampleRate << std::endl;
         }
-
+ 
         ImGui::PopFont();
         ImGui::SFML::Render(w);
 

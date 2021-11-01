@@ -76,3 +76,12 @@ void guitar_amp::io::file_names(std::vector<std::string> &name_vector, std::stri
         }
     }
 }
+
+void guitar_amp::io::align_c_str_vector(std::vector<std::string> &in, std::vector<const char *> &out) {
+    if (in.size() != out.size()) {
+        out.resize(in.size());
+    }
+    for (std::size_t i = 0; i < in.size(); i++) {
+        out[i] = in[i].c_str();
+    }
+}

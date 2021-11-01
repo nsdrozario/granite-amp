@@ -11,5 +11,6 @@ namespace guitar_amp {
     std::string open_entire_file(std::string file_name);
 
     CabSimSettings read_cabsim_config(std::string file_name);
+    void save_cabsim_config(CabSimSettings settings, std::string file_name);
 
 }

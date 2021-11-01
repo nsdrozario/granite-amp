@@ -8,6 +8,7 @@
 #include <mindsp/filter.hpp>
 #include "../ConfigManager.hpp"
 #include <sol/sol.hpp>
+#include <io_util.hpp>
 
 namespace guitar_amp {
 
@@ -28,6 +29,10 @@ namespace guitar_amp {
     private:
 
         std::vector<std::string> preset_files;
+        std::vector<std::string> preset_file_names;
+
+        std::vector<const char *> preset_file_names_c_str;
+        int file_selected = 0;
 
         // for comb filtering
         mindsp::util::ring_buffer<float> delay;
