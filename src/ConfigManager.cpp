@@ -63,7 +63,7 @@ namespace guitar_amp {
 
     }
     void save_cabsim_config(CabSimSettings settings, std::string file_name) {
-        std::ofstream file("assets/cabsim_presets/" + file_name);
+        std::ofstream file("assets/cabsim_presets/" + file_name + ".txt");
         file << "LowPassFreq: "  << settings.lpf.freq << std::endl;
         file << "LowPassQ: " << settings.lpf.q<< std::endl;
         file << "HighPassFreq: " << settings.hpf.freq<< std::endl;

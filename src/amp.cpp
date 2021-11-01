@@ -287,7 +287,7 @@ void callback(ma_device *d, void *output, const void *input, ma_uint32 numFrames
             rms_value = dsp::f32_to_dbfs(std::sqrt(rms_value));
         }
         rms_count++;
-        rms_count %= 3;
+        rms_count %= 1;
     }
 
 }
