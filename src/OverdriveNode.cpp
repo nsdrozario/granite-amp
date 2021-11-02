@@ -286,7 +286,7 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
     
     }
 
-    high_pass.apply(out, in, numFrames);
+    
     /*
     if (oversamplingEnabled) {
 
@@ -354,7 +354,7 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
                 break;
             case 1:
             */
-                dsp::clip_tanh(out, out, this->gain, this->output_volume, numFrames);
+                
             /*
                 break;
             case 2:
@@ -366,6 +366,8 @@ void OverdriveNode::ApplyFX(const float *in, float *out, size_t numFrames, Audio
     }
     */
    
+    high_pass.apply(out, in, numFrames);
+    dsp::clip_tanh(out, out, this->gain, this->output_volume, numFrames);
     low_pass.apply(out, out, numFrames);
     
 }
