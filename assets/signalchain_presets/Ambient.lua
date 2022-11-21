@@ -18,10 +18,11 @@ nodes = {
     {
         ["type"]="Flanger",
         ["state"]={
-            ["DelayTimeMilliseconds"]=10,
+            ["DelayTimeMilliseconds"]=5,
             ["DelayFrequency"]=0.7,
             ["Depth"]=75,
-            ["FeedbackGain"]=-5
+            ["FeedbackGain"]=-5,
+            ["DelayRange"]=4
         }
     },
     {

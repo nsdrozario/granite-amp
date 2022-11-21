@@ -84,9 +84,14 @@ namespace mindsp {
             T read_tap_lerp(float tap_index) {
                 float size = static_cast<float>(buffer.size());
                 float tap_index2 = std::fmod(tap_index, size);
-                float index = std::fmod(static_cast<float>(write_ptr) - tap_index2, size);
-                std::size_t x0 = static_cast<std::size_t> (index);
-                float out = (buffer[(x0 + 1) % buffer.size()] - buffer[x0]) * (index - std::floor(index)) + buffer[x0];
+                float index = std::fmod(size + static_cast<float>(write_ptr) - tap_index2, size);
+                std::size_t x0 = static_cast<std::size_t> ( std::floor(index) );
+
+                float y0 = buffer[x0];
+                float y1 = buffer[(x0+1) % buffer.size()]; 
+                float fraction = index - std::floor(index);
+                float out = ((y1 - y0) * (fraction)) + (y0);
+
                 if (std::isfinite(out)) {
                     return out;
                 } else {
