@@ -51,7 +51,7 @@ void OscillatorNode::showGui() {
         ImGui::Combo(
             "Wave type",
             &(this->wave_type),
-            "sine\0square\0triangle\0sawtooth\0"
+            "Sine\0Square\0Triangle\0Sawtooth\0White noise\0"
         );
 
         ImGui::SliderFloat("Amplitude (dB)", &(this->amplitude), -60.0f, 0.0f, "%.3f dB");
@@ -98,6 +98,11 @@ void OscillatorNode::ApplyFX(const float *in, float *out, size_t numFrames, Audi
         }
         ma_waveform_set_type(&(this->wav_gen), t);
     }
-
+    if (this->wave_type != 4) {
     ma_waveform_read_pcm_frames(&(this->wav_gen), out, numFrames);
+    } else {
+        for (size_t i = 0; i < numFrames; i++) {
+            out[i] = (2.0f * (static_cast<float>(rand()) / RAND_MAX) - 0.5f) * linear_amplitude;
+        }
+    }
 }
